@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import Button from '../components/UI/Button'
-import Input from '../components/UI/Input'
-import Select from '../components/UI/Select'
-import CreateProductModal from '../components/Modals/CreateProductModal'
+import Button from '../components/ui/button'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import CreateProductModal from '../components/modals/CreateProductModal'
 import './Products.css'
 
 const Products: React.FC = () => {

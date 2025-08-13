@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import Modal from '../UI/Modal'
-import Button from '../UI/Button'
-import Input from '../UI/Input'
-import FormField from '../UI/FormField'
+import Modal from '../ui/Modal'
+import Button from '../ui/button'
+import Input from '../ui/Input'
+import FormField from '../ui/FormField'
 
 interface CreateRoleModalProps {
   isOpen: boolean

@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import Button from '../components/UI/Button'
-import Input from '../components/UI/Input'
-import Select from '../components/UI/Select'
-import CreateUserModal from '../components/Modals/CreateUserModal'
-import CreateRoleModal from '../components/Modals/CreateRoleModal'
+import Button from '../components/ui/button'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import CreateUserModal from '../components/modals/CreateUserModal'
+import CreateRoleModal from '../components/modals/CreateRoleModal'
 import './Security.css'
 
 const Security: React.FC = () => {
