@@ -7,6 +7,7 @@ import Products from './pages/Products'
 import Company from './pages/Company'
 import Features from './pages/Features'
 import Settings from './pages/Settings'
+import './styles/global.css';
 
 const App: React.FC = () => {
   return (

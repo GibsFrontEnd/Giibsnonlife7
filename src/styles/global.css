@@ -1,3 +1,87 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+
+  --color-background: #ffffff;
+  --color-foreground: #020817;
+
+  --color-border: #e4e8ef;
+  --color-input: #BFBFBF;
+  --color-ring: #3b82f6;
+
+  /* Primary colors */
+  --color-primary: #8B4B8C;
+  --color-primary-blue: #8B4B8C;
+  --color-primary-foreground: #ffffff;
+
+  /* Neutral colors */
+  --color-neutral-gray: #666;
+  --color-neutral-placeholder: #999;
+
+  /* Secondary colors */
+  --color-secondary: #f0f0ff;
+  --color-secondary-foreground: #1e293b;
+
+  /* Destructive colors */
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #f8fafc;
+
+  /* Success colors */
+  --color-success: #22c55e;
+  --color-success-foreground: #f8fafc;
+
+  /* Warning colors */
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #f8fafc;
+
+  /* Info colors */
+  --color-info: #8B4B8C;
+  --color-info-foreground: #ffffff;
+
+  /* Accent colors */
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #1e293b;
+
+  /* Popover colors */
+  --color-popover: #ffffff;
+  --color-popover-foreground: #020817;
+
+  /* Card colors */
+  --color-card: #ffffff;
+  --color-card-foreground: #020817;
+
+  /* Box Shadows */
+  --shadow-table-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+  /* Animations */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+}
+
+/* Keyframes */
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+
+  to {
+    height: 0;
+  }
+}
+
 * {
   margin: 0;
   padding: 0;
