@@ -36,7 +36,7 @@ const LoginPage = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      navigate("/h", { replace: true });
+      navigate("/dashboard", { replace: true });
     }
   }, [navigate]);
 
@@ -54,7 +54,11 @@ const LoginPage = () => {
 
     try {
       console.log("Login data:", data);
-      const response = await axios.post(`${SERVER_URL}/auth/login`, data);
+      const response = await axios.post(
+        `${SERVER_URL}/auth/login?username=${encodeURIComponent(
+          data.username
+        )}&password=${encodeURIComponent(data.password)}`
+      );
 
       if (response.status === 200) {
         const user = response.data;
@@ -121,7 +125,7 @@ const LoginPage = () => {
           Sign in to your account to continue
         </p>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="p-6">
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
@@ -183,14 +187,14 @@ const LoginPage = () => {
                         )}
                       /> */}
 
-                  <Button
+                  {/* <Button
                     variant="link"
                     className="p-0 h-auto text-sm"
                     asLink
                     to="/"
                   >
                     Forgot password?
-                  </Button>
+                  </Button> */}
                 </div>
 
                 <Button
