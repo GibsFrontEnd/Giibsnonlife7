@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import Dashboard from "./pages/Dashboard";
 import Security from "./pages/Security";
@@ -35,16 +40,10 @@ const App: React.FC = () => {
           <Route path="/settings" element={<Settings />} />
         </Route>
 
-        {/* <div className="app">
-          <Layout>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/security" element={<Security />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/company" element={<Company />} />
-            <Route path="/features" element={<Features />} />
-            <Route path="/settings" element={<Settings />} />
-          </Layout>
-        </div> */}
+        <Route
+          path="*"
+          element={<Navigate to={!isExpired ? "/dashboard" : "/"} />}
+        />
       </Routes>
     </>
   );

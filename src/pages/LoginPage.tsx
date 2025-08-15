@@ -30,7 +30,7 @@ const loginSchema = z.object({
 const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const redirectTo = localStorage.getItem("redirectAfterLogin") || "/h";
+  const redirectTo = localStorage.getItem("redirectAfterLogin") || "/dashboard";
   const { toast } = useToast();
 
   useEffect(() => {
