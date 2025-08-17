@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import Button from '../components/UI/button'
-import Input from '../components/UI/input'
-import Select from '../components/UI/select'
+import Button from '../components/UI/Button'
+import Input from '../components/UI/Input'
+import Select from '../components/UI/Select'
 import CreateProductModal from '../components/Modals/CreateProductModal'
 import './Products.css'
 

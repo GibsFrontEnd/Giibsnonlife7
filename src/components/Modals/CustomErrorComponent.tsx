@@ -5,8 +5,8 @@ import {
   DialogHeader,
   DialogTitle,
   OutsideDismissDialog,
-} from "../ui/dialog";
-import { Button } from "../ui/new-button";
+} from "../UI/dialog";
+import { Button } from "../UI/new-button";
 import { useAppDispatch } from "../../hooks/use-apps";
 
 const CustomErrorComponent = () => {
