@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
