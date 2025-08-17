@@ -5,14 +5,12 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleResolution": "node",
-        "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "skipLibCheck": true
-,
-
+    "skipLibCheck": true,
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
@@ -21,5 +19,5 @@
     "noUncheckedIndexedAccess": true
   },
   "include": ["src"],
-  "exclude": ["components"]
+  "exclude": ["src/components"]
 }
