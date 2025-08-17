@@ -1,14 +1,14 @@
 
 import React, { useState } from "react";
-import CreateUserModal from "../components/modals/CreateUserModal";
-import CreateRoleModal from "../components/modals/CreateRoleModal";
+import CreateUserModal from "../components/Modals/CreateUserModal";
+import CreateRoleModal from "../components/Modals/CreateRoleModal";
 import "./Security.css";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "../components/ui/tabs";
+} from "../components/UI/tabs";
 import SecurityUsers from "../components/security-page/security.users";
 import SecurityRoles from "../components/security-page/security.roles";
 import SecurityGroups from "../components/security-page/security.groups";

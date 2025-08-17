@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import Button from '../components/ui/button'
-import Input from '../components/ui/input'
-import Select from '../components/ui/select'
-import CreateProductModal from '../components/modals/CreateProductModal'
+import Button from '../components/UI/button'
+import Input from '../components/UI/input'
+import Select from '../components/UI/select'
+import CreateProductModal from '../components/Modals/CreateProductModal'
 import './Products.css'
 
 const Products: React.FC = () => {
@@ -31,13 +31,13 @@ const Products: React.FC = () => {
                 <Input
                   placeholder="Search..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e: any) => setSearchTerm(e.target.value)}
                   className="search-input"
                 />
                 <Select
                   options={statusOptions}
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
+                  onChange={(e : any) => setStatusFilter(e.target.value)}
                   className="status-filter"
                 />
                 <Button variant="secondary" size="sm">🔍</Button>

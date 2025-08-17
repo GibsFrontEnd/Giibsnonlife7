@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import Button from '../components/ui/button'
-import Input from '../components/ui/input'
-import FormField from '../components/ui/formField'
-import CreateBranchModal from '../components/modals/CreateBranchModal'
-import CreateRegionModal from '../components/modals/CreateRegionModal'
+import Button from '../components/UI/button'
+import Input from '../components/UI/input'
+import FormField from '../components/UI/formField'
+import CreateBranchModal from '../components/Modals/CreateBranchModal'
+import CreateRegionModal from '../components/Modals/CreateRegionModal'
 import './Company.css'
 
 const Company: React.FC = () => {

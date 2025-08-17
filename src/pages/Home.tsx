@@ -1,4 +1,4 @@
-import { Button } from "../components/ui/new-button";
+import { Button } from "../components/UI/new-button";
 
 const HomePage = () => {
   return (

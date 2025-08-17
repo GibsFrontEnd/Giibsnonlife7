@@ -4,7 +4,7 @@ import {
   Route,
   Navigate,
 } from "react-router-dom";
-import Layout from "./components/layout/Layout";
+import Layout from "./components/Layout/Layout";
 import Dashboard from "./pages/Dashboard";
 import Security from "./pages/Security";
 import Products from "./pages/Products";
@@ -15,7 +15,7 @@ import "./styles/global.css";
 import { useAuth } from "./hooks/use-auth";
 import { useSelector } from "react-redux";
 import { RootState } from "./features/store";
-import { Toaster } from "./components/ui/toaster";
+import { Toaster } from "./components/UI/toaster";
 import HomePage from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
 
