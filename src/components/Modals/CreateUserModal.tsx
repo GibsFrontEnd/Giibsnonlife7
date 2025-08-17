@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import Modal from '../ui/Modal'
+import Modal from '../ui/modal'
 import Button from '../ui/button'
-import Input from '../ui/Input'
-import Select from '../ui/Select'
-import FormField from '../ui/FormField'
+import Input from '../ui/input'
+import Select from '../ui/select'
+import FormField from '../ui/formField'
 
 interface CreateUserModalProps {
   isOpen: boolean

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./Dashboard.css";
-import Button from "../components/ui/Button";
+import Button from "../components/ui/button";
 
 const Dashboard: React.FC = () => {
   const [showAdminDashboard, setShowAdminDashboard] = useState(false);
