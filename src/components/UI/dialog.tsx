@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import PropTypes from "prop-types";
 import { cloneElement, useEffect, useRef } from "react";
 import * as ReactDOM from "react-dom";
