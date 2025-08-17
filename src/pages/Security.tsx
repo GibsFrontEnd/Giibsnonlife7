@@ -163,7 +163,7 @@ const Security: React.FC = () => {
             <TabsTrigger
               key={tab.title}
               value={tab.title}
-              className="flex-1 min-w-[100px]"
+              className="flex-1 min-w-[100px] hover:bg-neutral-200"
             >
               {tab.title}
             </TabsTrigger>
