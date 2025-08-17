@@ -1,10 +1,10 @@
-import { OutsideDismissDialog } from "./ui/dialog";
+import { OutsideDismissDialog } from "./UI/dialog";
 import {
   selectUiState,
   setShowCreateRoleDialog,
   setShowEditRoleDialog,
 } from "../features/reducers/uiReducers/uiSlice";
-import { Card, CardContent } from "./ui/card";
+import { Card, CardContent } from "./UI/card";
 import {
   Form,
   FormControl,
@@ -12,9 +12,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./ui/form";
-import { Input } from "./ui/new-input";
-import { Button } from "./ui/new-button";
+} from "./UI/form";
+import { Input } from "./UI/new-input";
+import { Button } from "./UI/new-button";
 import { z } from "zod";
 import { useAppDispatch, useAppSelector } from "../hooks/use-apps";
 import { useForm } from "react-hook-form";
@@ -27,7 +27,7 @@ import {
   updateRole,
 } from "../features/reducers/adminReducers/roleSlice";
 import { Role } from "../types/role";
-import { useToast } from "./ui/use-toast";
+import { useToast } from "./UI/use-toast";
 
 const createRoleSchema = z.object({
   roleName: z.string().min(1, "Role name is required"),

@@ -11,12 +11,12 @@ import {
 } from "../components/UI/tabs";
 import SecurityUsers from "../components/security-page/security.users";
 import SecurityRoles from "../components/security-page/security.roles";
-import SecurityGroups from "../components/security-page/security.groups";
+/* import SecurityGroups from "../components/security-page/security.groups";
 import SecuritySignatures from "../components/security-page/security.signatures";
 import SecurityOnlineUsers from "../components/security-page/security.online-users";
 import SecurityAuditLogs from "../components/security-page/security.audit-logs";
 
-const Security: React.FC = () => {
+ */const Security: React.FC = () => {
   const [activeTab, setActiveTab] = useState("Users");
   const [showUserModal, setShowUserModal] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);

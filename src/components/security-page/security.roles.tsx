@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Button } from "../ui/new-button";
+import { Button } from "../UI/new-button";
 import { useAppDispatch, useAppSelector } from "../../hooks/use-apps";
-import ConfirmationModal from "../modals/ConfirmationModal";
+import ConfirmationModal from "../Modals/ConfirmationModal";
 import SearchBar from "../SearchBar";
 import {
   clearMessages,
@@ -16,7 +16,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/table";
+} from "../UI/table";
 import {
   Pagination,
   PaginationContent,
@@ -24,7 +24,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "../ui/pagination";
+} from "../UI/pagination";
 import {
   selectUiState,
   setShowCreateRoleDialog,
