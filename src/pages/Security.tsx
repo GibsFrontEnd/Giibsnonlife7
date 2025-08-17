@@ -25,11 +25,12 @@ const Security: React.FC = () => {
   const tabs = [
     { title: "Users", content: <SecurityUsers /> },
     { title: "Roles", content: <SecurityRoles /> },
-    { title: "Groups", content: <SecurityGroups /> },
+    { title: "Permissions", content: <SecurityRoles /> },
+/*     { title: "Groups", content: <SecurityGroups /> },
     { title: "Signatures", content: <SecuritySignatures /> },
     { title: "Online Users", content: <SecurityOnlineUsers /> },
     { title: "Audit Logs", content: <SecurityAuditLogs /> },
-  ];
+ */  ];
 
   const handleUserSubmit = (data: any) => {
     console.log("User created:", data);
@@ -163,7 +164,7 @@ const Security: React.FC = () => {
             <TabsTrigger
               key={tab.title}
               value={tab.title}
-              className="flex-1 min-w-[100px]"
+              className="flex-1 min-w-[100px] hover:bg-neutral-200"
             >
               {tab.title}
             </TabsTrigger>
