@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { z } from "zod";
 import { Button } from "../components/UI/new-button";
-import { Card, CardContent } from "../components/ui/card";
+import { Card, CardContent } from "../components/UI/card";
 import {
   Form,
   FormControl,
@@ -9,12 +9,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../components/ui/form";
+} from "../components/UI/form";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input, Password } from "../components/ui/new-input";
-import { useToast } from "../components/ui/use-toast";
+import { Input, Password } from "../components/UI/new-input";
+import { useToast } from "../components/UI/use-toast";
 import { useNavigate } from "react-router-dom";
 import { SERVER_URL } from "../utils/constants";
 import axios from "axios";
