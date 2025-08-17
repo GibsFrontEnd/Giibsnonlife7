@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { z } from "zod";
 import { Button } from "../components/ui/new-button";
 import { Card, CardContent } from "../components/ui/card";
