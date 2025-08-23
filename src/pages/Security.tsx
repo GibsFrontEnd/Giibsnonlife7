@@ -11,6 +11,7 @@ import {
 } from "../components/UI/tabs";
 import SecurityUsers from "../components/security-page/security.users";
 import SecurityRoles from "../components/security-page/security.roles";
+import SecurityPermissions from "../components/security-page/security.permissions";
 /* import SecurityGroups from "../components/security-page/security.groups";
 import SecuritySignatures from "../components/security-page/security.signatures";
 import SecurityOnlineUsers from "../components/security-page/security.online-users";
@@ -25,7 +26,7 @@ import SecurityAuditLogs from "../components/security-page/security.audit-logs";
   const tabs = [
     { title: "Users", content: <SecurityUsers /> },
     { title: "Roles", content: <SecurityRoles /> },
-    { title: "Permissions", content: <SecurityRoles /> },
+    { title: "Permissions", content: <SecurityPermissions />},
 /*     { title: "Groups", content: <SecurityGroups /> },
     { title: "Signatures", content: <SecuritySignatures /> },
     { title: "Online Users", content: <SecurityOnlineUsers /> },

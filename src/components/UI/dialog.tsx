@@ -3,6 +3,62 @@
 import { cloneElement, useEffect, useRef } from "react";
 import * as ReactDOM from "react-dom";
 import { useAppDispatch } from "../../hooks/use-apps";
+import React, { ReactNode } from "react";
+
+type DialogProps = {
+  open: boolean;
+  // callers in your code pass `handleClose` (no args) or sometimes action creators; accept either
+  onOpenChange: (open?: boolean) => void;
+  children: ReactNode;
+  maxWidth?: string;
+  height?: string;
+};
+
+export const Dialog = ({ open, onOpenChange, children, maxWidth = "640px", height = "max-content" }: DialogProps) => {
+  if (!open) return null;
+
+  return ReactDOM.createPortal(
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4"
+      // clicking backdrop will close the dialog
+      onClick={() => {
+        try {
+          onOpenChange(false);
+        } catch {
+          onOpenChange();
+        }
+      }}
+    >
+      <div
+        className="bg-white rounded-lg shadow-lg w-full relative"
+        style={{ maxWidth, height }}
+        // prevent clicks inside modal from closing it
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* content area */}
+        {children}
+
+        {/* optional close button — adjust styling as needed */}
+        <button
+          aria-label="Close dialog"
+          onClick={() => {
+            try {
+              onOpenChange(false);
+            } catch {
+              onOpenChange();
+            }
+          }}
+          className="absolute top-4 right-4 text-2xl leading-none"
+        >
+          ×
+        </button>
+      </div>
+    </div>,
+    // ensure document exists (Next.js client components will have document)
+    typeof document !== "undefined" ? document.body : null
+  );
+};
+
 
 export const ButtonDismissDialog = ({
   // @ts-ignore
