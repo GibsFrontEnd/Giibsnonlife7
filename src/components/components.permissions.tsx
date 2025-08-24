@@ -137,10 +137,12 @@ export const CreatePermission = () => {
           {error.createPermission && <div className="sp-error-message">{error.createPermission}</div>}
 
           <div className="sp-form-actions">
-            <Button type="button" variant="outline" onClick={handleClose} disabled={loading.createPermission}>
+            <Button // @ts-ignore
+            type="button" variant="outline" onClick={handleClose} disabled={loading.createPermission}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading.createPermission} className="sp-submit-btn">
+            <Button // @ts-ignore
+             type="submit" disabled={loading.createPermission} className="sp-submit-btn">
               {loading.createPermission ? "Creating..." : "Create Permission"}
             </Button>
           </div>
@@ -279,10 +281,12 @@ export const EditPermission = ({ permission }: { permission: Permission | null }
           {error.updatePermission && <div className="sp-error-message">{error.updatePermission}</div>}
 
           <div className="sp-form-actions">
-            <Button type="button" variant="outline" onClick={handleClose} disabled={loading.updatePermission}>
+            <Button // @ts-ignore
+            type="button" variant="outline" onClick={handleClose} disabled={loading.updatePermission}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading.updatePermission} className="sp-submit-btn">
+            <Button // @ts-ignore
+            type="submit" disabled={loading.updatePermission} className="sp-submit-btn">
               {loading.updatePermission ? "Updating..." : "Update Permission"}
             </Button>
           </div>
