@@ -12,7 +12,16 @@ interface UiState {
   showEditPermissionDialog: boolean;
   showDeletePermissionDialog: boolean;
   showViewPermissionDetailsDialog: boolean;
+
+  // User dialogs (new)
+  showCreateUserDialog: boolean;
+  showEditUserDialog: boolean;
+  showDeleteUserDialog: boolean;
+  showViewUserDetailsDialog: boolean;
+  showChangePasswordDialog: boolean;
 }
+
+
 
 const initialState: UiState = {
   // Role dialogs
@@ -26,6 +35,15 @@ const initialState: UiState = {
   showEditPermissionDialog: false,
   showDeletePermissionDialog: false,
   showViewPermissionDetailsDialog: false,
+
+  // User dialogs
+  showCreateUserDialog: false,
+  showEditUserDialog: false,
+  showDeleteUserDialog: false,
+  showViewUserDetailsDialog: false,
+  showChangePasswordDialog: false,
+
+
 };
 
 const uiSlice = createSlice({
@@ -59,6 +77,25 @@ const uiSlice = createSlice({
     setShowViewPermissionDetailsDialog: (state, action: PayloadAction<boolean>) => {
       state.showViewPermissionDetailsDialog = action.payload;
     },
+
+    // User reducers
+    setShowCreateUserDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreateUserDialog = action.payload;
+    },
+    setShowEditUserDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditUserDialog = action.payload;
+    },
+    setShowDeleteUserDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeleteUserDialog = action.payload;
+    },
+    setShowViewUserDetailsDialog: (state, action: PayloadAction<boolean>) => {
+      state.showViewUserDetailsDialog = action.payload;
+    },
+    setShowChangePasswordDialog: (state, action: PayloadAction<boolean>) => {
+      state.showChangePasswordDialog = action.payload;
+    },
+
+
   },
 });
 
@@ -73,6 +110,12 @@ export const {
   setShowEditPermissionDialog,
   setShowDeletePermissionDialog,
   setShowViewPermissionDetailsDialog,
+  // User actions
+  setShowCreateUserDialog,
+  setShowEditUserDialog,
+  setShowDeleteUserDialog,
+  setShowViewUserDetailsDialog,
+  setShowChangePasswordDialog,
 } = uiSlice.actions;
 
 // selector: you can replace the state typing with your RootState if you have it

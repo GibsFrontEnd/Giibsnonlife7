@@ -3,6 +3,7 @@ import authReducer from "./reducers/authReducers/authSlice";
 import roleReducer from "./reducers/adminReducers/roleSlice";
 import uiReducer from "./reducers/uiReducers/uiSlice";
 import permissionReducer from "./reducers/adminReducers/permissionSlice";
+import userReducer from "./reducers/adminReducers/userSlice"
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     ui: uiReducer,
     roles: roleReducer,
     permissions: permissionReducer,
+    users: userReducer,
   },
 });
 
