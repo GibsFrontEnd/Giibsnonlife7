@@ -4,7 +4,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { useAppDispatch, useAppSelector } from "../hooks/use-apps"
 import { Button } from "./UI/new-button"
-import Input from "./UI/input"
+import Input from "./UI/Input"
 import { Label } from "./UI/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./UI/dialog"
 import {
