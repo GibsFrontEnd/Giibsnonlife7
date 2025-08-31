@@ -20,13 +20,13 @@ const Header: React.FC = () => {
         ))}
       </div>
       
-      <div className="header-user">
+      {/* <div className="header-user">
         <div className="notification-icon">🔔</div>
         <div className="user-info">
           <span className="user-email">olayinka_k@inttecktechnologies.com</span>
           <span className="dropdown-arrow">▼</span>
         </div>
-      </div>
+      </div> */}
     </header>
   )
 }

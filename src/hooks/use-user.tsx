@@ -2,10 +2,11 @@ import { useState } from "react";
 import { store } from "../features/store";
 import { setTokenExpired } from "../features/reducers/authReducers/authSlice";
 import { decryptData } from "../utils/encrypt-utils";
+import { LocalUser } from "../types/user";
 
 const useUser = () => {
   // @ts-ignore
-  const [user, setUser] = useState(() => {
+  const [user, setUser] = useState<LocalUser>(() => {
     const storedUser = localStorage.getItem("user");
     return storedUser ? decryptData(storedUser) : null;
   });
