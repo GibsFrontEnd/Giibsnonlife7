@@ -5,13 +5,35 @@ export type ProductField = {
   description: string;
 };
 
+export interface ProductRate {
+  name: string;
+  type: string;
+  required: boolean;
+  description: string;
+  defaultValue: number;
+  maximumValue: number;
+  minimumValue: number;
+}
+
+export interface ProductSMI {
+  code: string;
+  name: string;
+}
+export interface ProductSection {
+  sectionID: string;
+  sectionName: string;
+  fields: ProductField[];
+  rates: ProductRate[];
+  smIs: ProductSMI[];
+}
+
 export type Product = {
   riskID: string;
   productID: string;
   productName: string;
-  sections: unknown | null;
-  fields: ProductField[];
-  rates: unknown | null;
+  sections: ProductSection[] | null;
+  fields: ProductField[] | null;
+  rates: ProductRate[] | null;
 };
 
 export interface ProductCreateUpdateRequest {

@@ -19,9 +19,13 @@ interface UiState {
   showDeleteUserDialog: boolean;
   showViewUserDetailsDialog: boolean;
   showChangePasswordDialog: boolean;
+
+  // Product Sub risk dialogs
+  showCreateProductDialog: boolean;
+  showEditProductDialog: boolean;
+  showDeleteProductDialog: boolean;
+  showViewProductDetailsDialog: boolean;
 }
-
-
 
 const initialState: UiState = {
   // Role dialogs
@@ -43,7 +47,11 @@ const initialState: UiState = {
   showViewUserDetailsDialog: false,
   showChangePasswordDialog: false,
 
-
+  // Product Sub risk
+  showCreateProductDialog: false,
+  showEditProductDialog: false,
+  showDeleteProductDialog: false,
+  showViewProductDetailsDialog: false,
 };
 
 const uiSlice = createSlice({
@@ -74,7 +82,10 @@ const uiSlice = createSlice({
     setShowDeletePermissionDialog: (state, action: PayloadAction<boolean>) => {
       state.showDeletePermissionDialog = action.payload;
     },
-    setShowViewPermissionDetailsDialog: (state, action: PayloadAction<boolean>) => {
+    setShowViewPermissionDetailsDialog: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
       state.showViewPermissionDetailsDialog = action.payload;
     },
 
@@ -95,7 +106,22 @@ const uiSlice = createSlice({
       state.showChangePasswordDialog = action.payload;
     },
 
-
+    // Product sub risk reducers
+    setShowCreateProductDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreateProductDialog = action.payload;
+    },
+    setShowEditProductDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditProductDialog = action.payload;
+    },
+    setShowDeleteProductDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeleteProductDialog = action.payload;
+    },
+    setShowViewProductDetailsDialog: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showViewProductDetailsDialog = action.payload;
+    },
   },
 });
 
@@ -116,9 +142,13 @@ export const {
   setShowDeleteUserDialog,
   setShowViewUserDetailsDialog,
   setShowChangePasswordDialog,
+  // product sub risk actions
+  setShowCreateProductDialog,
+  setShowEditProductDialog,
+  setShowDeleteProductDialog,
+  setShowViewProductDetailsDialog,
 } = uiSlice.actions;
 
-// selector: you can replace the state typing with your RootState if you have it
 export const selectUiState = (state: { ui: UiState }) => state.ui;
 
 export default uiSlice.reducer;

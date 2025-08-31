@@ -70,10 +70,10 @@ export const updateProduct = createAsyncThunk(
 
 export const deleteProduct = createAsyncThunk(
   "products/deleteProduct",
-  async (id: number | undefined, { rejectWithValue }) => {
+  async (productId: string | undefined, { rejectWithValue }) => {
     try {
-      await apiCall.delete(`/products/${id}`);
-      return id;
+      await apiCall.delete(`/products/${productId}`);
+      return productId;
     } catch (error) {
       return rejectWithValue(error);
     }

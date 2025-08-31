@@ -10,17 +10,18 @@ import {
   TabsTrigger,
 } from "../components/UI/tabs";
 
+const tabs = [
+  { title: "Risk", content: <ProductRisk /> },
+  { title: "Product", content: <ProductSubRisk /> },
+];
+
 const Products: React.FC = () => {
-  const [activeTab, setActiveTab] = useState("Products");
+  const [activeTab, setActiveTab] = useState(tabs[0]?.title);
   const [showProductModal, setShowProductModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("Active");
 
   // const tabs = ['Risks', 'Products']
-  const tabs = [
-    { title: "Risk", content: <ProductRisk /> },
-    { title: "Product", content: <ProductSubRisk /> },
-  ];
 
   // const statusOptions = [
   //   { value: "Active", label: "Active" },

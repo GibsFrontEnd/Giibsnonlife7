@@ -1,6 +1,6 @@
 export interface Risk {
   riskID: string;
-  name: string;
+  riskName: string;
   description?: string;
 }
 
