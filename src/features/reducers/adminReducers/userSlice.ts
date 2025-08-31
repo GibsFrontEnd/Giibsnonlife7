@@ -8,13 +8,17 @@ import type {
   UsersResponse,
   UserState,
 } from "../../../types/user"
+import { decryptData } from "../../../utils/encrypt-utils";
 import type { RootState } from "../../store"
+
+const encryptedToken = localStorage.getItem("token");
+
 
 const API_BASE_URL = "https://core-api.newgibsonline.com/api"
 
 // You'll need to get this token from your auth system
 const getAuthToken = () => {
-  return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoicGVsbHVtaSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiNjM0IiwiZXhwIjoxNzU2MDQ0Njc1fQ.6az_HwThBlloQMhugSTCa-wXgOlCi4qdgQVCtbymees"
+  return decryptData(encryptedToken);
 }
 
 // Async thunks

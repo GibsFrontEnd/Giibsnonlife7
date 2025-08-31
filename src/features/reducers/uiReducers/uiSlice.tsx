@@ -19,6 +19,12 @@ interface UiState {
   showDeleteUserDialog: boolean;
   showViewUserDetailsDialog: boolean;
   showChangePasswordDialog: boolean;
+
+  // Risk dialogs (new)
+  showCreateRiskDialog: boolean;
+  showEditRiskDialog: boolean;
+  showDeleteRiskDialog: boolean;
+  showViewRiskDetailsDialog: boolean;
 }
 
 
@@ -43,6 +49,11 @@ const initialState: UiState = {
   showViewUserDetailsDialog: false,
   showChangePasswordDialog: false,
 
+  // Risk dialogs (new)
+  showCreateRiskDialog: false,
+  showEditRiskDialog: false,
+  showDeleteRiskDialog: false,
+  showViewRiskDetailsDialog: false,
 
 };
 
@@ -95,6 +106,19 @@ const uiSlice = createSlice({
       state.showChangePasswordDialog = action.payload;
     },
 
+    // Risk reducers
+    setShowCreateRiskDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreateRiskDialog = action.payload;
+    },
+    setShowEditRiskDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditRiskDialog = action.payload;
+    },
+    setShowDeleteRiskDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeleteRiskDialog = action.payload;
+    },
+    setShowViewRiskDetailsDialog: (state, action: PayloadAction<boolean>) => {
+      state.showViewUserDetailsDialog = action.payload;
+    },
 
   },
 });
@@ -116,6 +140,13 @@ export const {
   setShowDeleteUserDialog,
   setShowViewUserDetailsDialog,
   setShowChangePasswordDialog,
+
+  // Risk actions
+  setShowCreateRiskDialog,
+  setShowEditRiskDialog,
+  setShowDeleteRiskDialog,
+  setShowViewRiskDetailsDialog,
+
 } = uiSlice.actions;
 
 // selector: you can replace the state typing with your RootState if you have it
