@@ -1,12 +1,24 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useRef, useCallback } from "react"
-import { Button } from "../UI/new-button"
-import { useAppDispatch, useAppSelector } from "../../hooks/use-apps"
-import ConfirmationModal from "../Modals/ConfirmationModal"
-import SearchBar from "../SearchBar"
-import { clearMessages, deleteUser, getAllUsers, selectUsers } from "../../features/reducers/adminReducers/userSlice"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../UI/table"
+import { useEffect, useState, useRef, useCallback } from "react";
+import { Button } from "../UI/new-button";
+import { useAppDispatch, useAppSelector } from "../../hooks/use-apps";
+import ConfirmationModal from "../Modals/ConfirmationModal";
+import SearchBar from "../SearchBar";
+import {
+  clearMessages,
+  deleteUser,
+  getAllUsers,
+  selectUsers,
+} from "../../features/reducers/adminReducers/userSlice";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../UI/table";
 import {
   Pagination,
   PaginationContent,
@@ -14,280 +26,377 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "../UI/pagination"
+} from "../UI/pagination";
 import {
   selectUiState,
   setShowCreateUserDialog,
   setShowDeleteUserDialog,
   setShowEditUserDialog,
   setShowChangePasswordDialog,
-} from "../../features/reducers/uiReducers/uiSlice"
-import type { User } from "../../types/user"
-import { CreateUser, EditUser, ChangePassword } from "../components.users"
-import "./SecurityUsers.css"
+} from "../../features/reducers/uiReducers/uiSlice";
+import type { User } from "../../types/user";
+import { CreateUser, EditUser, ChangePassword } from "../components.users";
+import "./SecurityUsers.css";
 
-const FETCH_CHUNK_SIZE = 50
-const PAGE_SIZE = 10
-const SEARCH_DEBOUNCE_MS = 300
-const PREFETCH_THRESHOLD_PAGES_FROM_END = 2
+const FETCH_CHUNK_SIZE = 50;
+const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 300;
+const PREFETCH_THRESHOLD_PAGES_FROM_END = 2;
 
 const SecurityUsers = () => {
-  const dispatch = useAppDispatch()
-  const { users: storeUsers, totalUsers: totalUsersFromStore, success, loading, error } = useAppSelector(selectUsers)
-  const { showDeleteUserDialog } = useAppSelector(selectUiState)
+  const dispatch = useAppDispatch();
+  const {
+    users: storeUsers,
+    totalUsers: totalUsersFromStore,
+    success,
+    loading,
+    error,
+  } = useAppSelector(selectUsers);
+  const { showDeleteUserDialog } = useAppSelector(selectUiState);
 
-  const [userToEdit, setUserToEdit] = useState<User | null>(null)
-  const [userToChangePassword, setUserToChangePassword] = useState<User | null>(null)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
-  const debounceRef = useRef<number | null>(null)
+  const [userToEdit, setUserToEdit] = useState<User | null>(null);
+  const [userToChangePassword, setUserToChangePassword] = useState<User | null>(
+    null
+  );
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const debounceRef = useRef<number | null>(null);
 
-  const [currentPage, setCurrentPage] = useState(1)
+  const [currentPage, setCurrentPage] = useState(1);
 
   // cache for normal listing
-  const [cachedUsers, setCachedUsers] = useState<(User | undefined)[]>([])
-  const fetchedChunksRef = useRef<Set<number>>(new Set())
-  const [isFetchingChunk, setIsFetchingChunk] = useState(false)
+  const [cachedUsers, setCachedUsers] = useState<(User | undefined)[]>([]);
+  const fetchedChunksRef = useRef<Set<number>>(new Set());
+  const [isFetchingChunk, setIsFetchingChunk] = useState(false);
 
   // search mode
-  const [isSearching, setIsSearching] = useState(false)
-  const [searchPageCache, setSearchPageCache] = useState<Record<number, User[]>>({})
-  const [searchTotal, setSearchTotal] = useState<number>(0)
-  const [isFetchingSearchPage, setIsFetchingSearchPage] = useState(false)
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchPageCache, setSearchPageCache] = useState<
+    Record<number, User[]>
+  >({});
+  const [searchTotal, setSearchTotal] = useState<number>(0);
+  const [isFetchingSearchPage, setIsFetchingSearchPage] = useState(false);
 
-  const pageSize = PAGE_SIZE
-  const pagesPerChunk = Math.ceil(FETCH_CHUNK_SIZE / pageSize)
+  const pageSize = PAGE_SIZE;
+  const pagesPerChunk = Math.ceil(FETCH_CHUNK_SIZE / pageSize);
 
   // derive totalUsers from mode
-  const totalUsers = isSearching ? searchTotal : (typeof totalUsersFromStore === "number" ? totalUsersFromStore : cachedUsers.filter(Boolean).length)
-  const totalPages = Math.max(1, Math.ceil((totalUsers || 0) / pageSize))
+  const totalUsers = isSearching
+    ? searchTotal
+    : typeof totalUsersFromStore === "number"
+    ? totalUsersFromStore
+    : cachedUsers.filter(Boolean).length;
+  const totalPages = Math.max(1, Math.ceil((totalUsers || 0) / pageSize));
 
   /* ------------------- Utilities ------------------- */
-  const extractPayloadUsers = (payload: any): { users: User[]; total?: number } => {
-    if (!payload) return { users: [], total: undefined }
-    if (Array.isArray(payload)) return { users: payload, total: undefined }
-    if (Array.isArray(payload.users)) return { users: payload.users, total: payload.totalUsers ?? payload.total }
-    if (Array.isArray(payload.data)) return { users: payload.data, total: payload.totalUsers ?? payload.total }
+  const extractPayloadUsers = (
+    payload: any
+  ): { users: User[]; total?: number } => {
+    if (!payload) return { users: [], total: undefined };
+    if (Array.isArray(payload)) return { users: payload, total: undefined };
+    if (Array.isArray(payload.users))
+      return {
+        users: payload.users,
+        total: payload.totalUsers ?? payload.total,
+      };
+    if (Array.isArray(payload.data))
+      return {
+        users: payload.data,
+        total: payload.totalUsers ?? payload.total,
+      };
     // shape might be { result: { rows: [], count: n } } or similar - try some common fallbacks:
-    if (Array.isArray(payload.result?.rows)) return { users: payload.result.rows, total: payload.result.count ?? payload.totalUsers ?? payload.total }
-    if (Array.isArray(payload.items)) return { users: payload.items, total: payload.total }
-    return { users: [], total: undefined }
-  }
+    if (Array.isArray(payload.result?.rows))
+      return {
+        users: payload.result.rows,
+        total: payload.result.count ?? payload.totalUsers ?? payload.total,
+      };
+    if (Array.isArray(payload.items))
+      return { users: payload.items, total: payload.total };
+    return { users: [], total: undefined };
+  };
 
   /* ------------------- Seed cached from store if present ------------------- */
   useEffect(() => {
     // If the global store already has a page of users (e.g., from another component),
     // seed the cache so UI doesn't wait for a fresh chunk.
-    if (Array.isArray(storeUsers) && storeUsers.length > 0 && cachedUsers.length === 0) {
+    if (
+      Array.isArray(storeUsers) &&
+      storeUsers.length > 0 &&
+      cachedUsers.length === 0
+    ) {
       // put storeUsers into the first chunk
-      const copy: (User | undefined)[] = []
-      for (let i = 0; i < storeUsers.length; i++) copy[i] = storeUsers[i]
-      setCachedUsers(copy)
-      fetchedChunksRef.current.add(1)
+      const copy: (User | undefined)[] = [];
+      for (let i = 0; i < storeUsers.length; i++) copy[i] = storeUsers[i];
+      setCachedUsers(copy);
+      fetchedChunksRef.current.add(1);
       if (typeof totalUsersFromStore === "number") {
-        setSearchTotal(totalUsersFromStore)
+        setSearchTotal(totalUsersFromStore);
       }
-      console.debug("SecurityUsers: seeded cache from storeUsers", { seedCount: storeUsers.length })
+      console.debug("SecurityUsers: seeded cache from storeUsers", {
+        seedCount: storeUsers.length,
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storeUsers])
+  }, [storeUsers]);
 
   /* ------------------- Debounce search input ------------------- */
   useEffect(() => {
-    if (debounceRef.current) window.clearTimeout(debounceRef.current)
-    debounceRef.current = window.setTimeout(() => setDebouncedSearch(searchTerm.trim()), SEARCH_DEBOUNCE_MS)
-    return () => { if (debounceRef.current) window.clearTimeout(debounceRef.current) }
-  }, [searchTerm])
+    if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    debounceRef.current = window.setTimeout(
+      () => setDebouncedSearch(searchTerm.trim()),
+      SEARCH_DEBOUNCE_MS
+    );
+    return () => {
+      if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    };
+  }, [searchTerm]);
 
   useEffect(() => {
     if (debouncedSearch.length > 0) {
-      setIsSearching(true)
-      setSearchPageCache({})
-      setCurrentPage(1)
+      setIsSearching(true);
+      setSearchPageCache({});
+      setCurrentPage(1);
     } else {
-      setIsSearching(false)
-      setSearchPageCache({})
-      setSearchTotal(typeof totalUsersFromStore === "number" ? totalUsersFromStore : 0)
-      setCurrentPage(1)
+      setIsSearching(false);
+      setSearchPageCache({});
+      setSearchTotal(
+        typeof totalUsersFromStore === "number" ? totalUsersFromStore : 0
+      );
+      setCurrentPage(1);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedSearch])
+  }, [debouncedSearch]);
 
   /* ------------------- Chunk fetch for listing ------------------- */
-  const ensureChunkForPage = useCallback(async (page: number) => {
-    const pageIndex0 = Math.max(0, page - 1)
-    const chunkNumber = Math.floor(pageIndex0 / pagesPerChunk) + 1
+  const ensureChunkForPage = useCallback(
+    async (page: number) => {
+      const pageIndex0 = Math.max(0, page - 1);
+      const chunkNumber = Math.floor(pageIndex0 / pagesPerChunk) + 1;
 
-    if (fetchedChunksRef.current.has(chunkNumber) || isFetchingChunk) return
+      if (fetchedChunksRef.current.has(chunkNumber) || isFetchingChunk) return;
 
-    setIsFetchingChunk(true)
-    try {
-      const action = await dispatch(getAllUsers({ page: chunkNumber, pageSize: FETCH_CHUNK_SIZE }))
-      const payload = (action as any)?.payload ?? action
-      const { users: fetchedUsers, total } = extractPayloadUsers(payload)
+      setIsFetchingChunk(true);
+      try {
+        const action = await dispatch(
+          getAllUsers({ page: chunkNumber, pageSize: FETCH_CHUNK_SIZE })
+        );
+        const payload = (action as any)?.payload ?? action;
+        const { users: fetchedUsers, total } = extractPayloadUsers(payload);
 
-      console.debug("ensureChunkForPage payload", { chunkNumber, fetchedUsersLength: fetchedUsers.length, total, payload })
+        console.debug("ensureChunkForPage payload", {
+          chunkNumber,
+          fetchedUsersLength: fetchedUsers.length,
+          total,
+          payload,
+        });
 
-      // If server provided total=0 and no users, mark total and bail
-      if ((fetchedUsers.length === 0) && typeof total === "number" && total === 0) {
-        // nothing to show
-        setCachedUsers([])
-        fetchedChunksRef.current.add(chunkNumber)
-        setSearchTotal(0)
-        return
-      }
-
-      setCachedUsers(prev => {
-        const baseIndex = (chunkNumber - 1) * FETCH_CHUNK_SIZE
-        const copy = prev.slice()
-        const needed = baseIndex + fetchedUsers.length
-        if (copy.length < needed) copy.length = needed
-        for (let i = 0; i < fetchedUsers.length; i++) {
-          copy[baseIndex + i] = fetchedUsers[i]
+        // If server provided total=0 and no users, mark total and bail
+        if (
+          fetchedUsers.length === 0 &&
+          typeof total === "number" &&
+          total === 0
+        ) {
+          // nothing to show
+          setCachedUsers([]);
+          fetchedChunksRef.current.add(chunkNumber);
+          setSearchTotal(0);
+          return;
         }
-        return copy
-      })
 
-      fetchedChunksRef.current.add(chunkNumber)
-      if (typeof total === "number") setSearchTotal(total)
-    } catch (err) {
-      console.error("Error fetching chunk:", err)
-    } finally {
-      setIsFetchingChunk(false)
-    }
-  }, [dispatch, isFetchingChunk, pagesPerChunk])
+        setCachedUsers((prev) => {
+          const baseIndex = (chunkNumber - 1) * FETCH_CHUNK_SIZE;
+          const copy = prev.slice();
+          const needed = baseIndex + fetchedUsers.length;
+          if (copy.length < needed) copy.length = needed;
+          for (let i = 0; i < fetchedUsers.length; i++) {
+            copy[baseIndex + i] = fetchedUsers[i];
+          }
+          return copy;
+        });
+
+        fetchedChunksRef.current.add(chunkNumber);
+        if (typeof total === "number") setSearchTotal(total);
+      } catch (err) {
+        console.error("Error fetching chunk:", err);
+      } finally {
+        setIsFetchingChunk(false);
+      }
+    },
+    [dispatch, isFetchingChunk, pagesPerChunk]
+  );
 
   /* ------------------- Fetch search page (server-side) ------------------- */
-  const fetchSearchPage = useCallback(async (page: number) => {
-    if (isFetchingSearchPage) return
-    setIsFetchingSearchPage(true)
-    try {
-      // @ts-ignore
-      const action = await dispatch(getAllUsers({ page, pageSize, q: debouncedSearch }))
-      const payload = (action as any)?.payload ?? action
-      const { users: fetchedUsers, total } = extractPayloadUsers(payload)
-      console.debug("fetchSearchPage payload", { page, fetchedUsersLength: fetchedUsers.length, total, payload })
-      setSearchPageCache(prev => ({ ...prev, [page]: fetchedUsers }))
-      if (typeof total === "number") setSearchTotal(total)
-    } catch (err) {
-      console.error("Error fetching search page:", err)
-    } finally {
-      setIsFetchingSearchPage(false)
-    }
-  }, [debouncedSearch, dispatch, isFetchingSearchPage, pageSize])
+  const fetchSearchPage = useCallback(
+    async (page: number) => {
+      if (isFetchingSearchPage) return;
+      setIsFetchingSearchPage(true);
+      try {
+        // @ts-ignore
+        const action = await dispatch(
+          getAllUsers({ page, pageSize, q: debouncedSearch })
+        );
+        const payload = (action as any)?.payload ?? action;
+        const { users: fetchedUsers, total } = extractPayloadUsers(payload);
+        console.debug("fetchSearchPage payload", {
+          page,
+          fetchedUsersLength: fetchedUsers.length,
+          total,
+          payload,
+        });
+        setSearchPageCache((prev) => ({ ...prev, [page]: fetchedUsers }));
+        if (typeof total === "number") setSearchTotal(total);
+      } catch (err) {
+        console.error("Error fetching search page:", err);
+      } finally {
+        setIsFetchingSearchPage(false);
+      }
+    },
+    [debouncedSearch, dispatch, isFetchingSearchPage, pageSize]
+  );
 
   /* ------------------- initial load ------------------- */
   useEffect(() => {
     if (!isSearching) {
-      ensureChunkForPage(1)
-      if (typeof totalUsersFromStore === "number" && totalUsersFromStore > 0) setSearchTotal(totalUsersFromStore)
+      ensureChunkForPage(1);
+      if (typeof totalUsersFromStore === "number" && totalUsersFromStore > 0)
+        setSearchTotal(totalUsersFromStore);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ensureChunkForPage, isSearching])
+  }, [ensureChunkForPage, isSearching]);
 
   /* ------------------- page change triggers fetches & prefetch ------------------- */
   useEffect(() => {
     if (isSearching) {
-      if (!searchPageCache[currentPage]) fetchSearchPage(currentPage)
+      if (!searchPageCache[currentPage]) fetchSearchPage(currentPage);
     } else {
-      ensureChunkForPage(currentPage)
+      ensureChunkForPage(currentPage);
 
-      const pageIndex0 = Math.max(0, currentPage - 1)
-      const currentChunk = Math.floor(pageIndex0 / pagesPerChunk) + 1
-      const posInChunk = pageIndex0 % pagesPerChunk
+      const pageIndex0 = Math.max(0, currentPage - 1);
+      const currentChunk = Math.floor(pageIndex0 / pagesPerChunk) + 1;
+      const posInChunk = pageIndex0 % pagesPerChunk;
 
       if (posInChunk >= pagesPerChunk - PREFETCH_THRESHOLD_PAGES_FROM_END) {
         // prefetch next chunk
-        ensureChunkForPage((currentChunk * pagesPerChunk) + 1)
+        ensureChunkForPage(currentChunk * pagesPerChunk + 1);
       }
       if (posInChunk >= pagesPerChunk - 1) {
-        ensureChunkForPage((currentChunk + 1) * pagesPerChunk + 1)
+        ensureChunkForPage((currentChunk + 1) * pagesPerChunk + 1);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, isSearching, fetchSearchPage, ensureChunkForPage])
+  }, [currentPage, isSearching, fetchSearchPage, ensureChunkForPage]);
 
   /* ------------------- build currentData ------------------- */
   const getCurrentPageData = (): (User | null)[] => {
     if (isSearching) {
-      const pageData = searchPageCache[currentPage] ?? []
-      return Array.from({ length: pageSize }, (_, i) => pageData[i] ?? null)
+      const pageData = searchPageCache[currentPage] ?? [];
+      return Array.from({ length: pageSize }, (_, i) => pageData[i] ?? null);
     }
-    const startIndex = (currentPage - 1) * pageSize
-    const pageSlice = cachedUsers.slice(startIndex, startIndex + pageSize)
-    return Array.from({ length: pageSize }, (_, i) => pageSlice[i] ?? null)
-  }
+    const startIndex = (currentPage - 1) * pageSize;
+    const pageSlice = cachedUsers.slice(startIndex, startIndex + pageSize);
+    return Array.from({ length: pageSize }, (_, i) => pageSlice[i] ?? null);
+  };
 
-  const currentData = getCurrentPageData()
+  const currentData = getCurrentPageData();
   // @ts-ignore
-  const anyMissing = currentData.some(d => d == null)
+  const anyMissing = currentData.some((d) => d == null);
 
-  const [userIdToDelete, setUserIdToDelete] = useState<number | null | undefined>(null)
+  const [userIdToDelete, setUserIdToDelete] = useState<
+    number | null | undefined
+  >(null);
   const confirmDeleteUser = async (userId: number | null | undefined) => {
     if (userId === null) {
-      console.log("No User Id")
-      return
+      console.log("No User Id");
+      return;
     }
-    dispatch(deleteUser(userId!))
+    dispatch(deleteUser(userId!));
     if (success.deleteUser) {
-      dispatch(clearMessages())
-      setUserIdToDelete(null)
-      dispatch(setShowDeleteUserDialog(false))
+      dispatch(clearMessages());
+      setUserIdToDelete(null);
+      dispatch(setShowDeleteUserDialog(false));
     } else if (error.deleteUser) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return "-"
-    return new Date(dateString).toLocaleDateString()
-  }
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString();
+  };
 
   const getStatusBadge = (active: number | boolean) => {
-    const isActive = active === 1 || active === true
-    return <span className={`su-status-badge ${isActive ? "su-active" : "su-inactive"}`}>{isActive ? "Active" : "Inactive"}</span>
-  }
+    const isActive = active === 1 || active === true;
+    return (
+      <span
+        className={`su-status-badge ${isActive ? "su-active" : "su-inactive"}`}
+      >
+        {isActive ? "Active" : "Inactive"}
+      </span>
+    );
+  };
 
   /* ------------------- pagination UI (5 window + ellipses) ------------------- */
   const renderPageNumbers = () => {
-    const pages: (number | "ellipsis")[] = []
-    const left = Math.max(1, currentPage - 2)
-    const right = Math.min(totalPages, currentPage + 2)
+    const pages: (number | "ellipsis")[] = [];
+    const left = Math.max(1, currentPage - 2);
+    const right = Math.min(totalPages, currentPage + 2);
 
     if (left > 1) {
-      pages.push(1)
-      if (left > 2) pages.push("ellipsis")
+      pages.push(1);
+      if (left > 2) pages.push("ellipsis");
     }
 
-    for (let p = left; p <= right; p++) pages.push(p)
+    for (let p = left; p <= right; p++) pages.push(p);
 
     if (right < totalPages) {
-      if (right < totalPages - 1) pages.push("ellipsis")
-      pages.push(totalPages)
+      if (right < totalPages - 1) pages.push("ellipsis");
+      pages.push(totalPages);
     }
 
-    return pages.map((p, idx) => p === "ellipsis" ? (
-      <PaginationItem key={`el-${idx}`} className="sp-pagination-item"><span style={{ padding: "0 .5rem" }}>…</span></PaginationItem>
-    ) : (
-      <PaginationItem key={p} className="sp-pagination-item">
-        <PaginationLink isActive={currentPage === p} onClick={() => setCurrentPage(p)}>{p}</PaginationLink>
-      </PaginationItem>
-    ))
-  }
+    return pages.map((p, idx) =>
+      p === "ellipsis" ? (
+        <PaginationItem key={`el-${idx}`} className="sp-pagination-item">
+          <span style={{ padding: "0 .5rem" }}>…</span>
+        </PaginationItem>
+      ) : (
+        <PaginationItem key={p} className="sp-pagination-item">
+          <PaginationLink
+            isActive={currentPage === p}
+            onClick={() => setCurrentPage(p)}
+          >
+            {p}
+          </PaginationLink>
+        </PaginationItem>
+      )
+    );
+  };
 
   /* ------------------- render ------------------- */
   // compute "showLoading" more robustly:
-  const showInitialLoading = !isSearching && cachedUsers.filter(Boolean).length === 0 && isFetchingChunk
-  const showSearchInitialLoading = isSearching && Object.keys(searchPageCache).length === 0 && isFetchingSearchPage
+  const showInitialLoading =
+    !isSearching && cachedUsers.filter(Boolean).length === 0 && isFetchingChunk;
+  const showSearchInitialLoading =
+    isSearching &&
+    Object.keys(searchPageCache).length === 0 &&
+    isFetchingSearchPage;
 
   return (
     <div className="su-users-container">
       <div className="su-users-header">
-        <SearchBar placeholder="Search by username, name, or email..." value={searchTerm} onChange={setSearchTerm} />
-        <Button className="su-add-user-btn" onClick={() => dispatch(setShowCreateUserDialog(true))}>Add New User</Button>
+        <SearchBar
+          placeholder="Search by username, name, or email..."
+          value={searchTerm}
+          onChange={setSearchTerm}
+        />
+        <Button
+          className="su-add-user-btn"
+          onClick={() => dispatch(setShowCreateUserDialog(true))}
+        >
+          Add New User
+        </Button>
       </div>
 
-      { (showInitialLoading || showSearchInitialLoading) ? (
+      {showInitialLoading || showSearchInitialLoading ? (
         <div className="su-loading-container">Loading...</div>
       ) : (
         <div className="su-table-container">
@@ -296,7 +405,7 @@ const SecurityUsers = () => {
               <TableRow>
                 <TableHead>S/N</TableHead>
                 <TableHead>Username</TableHead>
-                <TableHead>Full Name</TableHead>
+                {/* <TableHead>Full Name</TableHead> */}
                 <TableHead>Email</TableHead>
                 <TableHead>Phone</TableHead>
                 <TableHead>Status</TableHead>
@@ -306,43 +415,81 @@ const SecurityUsers = () => {
               </TableRow>
             </TableHeader>
             <TableBody className="su-table-body">
-              { (currentData.every(d => d == null) && (totalUsers === 0 || (!isSearching && cachedUsers.filter(Boolean).length === 0))) ? (
+              {currentData.every((d) => d == null) &&
+              (totalUsers === 0 ||
+                (!isSearching && cachedUsers.filter(Boolean).length === 0)) ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="su-no-data-cell">No users found</TableCell>
+                  <TableCell colSpan={9} className="su-no-data-cell">
+                    No users found
+                  </TableCell>
                 </TableRow>
               ) : (
                 currentData.map((user, index) => {
                   if (!user) {
                     return (
                       <TableRow key={`placeholder-${index}`}>
-                        <TableCell colSpan={9} className="su-no-data-cell">Loading...</TableCell>
+                        <TableCell colSpan={9} className="su-no-data-cell">
+                          Loading...
+                        </TableCell>
                       </TableRow>
-                    )
+                    );
                   }
 
-                  const globalIndex = (currentPage - 1) * pageSize + index
+                  const globalIndex = (currentPage - 1) * pageSize + index;
                   return (
                     <TableRow key={user.userID ?? globalIndex}>
                       <TableCell>{globalIndex + 1}</TableCell>
-                      <TableCell className="su-username-cell">{user.username}</TableCell>
-                      <TableCell className="su-fullname-cell">{`${user.firstName} ${user.lastName}`.trim()}</TableCell>
-                      <TableCell className="su-email-cell">{user.email || "-"}</TableCell>
+                      <TableCell className="su-username-cell">
+                        <p className="flex flex-col">{user.username}</p>
+                      </TableCell>
+                      {/* <TableCell className="su-fullname-cell">{`${user.firstName} ${user.lastName}`.trim()}</TableCell> */}
+                      <TableCell className="su-email-cell">
+                        <span className="font-medium text-sm normal-case">{`${user.firstName} ${user.lastName}`}</span>
+                        <br /> {user.email || "-"}
+                      </TableCell>
                       <TableCell>{user.phone || "-"}</TableCell>
                       <TableCell>{getStatusBadge(user.active)}</TableCell>
                       <TableCell>{formatDate(user.pwdExpiry)}</TableCell>
                       <TableCell className="su-modified-cell">
                         <div className="su-modified-info">
                           <div>{user.modifiedBy || "-"}</div>
-                          <div className="su-modified-date">{formatDate(user.modifiedOn)}</div>
+                          <div className="su-modified-date">
+                            {formatDate(user.modifiedOn)}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell className="su-actions-cell">
-                        <Button className="su-edit-btn" onClick={() => { setUserToEdit(user); dispatch(setShowEditUserDialog(true)) }}>Edit</Button>
-                        <Button className="su-password-btn" onClick={() => { setUserToChangePassword(user); dispatch(setShowChangePasswordDialog(true)) }}>Password</Button>
-                        <Button variant="destructive" className="su-delete-btn" onClick={() => { setUserIdToDelete(user.userID); dispatch(setShowDeleteUserDialog(true)) }}>Delete</Button>
+                        <Button
+                          className="su-edit-btn"
+                          onClick={() => {
+                            setUserToEdit(user);
+                            dispatch(setShowEditUserDialog(true));
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          className="su-password-btn"
+                          onClick={() => {
+                            setUserToChangePassword(user);
+                            dispatch(setShowChangePasswordDialog(true));
+                          }}
+                        >
+                          Password
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          className="su-delete-btn"
+                          onClick={() => {
+                            setUserIdToDelete(user.userID);
+                            dispatch(setShowDeleteUserDialog(true));
+                          }}
+                        >
+                          Delete
+                        </Button>
                       </TableCell>
                     </TableRow>
-                  )
+                  );
                 })
               )}
             </TableBody>
@@ -352,7 +499,12 @@ const SecurityUsers = () => {
             <div className="su-pagination-info">
               Showing{" "}
               <span className="su-pagination-numbers">
-                {totalUsers > 0 ? `${(currentPage - 1) * pageSize + 1} to ${Math.min(currentPage * pageSize, totalUsers)} of ${totalUsers}` : "0 to 0 of 0"}
+                {totalUsers > 0
+                  ? `${(currentPage - 1) * pageSize + 1} to ${Math.min(
+                      currentPage * pageSize,
+                      totalUsers
+                    )} of ${totalUsers}`
+                  : "0 to 0 of 0"}
               </span>{" "}
               Users
             </div>
@@ -360,13 +512,23 @@ const SecurityUsers = () => {
             <Pagination className="sp-pagination-controls">
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious className="sp-pagination-prev" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} />
+                  <PaginationPrevious
+                    className="sp-pagination-prev"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                  />
                 </PaginationItem>
 
                 {renderPageNumbers()}
 
                 <PaginationItem>
-                  <PaginationNext className="sp-pagination-next" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} />
+                  <PaginationNext
+                    className="sp-pagination-next"
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
+                  />
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
@@ -390,7 +552,7 @@ const SecurityUsers = () => {
         />
       )}
     </div>
-  )
-}
+  );
+};
 
-export default SecurityUsers
+export default SecurityUsers;

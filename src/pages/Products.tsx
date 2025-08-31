@@ -1,123 +1,133 @@
-// src/pages/Products.tsx
 import React, { useState } from "react";
-import Button from "../components/UI/Button";
-import Input from "../components/UI/Input";
-import Select from "../components/UI/Select";
+import ProductSubRisk from "../components/product-page/product.sub-risk";
+import ProductsRisks from "../components/product-page/products.risks";
+import CreateProductModal from "../components/Modals/CreateProductModal";
+import "./Products.css";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "../components/UI/tabs";
-import CreateProductModal from "../components/Modals/CreateProductModal";
-import ProductsRisks from "../components/product-page/products.risks";
-import "./Products.css";
-
-/**
- * === How to use ===
- * Replace the `tabs` array below with your tabs array.
- *
- * Example (exactly what you asked for):
- * const tabs = [
- *   { title: "Risks", content: <ProductRisks /> }
- * ];
- *
- * If you reference components like ProductRisks or ProductList, import them above.
- * -------------------------------------------------------------------------------
- */
-
-const DEFAULT_STATUS_OPTIONS = [
-  { value: "Active", label: "Active" },
-  { value: "Inactive", label: "Inactive" },
-];
-
-/* ============================
-   Replace this tabs array only
-   ============================
-   Example:
-   const tabs = [
-     { title: "Risks", content: <ProductRisks /> },
-     { title: "Products", content: <ProductsList /> }
-   ]
-*/
-const tabs: { title: string; content: React.ReactNode }[] = [
-  // put your tab objects here — replace the entire array with your own
-  { title: "Risks", content: <ProductsRisks /> },
-  { title: "Products", content: <ProductsRisks /> },
-  // { title: "Products", content: <ProductsList /> },
-];
-
-const SearchControls: React.FC<{
-  searchTerm: string;
-  setSearchTerm: (v: string) => void;
-  statusFilter: string;
-  setStatusFilter: (v: string) => void;
-}> = ({ searchTerm, setSearchTerm, statusFilter, setStatusFilter }) => {
-  return (
-    <div className="search-controls">
-      <Input
-        placeholder="Search..."
-        value={searchTerm}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setSearchTerm(e.target.value)
-        }
-        className="search-input"
-      />
-      <Select
-        options={DEFAULT_STATUS_OPTIONS}
-        value={statusFilter}
-        onChange={(e: any) => setStatusFilter(e.target.value)}
-        className="status-filter"
-      />
-      <Button variant="secondary" size="sm">
-        🔍
-      </Button>
-    </div>
-  );
-};
 
 const Products: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>(
-    tabs.length > 0 ? tabs[0].title : "Products"
-  );
-  const [showProductModal, setShowProductModal] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>("");
-  const [statusFilter, setStatusFilter] = useState<string>("Active");
+  const [activeTab, setActiveTab] = useState("Products");
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("Active");
+
+  // const tabs = ['Risks', 'Products']
+  const tabs = [
+    { title: "Product", content: <ProductSubRisk /> },
+    { title: "Risks", content: <ProductsRisks /> },
+    { title: "Products", content: <ProductsRisks /> },
+  ];
+
+  // const statusOptions = [
+  //   { value: "Active", label: "Active" },
+  //   { value: "Inactive", label: "Inactive" },
+  // ];
 
   const handleProductSubmit = (data: any) => {
     console.log("Product created:", data);
-    setShowProductModal(false);
   };
 
-  // If tabs array is empty, show a friendly placeholder
-  if (!tabs || tabs.length === 0) {
-    return (
-      <div className="products-page">
-        <div className="page-header">
-          <h1>Products</h1>
-        </div>
+  // const renderTabContent = () => {
+  //   switch (activeTab) {
+  //     case "Products":
+  //       return (
+  //         <div className="tab-content">
+  //           <div className="content-header">
+  //             <div className="search-controls">
+  //               <Input
+  //                 placeholder="Search..."
+  //                 value={searchTerm}
+  //                 onChange={(e: any) => setSearchTerm(e.target.value)}
+  //                 className="search-input"
+  //               />
+  //               <Select
+  //                 options={statusOptions}
+  //                 value={statusFilter}
+  //                 onChange={(e: any) => setStatusFilter(e.target.value)}
+  //                 className="status-filter"
+  //               />
+  //               <Button variant="secondary" size="sm">
+  //                 🔍
+  //               </Button>
+  //             </div>
+  //             <Button onClick={() => setShowProductModal(true)}>
+  //               + Create Product...
+  //             </Button>
+  //           </div>
 
-        <div className="empty-warning">
-          <p>
-            No tabs defined. Replace the `tabs` array at the top of this file
-            with something like:
-          </p>
-          <pre style={{ background: "#f4f4f4", padding: 12 }}>
-{`const tabs = [
-  { title: "Risks", content: <ProductRisks /> },
-  { title: "Products", content: <ProductsList /> }
-]`}
-          </pre>
-        </div>
+  //           <div className="products-table">
+  //             <div className="table-header">
+  //               <div className="header-cell">PRODUCT ID</div>
+  //               <div className="header-cell">PRODUCT NAME</div>
+  //               <div className="header-cell">RATES</div>
+  //               <div className="header-cell">RISK</div>
+  //               <div className="header-cell">MIDRISK</div>
+  //             </div>
+  //             <div className="table-body">
+  //               <div className="no-data">No items found</div>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       );
 
-        <CreateProductModal
-          isOpen={showProductModal}
-          onClose={() => setShowProductModal(false)}
-          onSubmit={handleProductSubmit}
-        />
-      </div>
-    );
-  }
+  //     case "Risks":
+  //       return (
+  //         <div className="tab-content">
+  //           <div className="risks-layout">
+  //             <div className="risks-section">
+  //               <h3>Classes</h3>
+  //               <div className="risks-table">
+  //                 <div className="table-header">
+  //                   <div className="header-cell">RISK ID</div>
+  //                   <div className="header-cell">RISK NAME</div>
+  //                   <div className="header-cell">CATEGORIES</div>
+  //                   <div className="header-cell">PRODUCTS</div>
+  //                 </div>
+  //                 <div className="table-body">
+  //                   <div className="status-badge">Not yet loaded</div>
+  //                 </div>
+  //               </div>
+  //             </div>
+
+  //             <div className="categories-section">
+  //               <div className="section-header">
+  //                 <h3>Categories</h3>
+  //                 <Button size="sm">+ Add MidRisk...</Button>
+  //               </div>
+  //               <div className="categories-table">
+  //                 <div className="table-header">
+  //                   <div className="header-cell">RISK ID</div>
+  //                   <div className="header-cell">MIDRISK ID</div>
+  //                   <div className="header-cell">MIDRISK NAME</div>
+  //                   <div className="header-cell">PRODUCTS</div>
+  //                 </div>
+  //                 <div className="table-body">
+  //                   <div className="placeholder-rows">
+  //                     {[...Array(4)].map((_, i) => (
+  //                       <div key={i} className="placeholder-row">
+  //                         <div className="placeholder-cell"></div>
+  //                         <div className="placeholder-cell"></div>
+  //                         <div className="placeholder-cell"></div>
+  //                         <div className="placeholder-cell"></div>
+  //                       </div>
+  //                     ))}
+  //                   </div>
+  //                 </div>
+  //               </div>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       );
+
+  //     default:
+  //       return <div className="no-data">No content available</div>;
+  //   }
+  // };
 
   return (
     <div className="products-page">
@@ -125,6 +135,17 @@ const Products: React.FC = () => {
         <h1>Products</h1>
       </div>
 
+      {/* <div className="tabs-container">
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            className={`tab ${activeTab === tab ? "active" : ""}`}
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab}
+          </button>
+        ))}
+      </div> */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="w-full flex flex-wrap">
           {tabs.map((tab) => (
@@ -137,28 +158,12 @@ const Products: React.FC = () => {
             </TabsTrigger>
           ))}
         </TabsList>
-
         {tabs.map((tab) => (
-          <TabsContent key={tab.title} value={tab.title}>
-            {/* If you'd like global search/filters for some tabs, you can include them in the tab's content.
-                For convenience, we provide a SearchControls component that you can reuse inside tab content
-                or place here globally by uncommenting the block below. */}
-            {/* <div className="content-header">
-              <SearchControls
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                statusFilter={statusFilter}
-                setStatusFilter={setStatusFilter}
-              />
-              <Button onClick={() => setShowProductModal(true)}>
-                + Create Product...
-              </Button>
-            </div> */}
-
-            {tab.content}
-          </TabsContent>
+          <TabsContent value={tab.title}>{tab.content}</TabsContent>
         ))}
       </Tabs>
+
+      {/* {renderTabContent()} */}
 
       <CreateProductModal
         isOpen={showProductModal}

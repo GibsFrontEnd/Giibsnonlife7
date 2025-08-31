@@ -73,7 +73,7 @@ export const CreateRisk = () => {
       handleClose()
       dispatch(clearMessages())
     }
-  }, [success.createRisk, dispatch])
+  }, [success?.createRisk, dispatch])
 
   return (
     <Dialog open={showCreateRiskDialog} onOpenChange={handleClose}>
@@ -211,7 +211,7 @@ export const EditRisk = ({ risk }: { risk: Risk | null }) => {
       handleClose()
       dispatch(clearMessages())
     }
-  }, [success.updateRisk, dispatch])
+  }, [success?.updateRisk, dispatch])
 
   return (
     <Dialog open={showEditRiskDialog} onOpenChange={handleClose}>

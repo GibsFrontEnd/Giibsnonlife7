@@ -36,10 +36,10 @@ const LoginPage = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
+/*     if (token) {
       navigate("/dashboard", { replace: true });
     }
-  }, [navigate]);
+ */  }, [navigate]);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -62,11 +62,11 @@ const LoginPage = () => {
       );
 
       if (response.status === 200) {
-        const user = response.data;
-        localStorage.setItem("user", encryptData(user));
-        localStorage.setItem("token", encryptData(user.token));
+        const data = response.data;
+        localStorage.setItem("user", encryptData(data.user));
+        localStorage.setItem("token", encryptData(data.token));
 
-        localStorage.setItem("unEncryptedUser", JSON.stringify(user));
+        localStorage.setItem("unEncryptedUser", JSON.stringify(data.user));
 
         toast({
           title: "Login successful!",
