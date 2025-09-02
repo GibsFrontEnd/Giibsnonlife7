@@ -3,6 +3,7 @@ import CreateProductModal from "../components/Modals/CreateProductModal";
 import "./Products.css";
 import ProductRisk from "../components/product-page/product.risk";
 import ProductSubRisk from "../components/product-page/product.sub-risk";
+import SubRiskSMIManagement from "../components/product-page/product.sub-risk-smis";
 import {
   Tabs,
   TabsContent,
@@ -13,6 +14,7 @@ import {
 const tabs = [
   { title: "Risk", content: <ProductRisk /> },
   { title: "Product", content: <ProductSubRisk /> },
+  { title: "Sub Risk SMI", content: <SubRiskSMIManagement /> },
 ];
 
 const Products: React.FC = () => {
