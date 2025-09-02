@@ -36,7 +36,7 @@ const ProductsRisks = () => {
   const [currentPage, setCurrentPage] = useState(1)
 
   // paging config
-  const rowsPerPage = 10
+  const rowsPerPage = 5
   const chunkSize = 50 // fetch 50 items per server request
   const prefetchThreshold = rowsPerPage * 2 // when within this many items from end, prefetch next chunk
 
@@ -287,6 +287,7 @@ const ProductsRisks = () => {
                         Edit
                       </Button>
                       <Button
+                        //@ts-ignore
                         variant="destructive"
                         className="pr-delete-btn"
                         onClick={() => {

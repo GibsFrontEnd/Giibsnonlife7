@@ -1,64 +1,41 @@
-import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit"
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import type {
-  SubRiskSection,
   CreateSubRiskSectionRequest,
   UpdateSubRiskSectionRequest,
   SubRiskSectionState,
 } from "../../../types/subRiskSection"
-import type { RootState } from "../../store"
 
 const API_BASE_URL = "https://core-api.newgibsonline.com/api"
-
-// You'll need to get this token from your auth system
-const getAuthToken = () => {
-  return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoicGVsbHVtaSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiNjM0IiwiZXhwIjoxNzU2NjA3MDc1fQ.IS6kuxNBX_0W0pq9A-V1VeZxkGlaHiqbOORdkV7J40M"
-}
 
 // Async thunks
 export const getAllSubRiskSections = createAsyncThunk(
   "subRiskSections/getAllSubRiskSections",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/SubRiskSections`, {
-        method: "GET",
-        headers: {
-          accept: "text/plain",
-          Authorization: `Bearer ${getAuthToken()}`,
-        },
-      })
-
+      const response = await fetch(`${API_BASE_URL}/SubRiskSections`)
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error("Failed to fetch sub risk sections")
       }
-
-      const data: SubRiskSection[] = await response.json()
+      const data = await response.json()
       return data
     } catch (error: any) {
-      return rejectWithValue(error.message || "Failed to fetch sub risk sections")
+      return rejectWithValue(error.message)
     }
   },
 )
 
 export const getSubRiskSectionById = createAsyncThunk(
   "subRiskSections/getSubRiskSectionById",
-  async (sectionId: number, { rejectWithValue }) => {
+  async (id: number, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/SubRiskSections/${sectionId}`, {
-        method: "GET",
-        headers: {
-          accept: "text/plain",
-          Authorization: `Bearer ${getAuthToken()}`,
-        },
-      })
-
+      const response = await fetch(`${API_BASE_URL}/SubRiskSections/${id}`)
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error("Failed to fetch sub risk section")
       }
-
-      const data: SubRiskSection = await response.json()
+      const data = await response.json()
       return data
     } catch (error: any) {
-      return rejectWithValue(error.message || "Failed to fetch sub risk section")
+      return rejectWithValue(error.message)
     }
   },
 )
@@ -67,22 +44,14 @@ export const getSubRiskSectionsBySectionCode = createAsyncThunk(
   "subRiskSections/getSubRiskSectionsBySectionCode",
   async (sectionCode: string, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/SubRiskSections/by-section-code/${sectionCode}`, {
-        method: "GET",
-        headers: {
-          accept: "text/plain",
-          Authorization: `Bearer ${getAuthToken()}`,
-        },
-      })
-
+      const response = await fetch(`${API_BASE_URL}/SubRiskSections/by-section-code/${sectionCode}`)
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error("Failed to fetch sub risk sections by section code")
       }
-
-      const data: SubRiskSection[] = await response.json()
+      const data = await response.json()
       return data
     } catch (error: any) {
-      return rejectWithValue(error.message || "Failed to fetch sub risk sections by section code")
+      return rejectWithValue(error.message)
     }
   },
 )
@@ -91,22 +60,14 @@ export const getSubRiskSectionsBySubRisk = createAsyncThunk(
   "subRiskSections/getSubRiskSectionsBySubRisk",
   async (subRiskId: string, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/SubRiskSections/by-subrisk/${subRiskId}`, {
-        method: "GET",
-        headers: {
-          accept: "text/plain",
-          Authorization: `Bearer ${getAuthToken()}`,
-        },
-      })
-
+      const response = await fetch(`${API_BASE_URL}/SubRiskSections/by-subrisk/${subRiskId}`)
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error("Failed to fetch sub risk sections by sub risk")
       }
-
-      const data: SubRiskSection[] = await response.json()
+      const data = await response.json()
       return data
     } catch (error: any) {
-      return rejectWithValue(error.message || "Failed to fetch sub risk sections by sub risk")
+      return rejectWithValue(error.message)
     }
   },
 )
@@ -115,46 +76,30 @@ export const getActiveSubRiskSections = createAsyncThunk(
   "subRiskSections/getActiveSubRiskSections",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/SubRiskSections/active`, {
-        method: "GET",
-        headers: {
-          accept: "text/plain",
-          Authorization: `Bearer ${getAuthToken()}`,
-        },
-      })
-
+      const response = await fetch(`${API_BASE_URL}/SubRiskSections/active`)
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error("Failed to fetch active sub risk sections")
       }
-
-      const data: SubRiskSection[] = await response.json()
+      const data = await response.json()
       return data
     } catch (error: any) {
-      return rejectWithValue(error.message || "Failed to fetch active sub risk sections")
+      return rejectWithValue(error.message)
     }
   },
 )
 
 export const checkSubRiskSectionExists = createAsyncThunk(
   "subRiskSections/checkSubRiskSectionExists",
-  async (sectionId: number, { rejectWithValue }) => {
+  async (id: number, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/SubRiskSections/${sectionId}/exists`, {
-        method: "GET",
-        headers: {
-          accept: "text/plain",
-          Authorization: `Bearer ${getAuthToken()}`,
-        },
-      })
-
+      const response = await fetch(`${API_BASE_URL}/SubRiskSections/${id}/exists`)
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error("Failed to check sub risk section existence")
       }
-
-      const data: boolean = await response.json()
-      return data
+      const data = await response.text()
+      return data === "true"
     } catch (error: any) {
-      return rejectWithValue(error.message || "Failed to check if sub risk section exists")
+      return rejectWithValue(error.message)
     }
   },
 )
@@ -166,21 +111,17 @@ export const createSubRiskSection = createAsyncThunk(
       const response = await fetch(`${API_BASE_URL}/SubRiskSections`, {
         method: "POST",
         headers: {
-          accept: "text/plain",
-          Authorization: `Bearer ${getAuthToken()}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(subRiskSectionData),
       })
-
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error("Failed to create sub risk section")
       }
-
-      const data: SubRiskSection = await response.json()
+      const data = await response.json()
       return data
     } catch (error: any) {
-      return rejectWithValue(error.message || "Failed to create sub risk section")
+      return rejectWithValue(error.message)
     }
   },
 )
@@ -195,50 +136,41 @@ export const updateSubRiskSection = createAsyncThunk(
       const response = await fetch(`${API_BASE_URL}/SubRiskSections/${id}`, {
         method: "PUT",
         headers: {
-          accept: "text/plain",
-          Authorization: `Bearer ${getAuthToken()}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(subRiskSectionData),
       })
-
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error("Failed to update sub risk section")
       }
-
-      const data: SubRiskSection = await response.json()
+      const data = await response.json()
       return data
     } catch (error: any) {
-      return rejectWithValue(error.message || "Failed to update sub risk section")
+      return rejectWithValue(error.message)
     }
   },
 )
 
 export const deleteSubRiskSection = createAsyncThunk(
   "subRiskSections/deleteSubRiskSection",
-  async (sectionId: number, { rejectWithValue }) => {
+  async (id: number, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/SubRiskSections/${sectionId}`, {
+      const response = await fetch(`${API_BASE_URL}/SubRiskSections/${id}`, {
         method: "DELETE",
-        headers: {
-          accept: "*/*",
-          Authorization: `Bearer ${getAuthToken()}`,
-        },
       })
-
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        throw new Error("Failed to delete sub risk section")
       }
-
-      return sectionId
+      return id
     } catch (error: any) {
-      return rejectWithValue(error.message || "Failed to delete sub risk section")
+      return rejectWithValue(error.message)
     }
   },
 )
 
 const initialState: SubRiskSectionState = {
   subRiskSections: [],
+  exists: null,
   loading: {
     getAllSubRiskSections: false,
     getSubRiskSectionById: false,
@@ -251,6 +183,12 @@ const initialState: SubRiskSectionState = {
     deleteSubRiskSection: false,
   },
   success: {
+    getAllSubRiskSections: false,
+    getSubRiskSectionById: false,
+    getSubRiskSectionsBySectionCode: false,
+    getSubRiskSectionsBySubRisk: false,
+    getActiveSubRiskSections: false,
+    checkSubRiskSectionExists: false,
     createSubRiskSection: false,
     updateSubRiskSection: false,
     deleteSubRiskSection: false,
@@ -266,7 +204,6 @@ const initialState: SubRiskSectionState = {
     updateSubRiskSection: null,
     deleteSubRiskSection: null,
   },
-  exists: null,
 }
 
 const subRiskSectionSlice = createSlice({
@@ -275,6 +212,12 @@ const subRiskSectionSlice = createSlice({
   reducers: {
     clearMessages: (state) => {
       state.success = {
+        getAllSubRiskSections: false,
+        getSubRiskSectionById: false,
+        getSubRiskSectionsBySectionCode: false,
+        getSubRiskSectionsBySubRisk: false,
+        getActiveSubRiskSections: false,
+        checkSubRiskSectionExists: false,
         createSubRiskSection: false,
         updateSubRiskSection: false,
         deleteSubRiskSection: false,
@@ -294,14 +237,15 @@ const subRiskSectionSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // Get all sub risk sections
     builder
-      // Get all sub risk sections
       .addCase(getAllSubRiskSections.pending, (state) => {
         state.loading.getAllSubRiskSections = true
         state.error.getAllSubRiskSections = null
       })
-      .addCase(getAllSubRiskSections.fulfilled, (state, action: PayloadAction<SubRiskSection[]>) => {
+      .addCase(getAllSubRiskSections.fulfilled, (state, action) => {
         state.loading.getAllSubRiskSections = false
+        state.success.getAllSubRiskSections = true
         state.subRiskSections = action.payload
       })
       .addCase(getAllSubRiskSections.rejected, (state, action) => {
@@ -309,30 +253,30 @@ const subRiskSectionSlice = createSlice({
         state.error.getAllSubRiskSections = action.payload as string
       })
 
-      // Get sub risk section by ID
+    // Get sub risk section by ID
+    builder
       .addCase(getSubRiskSectionById.pending, (state) => {
         state.loading.getSubRiskSectionById = true
         state.error.getSubRiskSectionById = null
       })
-      .addCase(getSubRiskSectionById.fulfilled, (state, action: PayloadAction<SubRiskSection>) => {
+      .addCase(getSubRiskSectionById.fulfilled, (state, action) => {
         state.loading.getSubRiskSectionById = false
-        const index = state.subRiskSections.findIndex((s) => s.sectionID === action.payload.sectionID)
-        if (index !== -1) {
-          state.subRiskSections[index] = action.payload
-        }
+        state.success.getSubRiskSectionById = true
       })
       .addCase(getSubRiskSectionById.rejected, (state, action) => {
         state.loading.getSubRiskSectionById = false
         state.error.getSubRiskSectionById = action.payload as string
       })
 
-      // Get sub risk sections by section code
+    // Get sub risk sections by section code
+    builder
       .addCase(getSubRiskSectionsBySectionCode.pending, (state) => {
         state.loading.getSubRiskSectionsBySectionCode = true
         state.error.getSubRiskSectionsBySectionCode = null
       })
-      .addCase(getSubRiskSectionsBySectionCode.fulfilled, (state, action: PayloadAction<SubRiskSection[]>) => {
+      .addCase(getSubRiskSectionsBySectionCode.fulfilled, (state, action) => {
         state.loading.getSubRiskSectionsBySectionCode = false
+        state.success.getSubRiskSectionsBySectionCode = true
         state.subRiskSections = action.payload
       })
       .addCase(getSubRiskSectionsBySectionCode.rejected, (state, action) => {
@@ -340,13 +284,15 @@ const subRiskSectionSlice = createSlice({
         state.error.getSubRiskSectionsBySectionCode = action.payload as string
       })
 
-      // Get sub risk sections by sub risk
+    // Get sub risk sections by sub risk
+    builder
       .addCase(getSubRiskSectionsBySubRisk.pending, (state) => {
         state.loading.getSubRiskSectionsBySubRisk = true
         state.error.getSubRiskSectionsBySubRisk = null
       })
-      .addCase(getSubRiskSectionsBySubRisk.fulfilled, (state, action: PayloadAction<SubRiskSection[]>) => {
+      .addCase(getSubRiskSectionsBySubRisk.fulfilled, (state, action) => {
         state.loading.getSubRiskSectionsBySubRisk = false
+        state.success.getSubRiskSectionsBySubRisk = true
         state.subRiskSections = action.payload
       })
       .addCase(getSubRiskSectionsBySubRisk.rejected, (state, action) => {
@@ -354,13 +300,15 @@ const subRiskSectionSlice = createSlice({
         state.error.getSubRiskSectionsBySubRisk = action.payload as string
       })
 
-      // Get active sub risk sections
+    // Get active sub risk sections
+    builder
       .addCase(getActiveSubRiskSections.pending, (state) => {
         state.loading.getActiveSubRiskSections = true
         state.error.getActiveSubRiskSections = null
       })
-      .addCase(getActiveSubRiskSections.fulfilled, (state, action: PayloadAction<SubRiskSection[]>) => {
+      .addCase(getActiveSubRiskSections.fulfilled, (state, action) => {
         state.loading.getActiveSubRiskSections = false
+        state.success.getActiveSubRiskSections = true
         state.subRiskSections = action.payload
       })
       .addCase(getActiveSubRiskSections.rejected, (state, action) => {
@@ -368,13 +316,15 @@ const subRiskSectionSlice = createSlice({
         state.error.getActiveSubRiskSections = action.payload as string
       })
 
-      // Check if sub risk section exists
+    // Check sub risk section exists
+    builder
       .addCase(checkSubRiskSectionExists.pending, (state) => {
         state.loading.checkSubRiskSectionExists = true
         state.error.checkSubRiskSectionExists = null
       })
-      .addCase(checkSubRiskSectionExists.fulfilled, (state, action: PayloadAction<boolean>) => {
+      .addCase(checkSubRiskSectionExists.fulfilled, (state, action) => {
         state.loading.checkSubRiskSectionExists = false
+        state.success.checkSubRiskSectionExists = true
         state.exists = action.payload
       })
       .addCase(checkSubRiskSectionExists.rejected, (state, action) => {
@@ -382,32 +332,32 @@ const subRiskSectionSlice = createSlice({
         state.error.checkSubRiskSectionExists = action.payload as string
       })
 
-      // Create sub risk section
+    // Create sub risk section
+    builder
       .addCase(createSubRiskSection.pending, (state) => {
         state.loading.createSubRiskSection = true
         state.error.createSubRiskSection = null
-        state.success.createSubRiskSection = false
       })
-      .addCase(createSubRiskSection.fulfilled, (state, action: PayloadAction<SubRiskSection>) => {
+      .addCase(createSubRiskSection.fulfilled, (state, action) => {
         state.loading.createSubRiskSection = false
         state.success.createSubRiskSection = true
-        state.subRiskSections.unshift(action.payload)
+        state.subRiskSections.push(action.payload)
       })
       .addCase(createSubRiskSection.rejected, (state, action) => {
         state.loading.createSubRiskSection = false
         state.error.createSubRiskSection = action.payload as string
       })
 
-      // Update sub risk section
+    // Update sub risk section
+    builder
       .addCase(updateSubRiskSection.pending, (state) => {
         state.loading.updateSubRiskSection = true
         state.error.updateSubRiskSection = null
-        state.success.updateSubRiskSection = false
       })
-      .addCase(updateSubRiskSection.fulfilled, (state, action: PayloadAction<SubRiskSection>) => {
+      .addCase(updateSubRiskSection.fulfilled, (state, action) => {
         state.loading.updateSubRiskSection = false
         state.success.updateSubRiskSection = true
-        const index = state.subRiskSections.findIndex((s) => s.sectionID === action.payload.sectionID)
+        const index = state.subRiskSections.findIndex((section) => section.sectionID === action.payload.sectionID)
         if (index !== -1) {
           state.subRiskSections[index] = action.payload
         }
@@ -417,16 +367,16 @@ const subRiskSectionSlice = createSlice({
         state.error.updateSubRiskSection = action.payload as string
       })
 
-      // Delete sub risk section
+    // Delete sub risk section
+    builder
       .addCase(deleteSubRiskSection.pending, (state) => {
         state.loading.deleteSubRiskSection = true
         state.error.deleteSubRiskSection = null
-        state.success.deleteSubRiskSection = false
       })
-      .addCase(deleteSubRiskSection.fulfilled, (state, action: PayloadAction<number>) => {
+      .addCase(deleteSubRiskSection.fulfilled, (state, action) => {
         state.loading.deleteSubRiskSection = false
         state.success.deleteSubRiskSection = true
-        state.subRiskSections = state.subRiskSections.filter((s) => s.sectionID !== action.payload)
+        state.subRiskSections = state.subRiskSections.filter((section) => section.sectionID !== action.payload)
       })
       .addCase(deleteSubRiskSection.rejected, (state, action) => {
         state.loading.deleteSubRiskSection = false
@@ -436,7 +386,5 @@ const subRiskSectionSlice = createSlice({
 })
 
 export const { clearMessages } = subRiskSectionSlice.actions
-
-export const selectSubRiskSections = (state: RootState) => state.subRiskSections
-
+export const selectSubRiskSections = (state: any) => state.subRiskSections
 export default subRiskSectionSlice.reducer

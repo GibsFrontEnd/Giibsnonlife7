@@ -5,18 +5,18 @@ export interface SubRiskSection {
   sectionName: string
   subRiskName: string
   field1: string
-  field2: string | null
-  rates: number | null
-  a1: number | null
-  a2: number | null
-  a3: number | null
-  a4: number | null
-  a5: number | null
-  active: number | null
-  submittedBy: string | null
-  submittedOn: string | null
-  modifiedBy: string | null
-  modifiedOn: string | null
+  field2?: string | null
+  rates?: number | null
+  a1?: number | null
+  a2?: number | null
+  a3?: number | null
+  a4?: number | null
+  a5?: number | null
+  active: number
+  submittedBy: string
+  submittedOn: string
+  modifiedBy?: string | null
+  modifiedOn?: string | null
 }
 
 export interface CreateSubRiskSectionRequest {
@@ -54,6 +54,7 @@ export interface UpdateSubRiskSectionRequest {
 
 export interface SubRiskSectionState {
   subRiskSections: SubRiskSection[]
+  exists: boolean | null
   loading: {
     getAllSubRiskSections: boolean
     getSubRiskSectionById: boolean
@@ -66,6 +67,12 @@ export interface SubRiskSectionState {
     deleteSubRiskSection: boolean
   }
   success: {
+    getAllSubRiskSections: boolean
+    getSubRiskSectionById: boolean
+    getSubRiskSectionsBySectionCode: boolean
+    getSubRiskSectionsBySubRisk: boolean
+    getActiveSubRiskSections: boolean
+    checkSubRiskSectionExists: boolean
     createSubRiskSection: boolean
     updateSubRiskSection: boolean
     deleteSubRiskSection: boolean
@@ -81,5 +88,4 @@ export interface SubRiskSectionState {
     updateSubRiskSection: string | null
     deleteSubRiskSection: string | null
   }
-  exists: boolean | null
 }

@@ -31,6 +31,12 @@ interface UiState {
   showEditSubRiskSectionDialog: boolean;
   showDeleteSubRiskSectionDialog: boolean;
   showViewSubRiskSectionDetailsDialog: boolean;
+
+  // Product Sub risk dialogs
+  showCreateProductDialog: boolean;
+  showEditProductDialog: boolean;
+  showDeleteProductDialog: boolean;
+  showViewProductDetailsDialog: boolean;
 }
 
 const initialState: UiState = {
@@ -63,6 +69,11 @@ const initialState: UiState = {
   showEditSubRiskSectionDialog: false,
   showDeleteSubRiskSectionDialog: false,
   showViewSubRiskSectionDetailsDialog: false,
+  // Product Sub risk
+  showCreateProductDialog: false,
+  showEditProductDialog: false,
+  showDeleteProductDialog: false,
+  showViewProductDetailsDialog: false,
 };
 
 const uiSlice = createSlice({
@@ -145,6 +156,22 @@ const uiSlice = createSlice({
       state.showViewSubRiskSectionDetailsDialog = action.payload;
     },
 
+    // Product sub risk reducers
+    setShowCreateProductDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreateProductDialog = action.payload;
+    },
+    setShowEditProductDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditProductDialog = action.payload;
+    },
+    setShowDeleteProductDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeleteProductDialog = action.payload;
+    },
+    setShowViewProductDetailsDialog: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showViewProductDetailsDialog = action.payload;
+    },
   },
 });
 
@@ -178,9 +205,13 @@ export const {
   setShowDeleteSubRiskSectionDialog,
   setShowViewSubRiskSectionDetailsDialog,
 
+  // product sub risk actions
+  setShowCreateProductDialog,
+  setShowEditProductDialog,
+  setShowDeleteProductDialog,
+  setShowViewProductDetailsDialog,
 } = uiSlice.actions;
 
-// selector: you can replace the state typing with your RootState if you have it
 export const selectUiState = (state: { ui: UiState }) => state.ui;
 
 export default uiSlice.reducer;

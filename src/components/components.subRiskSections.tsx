@@ -1,33 +1,29 @@
-"use client";
+"use client"
 
-import type React from "react";
-import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../hooks/use-apps";
-import { Button } from "./UI/new-button";
-import Input from "./UI/input";
-import { Label } from "./UI/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./UI/dialog";
+import type React from "react"
+import { useEffect, useState } from "react"
+import { useAppDispatch, useAppSelector } from "../hooks/use-apps"
+import { Button } from "./UI/new-button"
+import  Input  from "./UI/input"
+import { Label } from "./UI/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./UI/dialog"
 import {
   selectUiState,
   setShowCreateSubRiskSectionDialog,
   setShowEditSubRiskSectionDialog,
-} from "../features/reducers/uiReducers/uiSlice";
+} from "../features/reducers/uiReducers/uiSlice"
 import {
   createSubRiskSection,
   updateSubRiskSection,
   selectSubRiskSections,
   clearMessages,
-} from "../features/reducers/productReducers/subRiskSectionSlice";
-import type {
-  SubRiskSection,
-  CreateSubRiskSectionRequest,
-  UpdateSubRiskSectionRequest,
-} from "../types/subRiskSection";
+} from "../features/reducers/productReducers/subRiskSectionSlice"
+import type { SubRiskSection, CreateSubRiskSectionRequest, UpdateSubRiskSectionRequest } from "../types/subRiskSection"
 
 export const CreateSubRiskSection = () => {
-  const dispatch = useAppDispatch();
-  const { showCreateSubRiskSectionDialog } = useAppSelector(selectUiState);
-  const { loading, success, error } = useAppSelector(selectSubRiskSections);
+  const dispatch = useAppDispatch()
+  const { showCreateSubRiskSectionDialog } = useAppSelector(selectUiState)
+  const { loading, success, error } = useAppSelector(selectSubRiskSections)
 
   const [formData, setFormData] = useState<CreateSubRiskSectionRequest>({
     sectionCode: "",
@@ -43,43 +39,41 @@ export const CreateSubRiskSection = () => {
     a4: 0,
     a5: 0,
     submittedBy: "",
-  });
+  })
 
-  const [errors, setErrors] = useState<Partial<CreateSubRiskSectionRequest>>(
-    {}
-  );
+  const [errors, setErrors] = useState<Partial<CreateSubRiskSectionRequest>>({})
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     // Validation
-    const newErrors: Partial<CreateSubRiskSectionRequest> = {};
+    const newErrors: Partial<CreateSubRiskSectionRequest> = {}
     if (!formData.sectionCode.trim()) {
-      newErrors.sectionCode = "Section code is required";
+      newErrors.sectionCode = "Section code is required"
     }
     if (!formData.subRiskID.trim()) {
-      newErrors.subRiskID = "Sub risk ID is required";
+      newErrors.subRiskID = "Sub risk ID is required"
     }
     if (!formData.sectionName.trim()) {
-      newErrors.sectionName = "Section name is required";
+      newErrors.sectionName = "Section name is required"
     }
     if (!formData.subRiskName.trim()) {
-      newErrors.subRiskName = "Sub risk name is required";
+      newErrors.subRiskName = "Sub risk name is required"
     }
     if (!formData.field1.trim()) {
-      newErrors.field1 = "Field1 is required";
+      newErrors.field1 = "Field1 is required"
     }
     if (!formData.submittedBy.trim()) {
-      newErrors.submittedBy = "Submitted by is required";
+      newErrors.submittedBy = "Submitted by is required"
     }
 
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
+      setErrors(newErrors)
+      return
     }
 
-    dispatch(createSubRiskSection(formData));
-  };
+    dispatch(createSubRiskSection(formData))
+  }
 
   const handleClose = () => {
     setFormData({
@@ -96,46 +90,44 @@ export const CreateSubRiskSection = () => {
       a4: 0,
       a5: 0,
       submittedBy: "",
-    });
-    setErrors({});
-    dispatch(setShowCreateSubRiskSectionDialog(false));
-  };
+    })
+    setErrors({})
+    dispatch(setShowCreateSubRiskSectionDialog(false))
+  }
 
   const handleChange =
-    (field: keyof CreateSubRiskSectionRequest) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const value =
-        e.target.type === "number" ? Number(e.target.value) : e.target.value;
+    (field: keyof CreateSubRiskSectionRequest) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const value = e.target.type === "number" ? Number(e.target.value) : e.target.value
       setFormData((prev) => ({
         ...prev,
         [field]: value,
-      }));
+      }))
 
       if (errors[field]) {
         setErrors((prev) => ({
           ...prev,
           [field]: undefined,
-        }));
+        }))
       }
-    };
+    }
 
   useEffect(() => {
     if (success.createSubRiskSection) {
-      handleClose();
-      dispatch(clearMessages());
+      handleClose()
+      dispatch(clearMessages())
     }
-  }, [success.createSubRiskSection, dispatch]);
+  }, [success.createSubRiskSection, dispatch])
 
   return (
     <Dialog open={showCreateSubRiskSectionDialog} onOpenChange={handleClose}>
-      <DialogContent className="create-sub-risk-section-dialog">
+      <DialogContent className="subrisk-sections-create-dialog">
         <DialogHeader>
           <DialogTitle>Create New Sub Risk Section</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="sub-risk-section-form">
-          <div className="form-row">
-            <div className="form-field">
+        <form onSubmit={handleSubmit} className="subrisk-sections-form">
+          <div className="subrisk-sections-form-row">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="sectionCode">Section Code *</Label>
               <Input
                 id="sectionCode"
@@ -144,12 +136,10 @@ export const CreateSubRiskSection = () => {
                 placeholder="Enter section code"
                 className={errors.sectionCode ? "error" : ""}
               />
-              {errors.sectionCode && (
-                <span className="error-text">{errors.sectionCode}</span>
-              )}
+              {errors.sectionCode && <span className="subrisk-sections-error-text">{errors.sectionCode}</span>}
             </div>
 
-            <div className="form-field">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="subRiskID">Sub Risk ID *</Label>
               <Input
                 id="subRiskID"
@@ -158,14 +148,12 @@ export const CreateSubRiskSection = () => {
                 placeholder="Enter sub risk ID"
                 className={errors.subRiskID ? "error" : ""}
               />
-              {errors.subRiskID && (
-                <span className="error-text">{errors.subRiskID}</span>
-              )}
+              {errors.subRiskID && <span className="subrisk-sections-error-text">{errors.subRiskID}</span>}
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-field">
+          <div className="subrisk-sections-form-row">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="sectionName">Section Name *</Label>
               <Input
                 id="sectionName"
@@ -174,12 +162,10 @@ export const CreateSubRiskSection = () => {
                 placeholder="Enter section name"
                 className={errors.sectionName ? "error" : ""}
               />
-              {errors.sectionName && (
-                <span className="error-text">{errors.sectionName}</span>
-              )}
+              {errors.sectionName && <span className="subrisk-sections-error-text">{errors.sectionName}</span>}
             </div>
 
-            <div className="form-field">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="subRiskName">Sub Risk Name *</Label>
               <Input
                 id="subRiskName"
@@ -188,14 +174,12 @@ export const CreateSubRiskSection = () => {
                 placeholder="Enter sub risk name"
                 className={errors.subRiskName ? "error" : ""}
               />
-              {errors.subRiskName && (
-                <span className="error-text">{errors.subRiskName}</span>
-              )}
+              {errors.subRiskName && <span className="subrisk-sections-error-text">{errors.subRiskName}</span>}
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-field">
+          <div className="subrisk-sections-form-row">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="field1">Field1 *</Label>
               <Input
                 id="field1"
@@ -204,12 +188,10 @@ export const CreateSubRiskSection = () => {
                 placeholder="Enter field1"
                 className={errors.field1 ? "error" : ""}
               />
-              {errors.field1 && (
-                <span className="error-text">{errors.field1}</span>
-              )}
+              {errors.field1 && <span className="subrisk-sections-error-text">{errors.field1}</span>}
             </div>
 
-            <div className="form-field">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="field2">Field2</Label>
               <Input
                 id="field2"
@@ -220,8 +202,8 @@ export const CreateSubRiskSection = () => {
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-field">
+          <div className="subrisk-sections-form-row">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="rates">Rates</Label>
               <Input
                 id="rates"
@@ -232,7 +214,7 @@ export const CreateSubRiskSection = () => {
               />
             </div>
 
-            <div className="form-field">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="submittedBy">Submitted By *</Label>
               <Input
                 id="submittedBy"
@@ -241,14 +223,12 @@ export const CreateSubRiskSection = () => {
                 placeholder="Enter submitted by"
                 className={errors.submittedBy ? "error" : ""}
               />
-              {errors.submittedBy && (
-                <span className="error-text">{errors.submittedBy}</span>
-              )}
+              {errors.submittedBy && <span className="subrisk-sections-error-text">{errors.submittedBy}</span>}
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-field">
+          <div className="subrisk-sections-form-row">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="a1">A1</Label>
               <Input
                 id="a1"
@@ -259,7 +239,7 @@ export const CreateSubRiskSection = () => {
               />
             </div>
 
-            <div className="form-field">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="a2">A2</Label>
               <Input
                 id="a2"
@@ -271,8 +251,8 @@ export const CreateSubRiskSection = () => {
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-field">
+          <div className="subrisk-sections-form-row">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="a3">A3</Label>
               <Input
                 id="a3"
@@ -283,7 +263,7 @@ export const CreateSubRiskSection = () => {
               />
             </div>
 
-            <div className="form-field">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="a4">A4</Label>
               <Input
                 id="a4"
@@ -295,8 +275,8 @@ export const CreateSubRiskSection = () => {
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-field">
+          <div className="subrisk-sections-form-row">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="a5">A5</Label>
               <Input
                 id="a5"
@@ -309,42 +289,27 @@ export const CreateSubRiskSection = () => {
           </div>
 
           {error.createSubRiskSection && (
-            <div className="error-message">{error.createSubRiskSection}</div>
+            <div className="subrisk-sections-error-message">{error.createSubRiskSection}</div>
           )}
 
-          <div className="form-actions">
-            <Button //@ts-ignore
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={loading.createSubRiskSection}
-            >
+          <div className="subrisk-sections-form-actions">
+            <Button type="button" variant="outline" onClick={handleClose} disabled={loading.createSubRiskSection}>
               Cancel
             </Button>
-            <Button //@ts-ignore
-              type="submit"
-              disabled={loading.createSubRiskSection}
-              className="submit-btn"
-            >
-              {loading.createSubRiskSection
-                ? "Creating..."
-                : "Create Sub Risk Section"}
+            <Button type="submit" disabled={loading.createSubRiskSection} className="subrisk-sections-submit-btn">
+              {loading.createSubRiskSection ? "Creating..." : "Create Sub Risk Section"}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export const EditSubRiskSection = ({
-  subRiskSection,
-}: {
-  subRiskSection: SubRiskSection | null;
-}) => {
-  const dispatch = useAppDispatch();
-  const { showEditSubRiskSectionDialog } = useAppSelector(selectUiState);
-  const { loading, success, error } = useAppSelector(selectSubRiskSections);
+export const EditSubRiskSection = ({ subRiskSection }: { subRiskSection: SubRiskSection | null }) => {
+  const dispatch = useAppDispatch()
+  const { showEditSubRiskSectionDialog } = useAppSelector(selectUiState)
+  const { loading, success, error } = useAppSelector(selectSubRiskSections)
 
   const [formData, setFormData] = useState<UpdateSubRiskSectionRequest>({
     sectionCode: "",
@@ -361,11 +326,9 @@ export const EditSubRiskSection = ({
     a5: 0,
     active: 1,
     modifiedBy: "",
-  });
+  })
 
-  const [errors, setErrors] = useState<Partial<UpdateSubRiskSectionRequest>>(
-    {}
-  );
+  const [errors, setErrors] = useState<Partial<UpdateSubRiskSectionRequest>>({})
 
   useEffect(() => {
     if (subRiskSection) {
@@ -384,48 +347,43 @@ export const EditSubRiskSection = ({
         a5: subRiskSection.a5 || 0,
         active: subRiskSection.active || 1,
         modifiedBy: "",
-      });
+      })
     }
-  }, [subRiskSection]);
+  }, [subRiskSection])
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    if (!subRiskSection) return;
+    if (!subRiskSection) return
 
     // Validation
-    const newErrors: Partial<UpdateSubRiskSectionRequest> = {};
+    const newErrors: Partial<UpdateSubRiskSectionRequest> = {}
     if (!formData.sectionCode.trim()) {
-      newErrors.sectionCode = "Section code is required";
+      newErrors.sectionCode = "Section code is required"
     }
     if (!formData.subRiskID.trim()) {
-      newErrors.subRiskID = "Sub risk ID is required";
+      newErrors.subRiskID = "Sub risk ID is required"
     }
     if (!formData.sectionName.trim()) {
-      newErrors.sectionName = "Section name is required";
+      newErrors.sectionName = "Section name is required"
     }
     if (!formData.subRiskName.trim()) {
-      newErrors.subRiskName = "Sub risk name is required";
+      newErrors.subRiskName = "Sub risk name is required"
     }
     if (!formData.field1.trim()) {
-      newErrors.field1 = "Field1 is required";
+      newErrors.field1 = "Field1 is required"
     }
     if (!formData.modifiedBy.trim()) {
-      newErrors.modifiedBy = "Modified by is required";
+      newErrors.modifiedBy = "Modified by is required"
     }
 
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
+      setErrors(newErrors)
+      return
     }
 
-    dispatch(
-      updateSubRiskSection({
-        id: subRiskSection.sectionID,
-        subRiskSectionData: formData,
-      })
-    );
-  };
+    dispatch(updateSubRiskSection({ id: subRiskSection.sectionID, subRiskSectionData: formData }))
+  }
 
   const handleClose = () => {
     setFormData({
@@ -443,52 +401,45 @@ export const EditSubRiskSection = ({
       a5: 0,
       active: 1,
       modifiedBy: "",
-    });
-    setErrors({});
-    dispatch(setShowEditSubRiskSectionDialog(false));
-  };
+    })
+    setErrors({})
+    dispatch(setShowEditSubRiskSectionDialog(false))
+  }
 
   const handleChange =
     (field: keyof UpdateSubRiskSectionRequest) =>
-    (
-      e: React.ChangeEvent<
-        HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-      >
-    ) => {
-      const value =
-        e.target.type === "number" ? Number(e.target.value) : e.target.value;
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      const value = e.target.type === "number" ? Number(e.target.value) : e.target.value
       setFormData((prev) => ({
         ...prev,
         [field]: value,
-      }));
+      }))
 
       if (errors[field]) {
         setErrors((prev) => ({
           ...prev,
           [field]: undefined,
-        }));
+        }))
       }
-    };
+    }
 
   useEffect(() => {
     if (success.updateSubRiskSection) {
-      handleClose();
-      dispatch(clearMessages());
+      handleClose()
+      dispatch(clearMessages())
     }
-  }, [success.updateSubRiskSection, dispatch]);
+  }, [success.updateSubRiskSection, dispatch])
 
   return (
     <Dialog open={showEditSubRiskSectionDialog} onOpenChange={handleClose}>
-      <DialogContent className="edit-sub-risk-section-dialog">
+      <DialogContent className="subrisk-sections-edit-dialog">
         <DialogHeader>
-          <DialogTitle>
-            Edit Sub Risk Section - {subRiskSection?.sectionID}
-          </DialogTitle>
+          <DialogTitle>Edit Sub Risk Section - {subRiskSection?.sectionID}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="sub-risk-section-form">
-          <div className="form-row">
-            <div className="form-field">
+        <form onSubmit={handleSubmit} className="subrisk-sections-form">
+          <div className="subrisk-sections-form-row">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="editSectionCode">Section Code *</Label>
               <Input
                 id="editSectionCode"
@@ -497,12 +448,10 @@ export const EditSubRiskSection = ({
                 placeholder="Enter section code"
                 className={errors.sectionCode ? "error" : ""}
               />
-              {errors.sectionCode && (
-                <span className="error-text">{errors.sectionCode}</span>
-              )}
+              {errors.sectionCode && <span className="subrisk-sections-error-text">{errors.sectionCode}</span>}
             </div>
 
-            <div className="form-field">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="editSubRiskID">Sub Risk ID *</Label>
               <Input
                 id="editSubRiskID"
@@ -511,14 +460,12 @@ export const EditSubRiskSection = ({
                 placeholder="Enter sub risk ID"
                 className={errors.subRiskID ? "error" : ""}
               />
-              {errors.subRiskID && (
-                <span className="error-text">{errors.subRiskID}</span>
-              )}
+              {errors.subRiskID && <span className="subrisk-sections-error-text">{errors.subRiskID}</span>}
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-field">
+          <div className="subrisk-sections-form-row">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="editSectionName">Section Name *</Label>
               <Input
                 id="editSectionName"
@@ -527,12 +474,10 @@ export const EditSubRiskSection = ({
                 placeholder="Enter section name"
                 className={errors.sectionName ? "error" : ""}
               />
-              {errors.sectionName && (
-                <span className="error-text">{errors.sectionName}</span>
-              )}
+              {errors.sectionName && <span className="subrisk-sections-error-text">{errors.sectionName}</span>}
             </div>
 
-            <div className="form-field">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="editSubRiskName">Sub Risk Name *</Label>
               <Input
                 id="editSubRiskName"
@@ -541,14 +486,12 @@ export const EditSubRiskSection = ({
                 placeholder="Enter sub risk name"
                 className={errors.subRiskName ? "error" : ""}
               />
-              {errors.subRiskName && (
-                <span className="error-text">{errors.subRiskName}</span>
-              )}
+              {errors.subRiskName && <span className="subrisk-sections-error-text">{errors.subRiskName}</span>}
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-field">
+          <div className="subrisk-sections-form-row">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="editField1">Field1 *</Label>
               <Input
                 id="editField1"
@@ -557,12 +500,10 @@ export const EditSubRiskSection = ({
                 placeholder="Enter field1"
                 className={errors.field1 ? "error" : ""}
               />
-              {errors.field1 && (
-                <span className="error-text">{errors.field1}</span>
-              )}
+              {errors.field1 && <span className="subrisk-sections-error-text">{errors.field1}</span>}
             </div>
 
-            <div className="form-field">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="editField2">Field2</Label>
               <Input
                 id="editField2"
@@ -573,8 +514,8 @@ export const EditSubRiskSection = ({
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-field">
+          <div className="subrisk-sections-form-row">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="editRates">Rates</Label>
               <Input
                 id="editRates"
@@ -585,13 +526,13 @@ export const EditSubRiskSection = ({
               />
             </div>
 
-            <div className="form-field">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="editActive">Active Status *</Label>
               <select
                 id="editActive"
                 value={formData.active}
                 onChange={handleChange("active")}
-                className="form-field select"
+                className="subrisk-sections-form-select"
               >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
@@ -599,8 +540,8 @@ export const EditSubRiskSection = ({
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-field">
+          <div className="subrisk-sections-form-row">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="editA1">A1</Label>
               <Input
                 id="editA1"
@@ -611,7 +552,7 @@ export const EditSubRiskSection = ({
               />
             </div>
 
-            <div className="form-field">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="editA2">A2</Label>
               <Input
                 id="editA2"
@@ -623,8 +564,8 @@ export const EditSubRiskSection = ({
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-field">
+          <div className="subrisk-sections-form-row">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="editA3">A3</Label>
               <Input
                 id="editA3"
@@ -635,7 +576,7 @@ export const EditSubRiskSection = ({
               />
             </div>
 
-            <div className="form-field">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="editA4">A4</Label>
               <Input
                 id="editA4"
@@ -647,8 +588,8 @@ export const EditSubRiskSection = ({
             </div>
           </div>
 
-          <div className="form-row">
-            <div className="form-field">
+          <div className="subrisk-sections-form-row">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="editA5">A5</Label>
               <Input
                 id="editA5"
@@ -659,7 +600,7 @@ export const EditSubRiskSection = ({
               />
             </div>
 
-            <div className="form-field">
+            <div className="subrisk-sections-form-field">
               <Label htmlFor="editModifiedBy">Modified By *</Label>
               <Input
                 id="editModifiedBy"
@@ -668,37 +609,24 @@ export const EditSubRiskSection = ({
                 placeholder="Enter modified by"
                 className={errors.modifiedBy ? "error" : ""}
               />
-              {errors.modifiedBy && (
-                <span className="error-text">{errors.modifiedBy}</span>
-              )}
+              {errors.modifiedBy && <span className="subrisk-sections-error-text">{errors.modifiedBy}</span>}
             </div>
           </div>
 
           {error.updateSubRiskSection && (
-            <div className="error-message">{error.updateSubRiskSection}</div>
+            <div className="subrisk-sections-error-message">{error.updateSubRiskSection}</div>
           )}
 
-          <div className="form-actions">
-            <Button //@ts-ignore
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={loading.updateSubRiskSection}
-            >
+          <div className="subrisk-sections-form-actions">
+            <Button type="button" variant="outline" onClick={handleClose} disabled={loading.updateSubRiskSection}>
               Cancel
             </Button>
-            <Button //@ts-ignore
-              type="submit"
-              disabled={loading.updateSubRiskSection}
-              className="submit-btn"
-            >
-              {loading.updateSubRiskSection
-                ? "Updating..."
-                : "Update Sub Risk Section"}
+            <Button type="submit" disabled={loading.updateSubRiskSection} className="subrisk-sections-submit-btn">
+              {loading.updateSubRiskSection ? "Updating..." : "Update Sub Risk Section"}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}

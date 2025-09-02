@@ -130,7 +130,7 @@
 
 .sp-pagination-prev,
 .sp-pagination-next {
-  background-color: rgb(139, 75, 140);
+  background-color: #8b4b8c;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -138,7 +138,7 @@
   transition: background-color 0.2s ease;
 }
 .sp-pagination-prev:hover,
-.sp-pagination-next:hover { background-color: rgba(139, 75, 140,0.75); }
+.sp-pagination-next:hover { background-color: #8b4b8cbf; }
 
 .sp-pagination-item { cursor: pointer; }
 

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import ProductSubRisk from "../components/product-page/product.sub-risk";
 import ProductsSubRiskSections from "../components/product-page/products.subRiskSections";
 import ProductsRisks from "../components/product-page/products.risks";
 import CreateProductModal from "../components/Modals/CreateProductModal";
 import "./Products.css";
+import ProductSubRisk from "../components/product-page/product.sub-risk";
+import SubRiskSMIManagement from "../components/product-page/product.sub-risk-smis";
 import {
   Tabs,
   TabsContent,
@@ -12,18 +13,18 @@ import {
 } from "../components/UI/tabs";
 
 const Products: React.FC = () => {
-  const [activeTab, setActiveTab] = useState("Products");
+  const tabs = [
+    { title: "Product", content: <ProductSubRisk /> },
+    { title: "Risks", content: <ProductsRisks /> },
+    {title: "Sub Risk SMI", content: <SubRiskSMIManagement /> },
+    { title: "SubRiskSections", content: <ProductsSubRiskSections />},
+  ];
+  const [activeTab, setActiveTab] = useState(tabs[0]?.title);
   const [showProductModal, setShowProductModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("Active");
 
   // const tabs = ['Risks', 'Products']
-  const tabs = [
-    { title: "Product", content: <ProductSubRisk /> },
-    { title: "Risks", content: <ProductsRisks /> },
-    { title: "SubRiskSections", content: <ProductsSubRiskSections />},
-  ];
-
   // const statusOptions = [
   //   { value: "Active", label: "Active" },
   //   { value: "Inactive", label: "Inactive" },

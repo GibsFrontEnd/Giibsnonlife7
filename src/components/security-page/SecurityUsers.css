@@ -17,7 +17,7 @@
 }
 
 .su-add-user-btn {
-  background-color: #dc2626;
+  background-color: #8b4b8c;
   color: white;
   padding: 0.5rem 1rem;
   border: none;
@@ -26,7 +26,7 @@
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
-.su-add-user-btn:hover { background-color: #b91c1c; }
+.su-add-user-btn:hover { background-color: #8b4b8cbf; }
 
 .su-loading-container {
   display: flex;
@@ -173,7 +173,7 @@
 
 .su-pagination-prev,
 .su-pagination-next {
-  background-color: #dc2626;
+  background-color: #8b4b8c;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -184,7 +184,7 @@
   border-radius: 0.375rem;
 }
 .su-pagination-prev:hover,
-.su-pagination-next:hover { background-color: rgba(220,38,38,0.75); }
+.su-pagination-next:hover { background-color: #8b4b8cbf; }
 
 .su-pagination-item { cursor: pointer; }
 
@@ -328,7 +328,7 @@ border: 1px solid;
 }
 
 .su-submit-btn {
-  background-color: #dc2626;
+  background-color: #8b4b8c;
   color: white;
   padding: 0.5rem 1rem;
   border: none;
@@ -339,7 +339,7 @@ border: 1px solid;
 }
 
 .su-submit-btn:hover:not(:disabled) {
-  background-color: #b91c1c;
+  background-color: #8b4b8cbf;
 }
 
 .su-submit-btn:disabled {

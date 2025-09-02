@@ -3,32 +3,28 @@ import type React from "react";
 import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/use-apps";
 import {
-  createProduct,
+  updateProduct,
   selectProducts,
 } from "../../features/reducers/productReducers/productSlice";
+import type { Product, ProductCreateUpdateRequest } from "../../types/product";
 import { Button } from "../UI/new-button";
 import { Input } from "../UI/new-input";
 import { Label } from "../UI/label";
-import {
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "../UI/dialog";
+import { DialogContent, DialogHeader, DialogTitle } from "../UI/dialog";
 import { useToast } from "../UI/use-toast";
 import { OutsideDismissDialog } from "../UI/dialog";
-import { ProductCreateUpdateRequest } from "../../types/product";
 
-interface ProductCreateModalProps {
+interface ProductEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  riskId: string;
+  product: Product | null;
 }
 
-const ProductCreateModal = ({
+const ProductEditModal = ({
   isOpen,
   onClose,
-  riskId,
-}: ProductCreateModalProps) => {
+  product,
+}: ProductEditModalProps) => {
   const { toast } = useToast();
   const dispatch = useAppDispatch();
   const { loading, error, success } = useAppSelector(selectProducts);
@@ -45,23 +41,36 @@ const ProductCreateModal = ({
   const [errors, setErrors] = useState<Partial<ProductCreateUpdateRequest>>({});
 
   useEffect(() => {
-    if (success.createProduct) {
+    if (product) {
+      setFormData({
+        productID: product.productID || "",
+        classID: "", // These fields might not be in the Product type, set defaults
+        midClassID: "",
+        productName: product.productName || "",
+        shortName: "", // Set default or extract from product if available
+        naicomTypeID: "",
+      });
+    }
+  }, [product]);
+
+  useEffect(() => {
+    if (success.updateProduct) {
       toast({
-        title: "Product Created!",
-        description: "The product has been successfully created.",
+        title: "Product Updated!",
+        description: "The product has been successfully updated.",
         variant: "success",
         duration: 3000,
       });
       onClose();
       resetForm();
-    } else if (error.createProduct) {
+    } else if (error.updateProduct) {
       toast({
-        description: "Failed to create product. Please try again.",
+        description: "Failed to update product. Please try again.",
         variant: "destructive",
         duration: 5000,
       });
     }
-  }, [success.createProduct, error.createProduct, toast, onClose]);
+  }, [success.updateProduct, error.updateProduct, toast, onClose]);
 
   const resetForm = () => {
     setFormData({
@@ -95,11 +104,16 @@ const ProductCreateModal = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    if (!validateForm() || !product) {
       return;
     }
 
-    dispatch(createProduct(formData));
+    dispatch(
+      updateProduct({
+        id: Number.parseInt(product.productID),
+        data: formData,
+      })
+    );
   };
 
   const handleInputChange = (
@@ -121,7 +135,7 @@ const ProductCreateModal = ({
     <OutsideDismissDialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Create New Product</DialogTitle>
+          <DialogTitle>Edit Product</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 p-6 pt-0">
@@ -193,6 +207,7 @@ const ProductCreateModal = ({
                 value={formData.productID}
                 onChange={(e) => handleInputChange("productID", e.target.value)}
                 placeholder="Enter product ID"
+                disabled
               />
             </div>
 
@@ -214,16 +229,16 @@ const ProductCreateModal = ({
               type="button"
               variant="outline"
               onClick={handleClose}
-              disabled={loading.createProduct}
+              disabled={loading.updateProduct}
             >
               Cancel
             </Button>
             <Button
               type="submit"
               className="flex-1 bg-primary-blue text-white"
-              disabled={loading.createProduct}
+              loading={loading.updateProduct}
             >
-              {loading.createProduct ? "Creating..." : "Create Product"}
+              {loading.updateProduct ? "Updating..." : "Update Product"}
             </Button>
           </div>
         </form>
@@ -232,4 +247,4 @@ const ProductCreateModal = ({
   );
 };
 
-export default ProductCreateModal;
+export default ProductEditModal;

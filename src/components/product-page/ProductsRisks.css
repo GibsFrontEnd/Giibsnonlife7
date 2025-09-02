@@ -18,7 +18,7 @@
 }
 
 .pr-add-risk-btn {
-  background-color: #dc2626;
+  background-color: #8b4b8c;
   color: white;
   padding: 0.5rem 1rem;
   border: none;
@@ -29,7 +29,7 @@
 }
 
 .pr-add-risk-btn:hover {
-  background-color: #b91c1c;
+  background-color: #8b4b8c;
 }
 
 .pr-loading-container {
@@ -53,6 +53,7 @@
 }
 
 .pr-table-header {
+  color: #3030a5;
   text-align: center;
 }
 
@@ -109,7 +110,7 @@
 }
 
 .pr-edit-btn {
-  background-color: #3b82f6;
+  background-color: #8b4b8c;
   color: white;
   padding: 0.25rem 0.75rem;
   border: none;
@@ -120,7 +121,7 @@
 }
 
 .pr-edit-btn:hover {
-  background-color: #2563eb;
+  background-color: #8b4b8c;
 }
 
 .pr-delete-btn {
@@ -166,7 +167,7 @@
 
 .pr-pagination-prev,
 .pr-pagination-next {
-  background-color: #dc2626;
+  background-color: #8b4b8c;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -176,7 +177,7 @@
 
 .pr-pagination-prev:hover,
 .pr-pagination-next:hover {
-  background-color: rgba(220, 38, 38, 0.75);
+  background-color: #8b4b8cbf;
 }
 
 .pr-pagination-item {
@@ -263,7 +264,7 @@
 }
 
 .pr-submit-btn {
-  background-color: #dc2626;
+  background-color: #8b4b8c;
   color: white;
   padding: 0.5rem 1rem;
   border: none;
@@ -274,7 +275,7 @@
 }
 
 .pr-submit-btn:hover:not(:disabled) {
-  background-color: #b91c1c;
+  background-color: #8b4b8cbf;
 }
 
 .pr-submit-btn:disabled {
