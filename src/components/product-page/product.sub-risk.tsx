@@ -41,10 +41,15 @@ import {
 import { Alert, AlertDescription } from "../ui/alert";
 import {
   selectUiState,
+  setShowCreateProductDialog,
   setShowDeleteProductDialog,
+  setShowEditProductDialog,
 } from "../../features/reducers/uiReducers/uiSlice";
 import ConfirmationModal from "../Modals/ConfirmationModal";
 import { useToast } from "../UI/use-toast";
+import ProductCreateModal from "../Modals/CreateProductModal";
+import ProductEditModal from "../Modals/EditProductModal";
+import { Product } from "../../types/product";
 
 const ProductSubRisk = () => {
   const { toast } = useToast();
@@ -58,6 +63,7 @@ const ProductSubRisk = () => {
   const [productIdToDelete, setProductIdToDelete] = useState<string | null>(
     null
   );
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null);
 
   const {
     risks,
@@ -65,7 +71,11 @@ const ProductSubRisk = () => {
     error: riskError,
   } = useAppSelector(selectRisks);
   const { products, loading, error, success } = useAppSelector(selectProducts);
-  const { showDeleteProductDialog } = useAppSelector(selectUiState);
+  const {
+    showDeleteProductDialog,
+    showCreateProductDialog,
+    showEditProductDialog,
+  } = useAppSelector(selectUiState);
 
   const pageSize = 10;
   const totalPages = risks ? Math.ceil(risks.length / pageSize) : 0;
@@ -112,6 +122,27 @@ const ProductSubRisk = () => {
       });
     }
   }, [success.deleteProduct, dispatch, error.deleteProduct]);
+
+  useEffect(() => {
+    if (success.createProduct || success.updateProduct) {
+      if (selectedRisk?.riskID) {
+        dispatch(
+          getAllProducts({
+            riskId: selectedRisk.riskID,
+            pageNumber: currentPage,
+            pageSize,
+          })
+        );
+      }
+      dispatch(clearMessages());
+    }
+  }, [
+    success.createProduct,
+    success.updateProduct,
+    selectedRisk,
+    currentPage,
+    dispatch,
+  ]);
 
   const confirmDeleteProduct = async (productId: string | null) => {
     if (productId === null) {
@@ -197,7 +228,7 @@ const ProductSubRisk = () => {
         />
         <Button
           className="bg-primary-blue text-white"
-          // onClick={() => dispatch(setShowCreateProductDialog(true))}
+          onClick={() => dispatch(setShowCreateProductDialog(true))}
         >
           Add New Product
         </Button>
@@ -377,10 +408,11 @@ const ProductSubRisk = () => {
                         <TableCell className="flex gap-2 items-center justify-end">
                           <Button
                             className="action-button edit"
-                            // onClick={() => {
-                            //   setProductToEdit(product);
-                            //   dispatch(setShowEditProductDialog(true));
-                            // }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setProductToEdit(product);
+                              dispatch(setShowEditProductDialog(true));
+                            }}
                           >
                             Edit
                           </Button>
@@ -513,6 +545,25 @@ const ProductSubRisk = () => {
             )}
           </CardContent>
         </Card>
+      )}
+
+      {showCreateProductDialog && (
+        <ProductCreateModal
+          isOpen={showCreateProductDialog}
+          onClose={() => dispatch(setShowCreateProductDialog(false))}
+          riskId={selectedRisk?.riskID || ""}
+        />
+      )}
+
+      {showEditProductDialog && (
+        <ProductEditModal
+          isOpen={showEditProductDialog}
+          onClose={() => {
+            dispatch(setShowEditProductDialog(false));
+            setProductToEdit(null);
+          }}
+          product={productToEdit}
+        />
       )}
 
       {showDeleteProductDialog && (
