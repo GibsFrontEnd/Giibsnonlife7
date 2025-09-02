@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import ProductSubRisk from "../components/product-page/product.sub-risk";
+import ProductSubRiskSections from "../components/product-page/products.subRiskSections";
 import ProductsRisks from "../components/product-page/products.risks";
 import CreateProductModal from "../components/Modals/CreateProductModal";
 import "./Products.css";
@@ -20,7 +21,7 @@ const Products: React.FC = () => {
   const tabs = [
     { title: "Product", content: <ProductSubRisk /> },
     { title: "Risks", content: <ProductsRisks /> },
-    { title: "Products", content: <ProductsRisks /> },
+    { title: "SubRiskSections", content: <ProductSubRiskSections />},
   ];
 
   // const statusOptions = [

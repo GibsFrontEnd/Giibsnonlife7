@@ -25,9 +25,13 @@ interface UiState {
   showEditRiskDialog: boolean;
   showDeleteRiskDialog: boolean;
   showViewRiskDetailsDialog: boolean;
+
+  // Risk dialogs (new)
+  showCreateSubRiskSectionDialog: boolean;
+  showEditSubRiskSectionDialog: boolean;
+  showDeleteSubRiskSectionDialog: boolean;
+  showViewSubRiskSectionDetailsDialog: boolean;
 }
-
-
 
 const initialState: UiState = {
   // Role dialogs
@@ -55,6 +59,10 @@ const initialState: UiState = {
   showDeleteRiskDialog: false,
   showViewRiskDetailsDialog: false,
 
+  showCreateSubRiskSectionDialog: false,
+  showEditSubRiskSectionDialog: false,
+  showDeleteSubRiskSectionDialog: false,
+  showViewSubRiskSectionDetailsDialog: false,
 };
 
 const uiSlice = createSlice({
@@ -85,7 +93,10 @@ const uiSlice = createSlice({
     setShowDeletePermissionDialog: (state, action: PayloadAction<boolean>) => {
       state.showDeletePermissionDialog = action.payload;
     },
-    setShowViewPermissionDetailsDialog: (state, action: PayloadAction<boolean>) => {
+    setShowViewPermissionDetailsDialog: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
       state.showViewPermissionDetailsDialog = action.payload;
     },
 
@@ -117,7 +128,21 @@ const uiSlice = createSlice({
       state.showDeleteRiskDialog = action.payload;
     },
     setShowViewRiskDetailsDialog: (state, action: PayloadAction<boolean>) => {
-      state.showViewUserDetailsDialog = action.payload;
+      state.showViewRiskDetailsDialog = action.payload;
+    },
+
+    // Risk reducers
+    setShowCreateSubRiskSectionDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreateSubRiskSectionDialog = action.payload;
+    },
+    setShowEditSubRiskSectionDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditSubRiskSectionDialog = action.payload;
+    },
+    setShowDeleteSubRiskSectionDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeleteSubRiskSectionDialog = action.payload;
+    },
+    setShowViewSubRiskSectionDetailsDialog: (state, action: PayloadAction<boolean>) => {
+      state.showViewSubRiskSectionDetailsDialog = action.payload;
     },
 
   },
@@ -146,6 +171,12 @@ export const {
   setShowEditRiskDialog,
   setShowDeleteRiskDialog,
   setShowViewRiskDetailsDialog,
+
+  // Risk actions
+  setShowCreateSubRiskSectionDialog,
+  setShowEditSubRiskSectionDialog,
+  setShowDeleteSubRiskSectionDialog,
+  setShowViewSubRiskSectionDetailsDialog,
 
 } = uiSlice.actions;
 

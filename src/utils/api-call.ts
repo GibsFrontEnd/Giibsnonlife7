@@ -1,7 +1,7 @@
 import axios from "axios";
 import { SERVER_URL } from "./constants";
 import { setShowAuthError } from "../features/reducers/authReducers/authSlice";
-import { store } from "../features/store";
+import { store }  from "../features/store";
 import { decryptData } from "./encrypt-utils";
 
 const apiCall = axios.create({
