@@ -1,4 +1,6 @@
-.sub-risk-sections-container {
+/* Namespaced with srs- prefix to avoid collisions */
+
+.srs-container {
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -7,7 +9,7 @@
   min-height: calc(100vh - 64px);
 }
 
-.sub-risk-sections-header {
+.srs-header {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
@@ -15,13 +17,13 @@
   margin-bottom: 1rem;
 }
 
-.filter-controls {
+.srs-filter-controls {
   display: flex;
   gap: 0.5rem;
   align-items: center;
 }
 
-.filter-select {
+.srs-filter-select {
   padding: 0.5rem;
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
@@ -29,13 +31,13 @@
   background-color: white;
 }
 
-.filter-input-group {
+.srs-filter-input-group {
   display: flex;
   gap: 0.5rem;
   align-items: center;
 }
 
-.filter-input {
+.srs-filter-input {
   padding: 0.5rem;
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
@@ -43,7 +45,7 @@
   min-width: 150px;
 }
 
-.filter-submit-btn {
+.srs-filter-submit-btn {
   background-color: #3b82f6;
   color: white;
   padding: 0.5rem 1rem;
@@ -54,11 +56,11 @@
   transition: background-color 0.2s ease;
 }
 
-.filter-submit-btn:hover {
+.srs-filter-submit-btn:hover {
   background-color: #2563eb;
 }
 
-.add-sub-risk-section-btn {
+.srs-add-sub-risk-section-btn {
   background-color: #dc2626;
   color: white;
   padding: 0.5rem 1rem;
@@ -70,11 +72,11 @@
   margin-left: auto;
 }
 
-.add-sub-risk-section-btn:hover {
+.srs-add-sub-risk-section-btn:hover {
   background-color: #b91c1c;
 }
 
-.exists-indicator {
+.srs-exists-indicator {
   padding: 0.75rem;
   border-radius: 0.375rem;
   font-weight: 500;
@@ -82,19 +84,19 @@
   margin-bottom: 1rem;
 }
 
-.exists-indicator.exists-true {
+.srs-exists-indicator.srs-exists-true {
   background-color: #d1fae5;
   color: #065f46;
   border: 1px solid #a7f3d0;
 }
 
-.exists-indicator.exists-false {
+.srs-exists-indicator.srs-exists-false {
   background-color: #fee2e2;
   color: #991b1b;
   border: 1px solid #fecaca;
 }
 
-.loading-container {
+.srs-loading-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -103,108 +105,108 @@
   color: #6b7280;
 }
 
-.table-container {
+.srs-table-container {
   border-radius: 0.75rem;
   overflow: hidden;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.sub-risk-sections-table {
+.srs-table {
   border-collapse: collapse;
   width: 100%;
   font-size: 0.875rem;
 }
 
-.table-body {
+.srs-table-body {
   background-color: white;
 }
 
-.no-data-cell {
+.srs-no-data-cell {
   text-align: center;
   color: #9ca3af;
   padding: 1.5rem;
 }
 
-.section-id-cell {
+.srs-section-id-cell {
   font-weight: 600;
   color: #111827;
   font-family: monospace;
   font-size: 0.875rem;
 }
 
-.section-code-cell {
+.srs-section-code-cell {
   font-weight: 500;
   color: #111827;
   font-family: monospace;
 }
 
-.sub-risk-id-cell {
+.srs-sub-risk-id-cell {
   font-weight: 500;
   color: #374151;
   font-family: monospace;
 }
 
-.section-name-cell,
-.sub-risk-name-cell {
+.srs-section-name-cell,
+.srs-sub-risk-name-cell {
   color: #111827;
   max-width: 150px;
   word-wrap: break-word;
   font-size: 0.8rem;
 }
 
-.field-cell {
+.srs-field-cell {
   color: #6b7280;
   font-size: 0.8rem;
   text-align: center;
 }
 
-.rates-cell {
+.srs-rates-cell {
   color: #374151;
   font-weight: 500;
   text-align: center;
 }
 
-.a-values-cell {
+.srs-a-values-cell {
   font-size: 0.75rem;
   color: #6b7280;
 }
 
-.a-values-grid {
+.srs-a-values-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.25rem;
   max-width: 120px;
 }
 
-.active-cell {
+.srs-active-cell {
   text-align: center;
 }
 
-.status-badge {
+.srs-status-badge {
   padding: 0.25rem 0.5rem;
   border-radius: 0.375rem;
   font-size: 0.75rem;
   font-weight: 500;
 }
 
-.status-badge.active {
+.srs-status-badge.srs-active {
   background-color: #d1fae5;
   color: #065f46;
   border: 1px solid #a7f3d0;
 }
 
-.status-badge.inactive {
+.srs-status-badge.srs-inactive {
   background-color: #fee2e2;
   color: #991b1b;
   border: 1px solid #fecaca;
 }
 
-.submitted-by-cell {
+.srs-submitted-by-cell {
   color: #6b7280;
   font-size: 0.8rem;
 }
 
-.actions-cell {
+.srs-actions-cell {
   display: flex;
   gap: 0.5rem;
   align-items: center;
@@ -212,7 +214,7 @@
   flex-wrap: wrap;
 }
 
-.check-btn {
+.srs-check-btn {
   background-color: #10b981;
   color: white;
   padding: 0.25rem 0.75rem;
@@ -223,11 +225,11 @@
   transition: background-color 0.2s ease;
 }
 
-.check-btn:hover {
+.srs-check-btn:hover {
   background-color: #059669;
 }
 
-.edit-btn {
+.srs-edit-btn {
   background-color: #3b82f6;
   color: white;
   padding: 0.25rem 0.75rem;
@@ -238,11 +240,11 @@
   transition: background-color 0.2s ease;
 }
 
-.edit-btn:hover {
+.srs-edit-btn:hover {
   background-color: #2563eb;
 }
 
-.delete-btn {
+.srs-delete-btn {
   background-color: #dc2626;
   color: white;
   padding: 0.25rem 0.75rem;
@@ -253,11 +255,11 @@
   transition: background-color 0.2s ease;
 }
 
-.delete-btn:hover {
+.srs-delete-btn:hover {
   background-color: #b91c1c;
 }
 
-.pagination-container {
+.srs-pagination-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -266,16 +268,16 @@
   margin-top: 1rem;
 }
 
-.pagination-info {
+.srs-pagination-info {
   font-size: 0.875rem;
   color: #6b7280;
 }
 
-.pagination-numbers {
+.srs-pagination-numbers {
   font-weight: 500;
 }
 
-.pagination-controls {
+.srs-pagination-controls {
   display: flex;
   align-items: flex-end;
   width: max-content;
@@ -283,8 +285,8 @@
   margin-left: auto;
 }
 
-.pagination-prev,
-.pagination-next {
+.srs-pagination-prev,
+.srs-pagination-next {
   background-color: #dc2626;
   cursor: pointer;
   display: flex;
@@ -293,23 +295,23 @@
   transition: background-color 0.2s ease;
 }
 
-.pagination-prev:hover,
-.pagination-next:hover {
+.srs-pagination-prev:hover,
+.srs-pagination-next:hover {
   background-color: rgba(220, 38, 38, 0.75);
 }
 
-.pagination-item {
+.srs-pagination-item {
   cursor: pointer;
 }
 
 /* Sub Risk Section Modal Styles */
-.create-sub-risk-section-dialog,
-.edit-sub-risk-section-dialog {
+.srs-create-dialog,
+.srs-edit-dialog {
   max-width: 600px;
   width: 100%;
 }
 
-.sub-risk-section-form {
+.srs-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -318,31 +320,31 @@
   overflow-y: auto;
 }
 
-.form-row {
+.srs-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-.form-row.full-width {
+.srs-form-row.full-width {
   grid-template-columns: 1fr;
 }
 
-.form-field {
+.srs-form-field {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.form-field label {
+.srs-form-field label {
   font-size: 0.875rem;
   font-weight: 500;
   color: #374151;
 }
 
-.form-field input,
-.form-field select,
-.form-field textarea {
+.srs-form-field input,
+.srs-form-field select,
+.srs-form-field textarea {
   padding: 0.5rem 0.75rem;
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
@@ -351,32 +353,32 @@
   font-family: inherit;
 }
 
-.form-field textarea {
+.srs-form-field textarea {
   resize: vertical;
   min-height: 80px;
 }
 
-.form-field input:focus,
-.form-field select:focus,
-.form-field textarea:focus {
+.srs-form-field input:focus,
+.srs-form-field select:focus,
+.srs-form-field textarea:focus {
   outline: none;
   border-color: #dc2626;
   box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
 }
 
-.form-field input.error,
-.form-field select.error,
-.form-field textarea.error {
+.srs-form-field input.error,
+.srs-form-field select.error,
+.srs-form-field textarea.error {
   border-color: #dc2626;
 }
 
-.error-text {
+.srs-error-text {
   font-size: 0.75rem;
   color: #dc2626;
   margin-top: 0.25rem;
 }
 
-.error-message {
+.srs-error-message {
   background-color: #fef2f2;
   border: 1px solid #fecaca;
   color: #dc2626;
@@ -385,7 +387,7 @@
   font-size: 0.875rem;
 }
 
-.form-actions {
+.srs-form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 0.75rem;
@@ -394,7 +396,7 @@
   border-top: 1px solid #e5e7eb;
 }
 
-.submit-btn {
+.srs-submit-btn {
   background-color: #dc2626;
   color: white;
   padding: 0.5rem 1rem;
@@ -405,74 +407,74 @@
   transition: background-color 0.2s ease;
 }
 
-.submit-btn:hover:not(:disabled) {
+.srs-submit-btn:hover:not(:disabled) {
   background-color: #b91c1c;
 }
 
-.submit-btn:disabled {
+.srs-submit-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .sub-risk-sections-container {
+  .srs-container {
     padding: 0.75rem;
   }
 
-  .sub-risk-sections-header {
+  .srs-header {
     flex-direction: column;
     align-items: stretch;
     gap: 0.75rem;
   }
 
-  .filter-controls {
+  .srs-filter-controls {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .filter-input-group {
+  .srs-filter-input-group {
     flex-direction: column;
   }
 
-  .actions-cell {
+  .srs-actions-cell {
     flex-direction: column;
     gap: 0.25rem;
   }
 
-  .pagination-container {
+  .srs-pagination-container {
     flex-direction: column;
     gap: 1rem;
     align-items: center;
   }
 
-  .pagination-controls {
+  .srs-pagination-controls {
     margin-left: 0;
   }
 
-  .sub-risk-sections-table {
+  .srs-table {
     font-size: 0.75rem;
   }
 
-  .form-row {
+  .srs-form-row {
     grid-template-columns: 1fr;
   }
 
-  .create-sub-risk-section-dialog,
-  .edit-sub-risk-section-dialog {
+  .srs-create-dialog,
+  .srs-edit-dialog {
     max-width: 90vw;
   }
 }
 
 @media (max-width: 480px) {
-  .check-btn,
-  .edit-btn,
-  .delete-btn {
+  .srs-check-btn,
+  .srs-edit-btn,
+  .srs-delete-btn {
     padding: 0.2rem 0.5rem;
     font-size: 0.7rem;
   }
 
-  .a-values-grid {
+  .srs-a-values-grid {
     grid-template-columns: 1fr;
     max-width: 80px;
   }

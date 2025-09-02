@@ -30,8 +30,9 @@ import {
   setShowDeleteSubRiskSectionDialog,
   setShowEditSubRiskSectionDialog,
 } from "../../features/reducers/uiReducers/uiSlice"
+import { CreateSubRiskSection } from "../components.subrisksections"
+import { EditSubRiskSection } from "../components.subrisksections"
 import type { SubRiskSection } from "../../types/subRiskSection"
-import { CreateSubRiskSection, EditSubRiskSection } from "../components.subRiskSections"
 import "./ProductsSubRiskSections.css"
 
 const ProductsSubRiskSections = () => {
@@ -126,19 +127,19 @@ const ProductsSubRiskSections = () => {
   }
 
   return (
-    <div className="sub-risk-sections-container">
-      <div className="sub-risk-sections-header">
+    <div className="srs-container">
+      <div className="srs-header">
         <SearchBar
           placeholder="Search by section code, name, sub risk ID, sub risk name, or field..."
           value={searchTerm}
           onChange={setSearchTerm}
         />
 
-        <div className="filter-controls">
+        <div className="srs-filter-controls">
           <select
             value={filterType}
             onChange={(e) => handleFilterChange(e.target.value as any)}
-            className="filter-select"
+            className="srs-filter-select"
           >
             <option value="all">All Sections</option>
             <option value="active">Active Only</option>
@@ -147,28 +148,28 @@ const ProductsSubRiskSections = () => {
           </select>
 
           {(filterType === "sectionCode" || filterType === "subRisk") && (
-            <div className="filter-input-group">
+            <div className="srs-filter-input-group">
               <input
                 type="text"
                 placeholder={`Enter ${filterType === "sectionCode" ? "section code" : "sub risk ID"}...`}
                 value={filterValue}
                 onChange={(e) => setFilterValue(e.target.value)}
-                className="filter-input"
+                className="srs-filter-input"
               />
-              <Button onClick={handleFilterValueSubmit} className="filter-submit-btn">
+              <Button onClick={handleFilterValueSubmit} className="srs-filter-submit-btn">
                 Filter
               </Button>
             </div>
           )}
         </div>
 
-        <Button className="add-sub-risk-section-btn" onClick={() => dispatch(setShowCreateSubRiskSectionDialog(true))}>
+        <Button className="srs-add-sub-risk-section-btn" onClick={() => dispatch(setShowCreateSubRiskSectionDialog(true))}>
           Add New Sub Risk Section
         </Button>
       </div>
 
       {exists !== null && sectionIdToCheck && (
-        <div className={`exists-indicator ${exists ? "exists-true" : "exists-false"}`}>
+        <div className={`srs-exists-indicator ${exists ? "srs-exists-true" : "srs-exists-false"}`}>
           Section ID {sectionIdToCheck} {exists ? "exists" : "does not exist"}
         </div>
       )}
@@ -177,10 +178,10 @@ const ProductsSubRiskSections = () => {
       loading.getActiveSubRiskSections ||
       loading.getSubRiskSectionsBySectionCode ||
       loading.getSubRiskSectionsBySubRisk ? (
-        <div className="loading-container">Loading...</div>
+        <div className="srs-loading-container">Loading...</div>
       ) : (
-        <div className="table-container">
-          <Table className="sub-risk-sections-table">
+        <div className="srs-table-container">
+          <Table className="srs-table">
             <TableHeader>
               <TableRow>
                 <TableHead>S/N</TableHead>
@@ -198,10 +199,10 @@ const ProductsSubRiskSections = () => {
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="table-body">
+            <TableBody className="srs-table-body">
               {currentData.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={13} className="no-data-cell">
+                  <TableCell colSpan={13} className="srs-no-data-cell">
                     No sub risk sections found
                   </TableCell>
                 </TableRow>
@@ -209,16 +210,16 @@ const ProductsSubRiskSections = () => {
                 currentData.map((section, index) => (
                   <TableRow key={section.sectionID}>
                     <TableCell>{(currentPage - 1) * rowsPerPage + index + 1}</TableCell>
-                    <TableCell className="section-id-cell">{section.sectionID}</TableCell>
-                    <TableCell className="section-code-cell">{section.sectionCode}</TableCell>
-                    <TableCell className="sub-risk-id-cell">{section.subRiskID}</TableCell>
-                    <TableCell className="section-name-cell">{section.sectionName}</TableCell>
-                    <TableCell className="sub-risk-name-cell">{section.subRiskName}</TableCell>
-                    <TableCell className="field-cell">{section.field1}</TableCell>
-                    <TableCell className="field-cell">{section.field2 || "-"}</TableCell>
-                    <TableCell className="rates-cell">{section.rates ?? "-"}</TableCell>
-                    <TableCell className="a-values-cell">
-                      <div className="a-values-grid">
+                    <TableCell className="srs-section-id-cell">{section.sectionID}</TableCell>
+                    <TableCell className="srs-section-code-cell">{section.sectionCode}</TableCell>
+                    <TableCell className="srs-sub-risk-id-cell">{section.subRiskID}</TableCell>
+                    <TableCell className="srs-section-name-cell">{section.sectionName}</TableCell>
+                    <TableCell className="srs-sub-risk-name-cell">{section.subRiskName}</TableCell>
+                    <TableCell className="srs-field-cell">{section.field1}</TableCell>
+                    <TableCell className="srs-field-cell">{section.field2 || "-"}</TableCell>
+                    <TableCell className="srs-rates-cell">{section.rates ?? "-"}</TableCell>
+                    <TableCell className="srs-a-values-cell">
+                      <div className="srs-a-values-grid">
                         <span>A1: {section.a1 ?? "-"}</span>
                         <span>A2: {section.a2 ?? "-"}</span>
                         <span>A3: {section.a3 ?? "-"}</span>
@@ -226,18 +227,18 @@ const ProductsSubRiskSections = () => {
                         <span>A5: {section.a5 ?? "-"}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="active-cell">
-                      <span className={`status-badge ${section.active === 1 ? "active" : "inactive"}`}>
+                    <TableCell className="srs-active-cell">
+                      <span className={`srs-status-badge ${section.active === 1 ? "srs-active" : "srs-inactive"}`}>
                         {section.active === 1 ? "Active" : "Inactive"}
                       </span>
                     </TableCell>
-                    <TableCell className="submitted-by-cell">{section.submittedBy || "-"}</TableCell>
-                    <TableCell className="actions-cell">
-                      <Button className="check-btn" onClick={() => handleCheckExists(section.sectionID)}>
+                    <TableCell className="srs-submitted-by-cell">{section.submittedBy || "-"}</TableCell>
+                    <TableCell className="srs-actions-cell">
+                      <Button className="srs-check-btn" onClick={() => handleCheckExists(section.sectionID)}>
                         Check
                       </Button>
                       <Button
-                        className="edit-btn"
+                        className="srs-edit-btn"
                         onClick={() => {
                           setSubRiskSectionToEdit(section)
                           dispatch(setShowEditSubRiskSectionDialog(true))
@@ -247,7 +248,7 @@ const ProductsSubRiskSections = () => {
                       </Button>
                       <Button
                         variant="destructive"
-                        className="delete-btn"
+                        className="srs-delete-btn"
                         onClick={() => {
                           setSectionIdToDelete(section.sectionID)
                           dispatch(setShowDeleteSubRiskSectionDialog(true))
@@ -262,10 +263,10 @@ const ProductsSubRiskSections = () => {
             </TableBody>
           </Table>
 
-          <div className="pagination-container">
-            <div className="pagination-info">
+          <div className="srs-pagination-container">
+            <div className="srs-pagination-info">
               Showing{" "}
-              <span className="pagination-numbers">
+              <span className="srs-pagination-numbers">
                 {filteredSubRiskSections.length > 0
                   ? `${(currentPage - 1) * rowsPerPage + 1} to ${Math.min(
                       currentPage * rowsPerPage,
@@ -276,17 +277,17 @@ const ProductsSubRiskSections = () => {
               Sub Risk Sections
             </div>
 
-            <Pagination className="pagination-controls">
+            <Pagination className="srs-pagination-controls">
               <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious
-                    className="pagination-prev"
+                    className="srs-pagination-prev"
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   />
                 </PaginationItem>
 
                 {Array.from({ length: totalPages }, (_, i) => (
-                  <PaginationItem key={i + 1} className="pagination-item">
+                  <PaginationItem key={i + 1} className="srs-pagination-item">
                     <PaginationLink isActive={currentPage === i + 1} onClick={() => setCurrentPage(i + 1)}>
                       {i + 1}
                     </PaginationLink>
@@ -295,7 +296,7 @@ const ProductsSubRiskSections = () => {
 
                 <PaginationItem>
                   <PaginationNext
-                    className="pagination-next"
+                    className="srs-pagination-next"
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                   />
                 </PaginationItem>
