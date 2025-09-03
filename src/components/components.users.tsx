@@ -17,6 +17,8 @@ import {
   createUser,
   updateUser,
   changePassword,
+  assignRole,
+  removeRole,
   selectUsers,
   clearMessages,
 } from "../features/reducers/adminReducers/userSlice"
@@ -166,12 +168,22 @@ export const CreateUser = () => {
           <div className="su-form-row">
             <div className="su-form-field">
               <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" value={formData.phone} onChange={handleChange("phone")} placeholder="Enter phone number" />
+              <Input
+                id="phone"
+                value={formData.phone}
+                onChange={handleChange("phone")}
+                placeholder="Enter phone number"
+              />
             </div>
 
             <div className="su-form-field">
               <Label htmlFor="address">Address</Label>
-              <Input id="address" value={formData.address} onChange={handleChange("address")} placeholder="Enter address" />
+              <Input
+                id="address"
+                value={formData.address}
+                onChange={handleChange("address")}
+                placeholder="Enter address"
+              />
             </div>
           </div>
 
@@ -353,12 +365,22 @@ export const EditUser = ({ user }: { user: User | null }) => {
           <div className="su-form-row">
             <div className="su-form-field">
               <Label htmlFor="editPhone">Phone</Label>
-              <Input id="editPhone" value={formData.phone} onChange={handleChange("phone")} placeholder="Enter phone number" />
+              <Input
+                id="editPhone"
+                value={formData.phone}
+                onChange={handleChange("phone")}
+                placeholder="Enter phone number"
+              />
             </div>
 
             <div className="su-form-field">
               <Label htmlFor="editAddress">Address</Label>
-              <Input id="editAddress" value={formData.address} onChange={handleChange("address")} placeholder="Enter address" />
+              <Input
+                id="editAddress"
+                value={formData.address}
+                onChange={handleChange("address")}
+                placeholder="Enter address"
+              />
             </div>
           </div>
 
@@ -520,6 +542,286 @@ export const ChangePassword = ({ user }: { user: User | null }) => {
             </Button>
           </div>
         </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export const AssignRole = ({
+  user,
+  roles,
+  isOpen,
+  onClose,
+}: {
+  user: User | null
+  roles: any[]
+  isOpen: boolean
+  onClose: () => void
+}) => {
+  const dispatch = useAppDispatch()
+  const { loading, success, error } = useAppSelector(selectUsers)
+
+  const [searchTerm, setSearchTerm] = useState("")
+  const [selectedRole, setSelectedRole] = useState<any>(null)
+
+  const filteredRoles = roles.filter(
+    (role) =>
+      role.roleName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      role.roleDescription?.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
+
+  const handleAssignRole = () => {
+    if (!user || !selectedRole) return
+
+    dispatch(
+      assignRole({
+        userId: user.userID,
+        roleId: selectedRole.roleID,
+      }),
+    )
+  }
+
+  const handleClose = () => {
+    setSearchTerm("")
+    setSelectedRole(null)
+    onClose()
+  }
+
+  useEffect(() => {
+    if (success.assignRole) {
+      handleClose()
+      dispatch(clearMessages())
+    }
+  }, [success.assignRole, dispatch])
+
+  // Get user's current roles to avoid duplicates
+  const userRoleIds = user?.roles?.map((role) => role.roleID || role.roleId || role.id) || []
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="su-assign-role-dialog">
+        <DialogHeader>
+          <DialogTitle>Assign Role to {user?.username}</DialogTitle>
+        </DialogHeader>
+
+        <div className="su-role-form">
+          {user?.roles && user.roles.length > 0 && (
+            <div className="su-current-roles">
+              <div className="su-current-roles-title">Current Roles:</div>
+              <div className="su-current-roles-list">
+                {user.roles.map((role, index) => (
+                  <span key={index} className="su-current-role-badge">
+                    {role.roleName || role.name || `Role ${role.roleId || role.id}`}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="su-form-field">
+            <Label htmlFor="roleSearch">Search Roles</Label>
+            <Input
+              id="roleSearch"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search by role name or description..."
+              className="su-role-search"
+            />
+          </div>
+
+          <div className="su-form-field">
+            <Label>Available Roles</Label>
+            <div className="su-role-list">
+              {filteredRoles.length === 0 ? (
+                <div className="su-role-item">
+                  <span>No roles found</span>
+                </div>
+              ) : (
+                filteredRoles
+                  .filter((role) => !userRoleIds.includes(role.roleID))
+                  .map((role) => (
+                    <div key={role.roleID} className="su-role-item">
+                      <div className="su-role-info">
+                        <div className="su-role-name">{role.roleName}</div>
+                        {role.roleDescription && <div className="su-role-description">{role.roleDescription}</div>}
+                      </div>
+                      <Button
+                        className="su-role-select-btn"
+                        onClick={() => setSelectedRole(role)} //@ts-ignore
+                        disabled={loading.assignRole}
+                      >
+                        {selectedRole?.roleID === role.roleID ? "Selected" : "Select"}
+                      </Button>
+                    </div>
+                  ))
+              )}
+            </div>
+          </div>
+
+          {selectedRole && (
+            <div className="su-form-field"> <br />
+              <Label>Selected Role</Label>
+              <div className="su-role-item" style={{ border: "2px solid #dc2626", borderRadius: "6px" }}>
+                <div className="su-role-info">
+                  <div className="su-role-name">{selectedRole.roleName}</div>
+                  {selectedRole.roleDescription && (
+                    <div className="su-role-description">{selectedRole.roleDescription}</div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {error.assignRole && <div className="su-error-message">{error.assignRole}</div>}
+
+          <div className="su-form-actions">
+            <Button // @ts-ignore
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={loading.assignRole}
+            >
+              Cancel
+            </Button>
+            <Button // @ts-ignore
+              type="button"
+              onClick={handleAssignRole}
+              disabled={loading.assignRole || !selectedRole}
+              className="su-submit-btn"
+            >
+              {loading.assignRole ? "Assigning..." : "Assign Role"}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export const RemoveRole = ({
+  user,
+  //@ts-ignore
+  roles,
+  isOpen,
+  onClose,
+}: {
+  user: User | null
+  roles: any[]
+  isOpen: boolean
+  onClose: () => void
+}) => {
+  const dispatch = useAppDispatch()
+  const { loading, success, error } = useAppSelector(selectUsers)
+
+  const [selectedRole, setSelectedRole] = useState<any>(null)
+
+  const handleRemoveRole = () => {
+    if (!user || !selectedRole) return
+
+    dispatch(
+      removeRole({
+        userId: user.userID,
+        roleId: selectedRole.roleID || selectedRole.roleId || selectedRole.id,
+      }),
+    )
+  }
+
+  const handleClose = () => {
+    setSelectedRole(null)
+    onClose()
+  }
+
+  useEffect(() => {
+    if (success.removeRole) {
+      handleClose()
+      dispatch(clearMessages())
+    }
+  }, [success.removeRole, dispatch])
+
+  // Get user's current roles
+  const userRoles = user?.roles || []
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="su-remove-role-dialog">
+        <DialogHeader>
+          <DialogTitle>Remove Role from {user?.username}</DialogTitle>
+        </DialogHeader>
+
+        <div className="su-role-form">
+          {userRoles.length === 0 ? (
+            <div className="su-form-field">
+              <p>This user has no roles assigned.</p>
+            </div>
+          ) : (
+            <>
+              <div className="su-form-field">
+                <Label>Current Roles</Label>
+                <div className="su-role-list">
+                  {userRoles.map((role, index) => (
+                    <div key={role.roleID || role.roleId || role.id || index} className="su-role-item">
+                      <div className="su-role-info">
+                        <div className="su-role-name">
+                          {role.roleName || role.name || `Role ${role.roleId || role.id}`}
+                        </div>
+                        {role.roleDescription && <div className="su-role-description">{role.roleDescription}</div>}
+                      </div>
+                      <Button 
+                        className="su-role-select-btn"
+                        onClick={() => setSelectedRole(role)} //@ts-ignore
+                        disabled={loading.removeRole}
+                        style={{
+                          background:
+                            selectedRole?.roleID === (role.roleID || role.roleId || role.id) ? "#b91c1c" : "#dc2626",
+                        }}
+                      >
+                        {selectedRole?.roleID === (role.roleID || role.roleId || role.id) ? "Selected" : "Remove"}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {selectedRole && (
+                <div className="su-form-field">
+                  <Label>Role to Remove</Label>
+                  <div className="su-role-item" style={{ border: "2px solid #dc2626", borderRadius: "6px" }}>
+                    <div className="su-role-info">
+                      <div className="su-role-name">
+                        {selectedRole.roleName || selectedRole.name || `Role ${selectedRole.roleId || selectedRole.id}`}
+                      </div>
+                      {selectedRole.roleDescription && (
+                        <div className="su-role-description">{selectedRole.roleDescription}</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {error.removeRole && <div className="su-error-message">{error.removeRole}</div>}
+
+          <div className="su-form-actions">
+            <Button // @ts-ignore
+              type="button"
+              variant="outline"
+              onClick={handleClose}
+              disabled={loading.removeRole}
+            >
+              Cancel
+            </Button>
+            <Button // @ts-ignore
+              type="button"
+              onClick={handleRemoveRole}
+              disabled={loading.removeRole || !selectedRole || userRoles.length === 0}
+              className="su-submit-btn"
+              style={{ background: "#dc2626" }}
+            >
+              {loading.removeRole ? "Removing..." : "Remove Role"}
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )

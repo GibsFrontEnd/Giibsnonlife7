@@ -225,6 +225,7 @@
 }
 /* User Modal Styles - namespaced with su- prefix */
 .su-create-user-dialog,
+.su-assign-role-dialog,
 .su-edit-user-dialog {
 padding: 20px;
 border: 1px solid;
@@ -360,4 +361,235 @@ border: 1px solid;
     padding: 20px;
     width: 100%;
     }
+}
+
+/* Role Management Specific */
+.su-role-search {
+  margin-bottom: 1rem;
+}
+
+.su-role-list {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #f9fafb;
+}
+
+.su-role-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.15s;
+}
+
+.su-role-item:last-child {
+  border-bottom: none;
+}
+
+.su-role-item:hover {
+  background: #f3f4f6;
+}
+
+.su-role-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.su-role-name {
+  font-weight: 500;
+  color: #111827;
+  font-size: 0.875rem;
+}
+
+.su-role-description {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.su-role-select-btn {
+  padding: 0.375rem 0.75rem;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.su-role-select-btn:hover {
+  background: #b91c1c;
+}
+
+.su-role-select-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.su-current-roles {
+  margin-bottom: 1rem;
+}
+
+.su-current-roles-title {
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.su-current-roles-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.su-current-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.su-remove-role-x {
+  cursor: pointer;
+  font-weight: bold;
+  color: #dc2626;
+  transition: color 0.2s;
+}
+
+.su-remove-role-x:hover {
+  color: #b91c1c;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .su-users-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .su-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .su-action-buttons {
+    flex-direction: column;
+  }
+
+  .su-actions-cell {
+    min-width: auto;
+  }
+
+  .su-pagination-container {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .su-users-container {
+    padding: 1rem;
+  }
+
+  .su-users-table th,
+  .su-users-table td {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .su-form-actions {
+    flex-direction: column;
+  }
+}
+
+/* Compact actions menu + overflow */
+.su-actions-menu {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  position: relative; /* for dropdown positioning */
+}
+
+.su-main-actions {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.su-overflow-wrapper {
+  position: relative;
+}
+
+.su-overflow-btn {
+  appearance: none;
+  border: 1px solid #e6e6e6;
+  background: white;
+  padding: 0.28rem 0.6rem;
+  border-radius: 0.35rem;
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.su-overflow-btn:focus {
+  outline: 2px solid rgba(139,75,140,0.15);
+}
+
+.su-overflow-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 20px rgba(2,6,23,0.08);
+  min-width: 160px;
+  z-index: 60;
+  padding: 0.25rem 0;
+}
+
+.su-action-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.su-action-item:hover {
+  background: #f3f4f6;
+}
+
+/* Slightly reduce padding on table action buttons so the table feels less crowded */
+.su-edit-btn,
+.su-password-btn,
+.su-delete-btn,
+.su-role-btn,
+.su-remove-role-btn {
+  padding: 0.25rem 0.6rem; /* consistent compact size */
+  font-size: 0.85rem;
+}
+
+/* On very small screens show overflow button and hide the two main buttons to keep rows compact */
+@media (max-width: 420px) {
+  .su-main-actions { display: none; }
+  .su-overflow-btn { display: inline-flex; }
+}
+
+/* ensure dropdown uses full width on tiny screens */
+@media (max-width: 360px) {
+  .su-overflow-dropdown { left: 0; right: 0; min-width: auto; }
 }

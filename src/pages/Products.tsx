@@ -16,8 +16,8 @@ const Products: React.FC = () => {
   const tabs = [
     { title: "Product", content: <ProductSubRisk /> },
     { title: "Risks", content: <ProductsRisks /> },
-    {title: "Sub Risk SMI", content: <SubRiskSMIManagement /> },
-    { title: "SubRiskSections", content: <ProductsSubRiskSections />},
+    { title: "Sub-Risk Sections", content: <ProductsSubRiskSections />},
+    {title: "Sub-Risk SMI", content: <SubRiskSMIManagement /> },
   ];
   const [activeTab, setActiveTab] = useState(tabs[0]?.title);
   const [showProductModal, setShowProductModal] = useState(false);
