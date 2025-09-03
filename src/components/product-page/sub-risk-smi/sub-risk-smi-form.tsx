@@ -3,12 +3,12 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { Button } from "../../ui/new-button"
-import { Input } from "../../ui/new-input"
-import { Label } from "../../ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card"
-import { Switch } from "../../ui/switch"
-import { Textarea } from "../../ui/textarea"
+import { Button } from "../../UI/new-button"
+import { Input } from "../../UI/new-input"
+import { Label } from "../../UI/label"
+import { Card, CardContent, CardHeader, CardTitle } from "../../UI/card"
+import { Switch } from "../../UI/switch"
+import { Textarea } from "../../UI/textarea"
 import type { SubRiskSMI, SubRiskSMICreateUpdateRequest } from "../../../types/sub-risk-smis"
 
 interface SubRiskSMIFormProps {

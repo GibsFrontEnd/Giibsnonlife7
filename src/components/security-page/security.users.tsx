@@ -232,7 +232,7 @@ const SecurityUsers = () => {
       setIsFetchingSearchPage(true);
       try {
         // @ts-ignore
-        const action = await dispatch(
+        const action = await dispatch(   //@ts-ignore
           getAllUsers({ page, pageSize, q: debouncedSearch })
         );
         const payload = (action as any)?.payload ?? action;

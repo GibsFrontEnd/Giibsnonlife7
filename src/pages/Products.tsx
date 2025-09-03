@@ -21,7 +21,9 @@ const Products: React.FC = () => {
   ];
   const [activeTab, setActiveTab] = useState(tabs[0]?.title);
   const [showProductModal, setShowProductModal] = useState(false);
+  //@ts-ignore
   const [searchTerm, setSearchTerm] = useState("");
+    //@ts-ignore
   const [statusFilter, setStatusFilter] = useState("Active");
 
   // const tabs = ['Risks', 'Products']
@@ -169,7 +171,7 @@ const Products: React.FC = () => {
 
       <CreateProductModal
         isOpen={showProductModal}
-        onClose={() => setShowProductModal(false)}
+        onClose={() => setShowProductModal(false)}  //@ts-ignore
         onSubmit={handleProductSubmit}
       />
     </div>

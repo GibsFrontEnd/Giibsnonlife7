@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { Button } from "../ui/new-button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Button } from "../UI/new-button";
+import { Card, CardContent, CardHeader, CardTitle } from "../UI/card";
 import {
   OutsideDismissDialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "../ui/dialog";
-import { useToast } from "../ui/use-toast";
-import { Toaster } from "../ui/toaster";
+} from "../UI/dialog";
+import { useToast } from "../UI/use-toast";
+import { Toaster } from "../UI/toaster";
 import { SubRiskSMIForm } from "./sub-risk-smi/sub-risk-smi-form";
 import { SubRiskSMITable } from "./sub-risk-smi/sub-risk-smi-table";
 import { SubRiskSMIFilters } from "./sub-risk-smi/sub-risk-smi-filters";

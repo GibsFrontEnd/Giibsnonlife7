@@ -10,7 +10,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "../ui/dropdown";
+} from "../UI/dropdown";
 import { Input } from "../UI/new-input";
 import { Risk } from "../../types/risk";
 import {
@@ -38,7 +38,7 @@ import {
   TableHeader,
   TableRow,
 } from "../UI/table";
-import { Alert, AlertDescription } from "../ui/alert";
+import { Alert, AlertDescription } from "../UI/alert";
 import {
   selectUiState,
   setShowCreateProductDialog,

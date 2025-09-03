@@ -259,7 +259,7 @@ const subRiskSectionSlice = createSlice({
         state.loading.getSubRiskSectionById = true
         state.error.getSubRiskSectionById = null
       })
-      .addCase(getSubRiskSectionById.fulfilled, (state, action) => {
+      .addCase(getSubRiskSectionById.fulfilled, (state) => {
         state.loading.getSubRiskSectionById = false
         state.success.getSubRiskSectionById = true
       })
