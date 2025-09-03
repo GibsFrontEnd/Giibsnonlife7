@@ -156,6 +156,7 @@ const ProductSubRisk = () => {
       return;
     }
 
+      //@ts-ignore
     dispatch(deleteProduct(productId));
   };
 

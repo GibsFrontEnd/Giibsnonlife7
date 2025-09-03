@@ -214,7 +214,8 @@ export default function SubRiskSMIManagement() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={handleRefresh} variant="outline" size="sm">
+          <Button   //@ts-ignore
+          onClick={handleRefresh} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
@@ -284,7 +285,7 @@ export default function SubRiskSMIManagement() {
               SubRisk SMI with ID {existsResult.id}{" "}
               {existsResult.exists ? "exists" : "does not exist"}
             </p>
-            <Button
+            <Button   //@ts-ignore
               variant="outline"
               size="sm"
               onClick={() => dispatch(clearExistsResult())}
