@@ -4,7 +4,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { useAppDispatch, useAppSelector } from "../hooks/use-apps"
 import { Button } from "./UI/new-button"
-import  Input  from "./UI/input"
+import  Input  from "./UI/Input"
 import { Label } from "./UI/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./UI/dialog"
 import {
@@ -618,10 +618,14 @@ export const EditSubRiskSection = ({ subRiskSection }: { subRiskSection: SubRisk
           )}
 
           <div className="subrisk-sections-form-actions">
-            <Button type="button" variant="outline" onClick={handleClose} disabled={loading.updateSubRiskSection}>
+            <Button 
+              //@ts-ignore
+type="button" variant="outline" onClick={handleClose} disabled={loading.updateSubRiskSection}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading.updateSubRiskSection} className="subrisk-sections-submit-btn">
+            <Button
+              //@ts-ignore
+ type="submit" disabled={loading.updateSubRiskSection} className="subrisk-sections-submit-btn">
               {loading.updateSubRiskSection ? "Updating..." : "Update Sub Risk Section"}
             </Button>
           </div>
