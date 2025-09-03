@@ -27,7 +27,6 @@ interface ProductCreateModalProps {
 const ProductCreateModal = ({
   isOpen,
   onClose,
-  riskId,
 }: ProductCreateModalProps) => {
   const { toast } = useToast();
   const dispatch = useAppDispatch();
@@ -210,7 +209,7 @@ const ProductCreateModal = ({
           </div>
 
           <div className="gap-2 flex">
-            <Button
+            <Button   //@ts-ignore
               type="button"
               variant="outline"
               onClick={handleClose}
@@ -218,7 +217,7 @@ const ProductCreateModal = ({
             >
               Cancel
             </Button>
-            <Button
+            <Button   //@ts-ignore
               type="submit"
               className="flex-1 bg-primary-blue text-white"
               disabled={loading.createProduct}

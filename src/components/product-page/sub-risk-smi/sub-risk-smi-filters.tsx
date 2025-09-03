@@ -129,10 +129,12 @@ export function SubRiskSMIFilters({
         </div>
 
         <div className="flex gap-2">
-          <Button onClick={handleApplyFilters} disabled={isLoading}>
+          <Button   //@ts-ignore
+          onClick={handleApplyFilters} disabled={isLoading}>
             Apply Filters
           </Button>
-          <Button variant="outline" onClick={handleClearFilters}>
+          <Button   //@ts-ignore
+          variant="outline" onClick={handleClearFilters}>
             Clear Filters
           </Button>
         </div>

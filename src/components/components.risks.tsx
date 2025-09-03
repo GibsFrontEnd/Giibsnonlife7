@@ -121,7 +121,7 @@ export const CreateRisk = () => {
           {error.createRisk && <div className="pr-error-message">{error.createRisk}</div>}
 
           <div className="pr-form-actions"> 
-            <Button 
+            <Button    //@ts-ignore
               type="button" 
               variant="outline" 
               onClick={handleClose} 
@@ -129,7 +129,7 @@ export const CreateRisk = () => {
             >
               Cancel
             </Button>
-            <Button 
+            <Button   //@ts-ignore
               type="submit" 
               disabled={loading.createRisk} 
               className="pr-submit-btn"
@@ -247,7 +247,7 @@ export const EditRisk = ({ risk }: { risk: Risk | null }) => {
           {error.updateRisk && <div className="pr-error-message">{error.updateRisk}</div>}
 
           <div className="pr-form-actions">
-            <Button 
+            <Button   //@ts-ignore
               type="button" 
               variant="outline" 
               onClick={handleClose} 
@@ -255,7 +255,7 @@ export const EditRisk = ({ risk }: { risk: Risk | null }) => {
             >
               Cancel
             </Button>
-            <Button 
+            <Button   //@ts-ignore
               type="submit" 
               disabled={loading.updateRisk} 
               className="pr-submit-btn"

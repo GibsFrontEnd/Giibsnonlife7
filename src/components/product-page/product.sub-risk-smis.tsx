@@ -24,8 +24,8 @@ import {
   getActiveSubRiskSMIs,
   getSubRiskSMIsBySMICode,
   getSubRiskSMIsWithFlags,
-  checkSubRiskSMIExists,
-  bulkUpdateActive,
+/*   checkSubRiskSMIExists,
+ */  bulkUpdateActive,
   bulkUpdateFlags,
   clearMessages,
   clearCurrentSubRiskSMI,
@@ -200,10 +200,10 @@ export default function SubRiskSMIManagement() {
     dispatch(getAllSubRiskSMIs());
   };
 
-  const handleCheckExists = (id: number) => {
+/*   const handleCheckExists = (id: number) => {
     dispatch(checkSubRiskSMIExists(id));
   };
-
+ */
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
