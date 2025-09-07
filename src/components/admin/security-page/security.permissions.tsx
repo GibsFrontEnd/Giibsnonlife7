@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "../UI/new-button";
-import { useAppDispatch, useAppSelector } from "../../hooks/use-apps";
-import ConfirmationModal from "../Modals/ConfirmationModal";
-import SearchBar from "../SearchBar";
+import { Button } from "@/components/UI/new-button";
+import { useAppDispatch, useAppSelector } from "@/hooks/use-apps";
+import ConfirmationModal from "@/components/Modals/ConfirmationModal";
+import SearchBar from "@/components/SearchBar";
 import {
   clearMessages,
   deletePermission,
   getAllPermissions,
   selectPermissions,
-} from "../../features/reducers/adminReducers/permissionSlice";
+} from "@/features/reducers/adminReducers/permissionSlice";
 import {
   Table,
   TableBody,
@@ -18,7 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../UI/table";
+} from "@/components/UI/table";
 import {
   Pagination,
   PaginationContent,
@@ -26,15 +26,15 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "../UI/pagination";
+} from "@/components/UI/pagination";
 import {
   selectUiState,
   setShowCreatePermissionDialog,
   setShowDeletePermissionDialog,
   setShowEditPermissionDialog,
-} from "../../features/reducers/uiReducers/uiSlice";
-import type { Permission } from "../../types/permission";
-import { CreatePermission, EditPermission } from "../components.permissions";
+} from "@/features/reducers/uiReducers/uiSlice";
+import type { Permission } from "@/types/permission";
+import { CreatePermission, EditPermission } from "@/components/components.permissions";
 import "./SecurityPermissions.css";
 
 const SecurityPermissions = () => {

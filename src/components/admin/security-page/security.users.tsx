@@ -1,13 +1,13 @@
 "use client"
 
 import { useEffect, useState, useRef, useCallback } from "react"
-import { Button } from "../UI/new-button"
-import { useAppDispatch, useAppSelector } from "../../hooks/use-apps"
-import ConfirmationModal from "../Modals/ConfirmationModal"
-import SearchBar from "../SearchBar"
-import { clearMessages, deleteUser, getAllUsers, selectUsers } from "../../features/reducers/adminReducers/userSlice"
-import { getAllRoles, selectRoles } from "../../features/reducers/adminReducers/roleSlice"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../UI/table"
+import { Button } from "../../UI/new-button"
+import { useAppDispatch, useAppSelector } from "../../../hooks/use-apps"
+import ConfirmationModal from "../../Modals/ConfirmationModal"
+import SearchBar from "../../SearchBar"
+import { clearMessages, deleteUser, getAllUsers, selectUsers } from "../../../features/reducers/adminReducers/userSlice"
+import { getAllRoles, selectRoles } from "../../../features/reducers/adminReducers/roleSlice"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../UI/table"
 import {
   Pagination,
   PaginationContent,
@@ -15,16 +15,16 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "../UI/pagination"
+} from "../../UI/pagination"
 import {
   selectUiState,
   setShowCreateUserDialog,
   setShowDeleteUserDialog,
   setShowEditUserDialog,
   setShowChangePasswordDialog,
-} from "../../features/reducers/uiReducers/uiSlice"
-import type { User } from "../../types/user"
-import { CreateUser, EditUser, ChangePassword, AssignRole, RemoveRole } from "../components.users"
+} from "../../../features/reducers/uiReducers/uiSlice"
+import type { User } from "../../../types/user"
+import { CreateUser, EditUser, ChangePassword, AssignRole, RemoveRole } from "../../components.users"
 import "./SecurityUsers.css"
 
 const FETCH_CHUNK_SIZE = 50

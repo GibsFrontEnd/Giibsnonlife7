@@ -1,12 +1,12 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { Button } from "../UI/new-button"
-import { useAppDispatch, useAppSelector } from "../../hooks/use-apps"
-import ConfirmationModal from "../Modals/ConfirmationModal"
-import SearchBar from "../SearchBar"
-import { clearMessages, deleteRisk, getAllRisks, selectRisks } from "../../features/reducers/adminReducers/riskSlice"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../UI/table"
+import { Button } from "../../UI/new-button"
+import { useAppDispatch, useAppSelector } from "../../../hooks/use-apps"
+import ConfirmationModal from "../../Modals/ConfirmationModal"
+import SearchBar from "../../SearchBar"
+import { clearMessages, deleteRisk, getAllRisks, selectRisks } from "../../../features/reducers/adminReducers/riskSlice"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../UI/table"
 import {
   Pagination,
   PaginationContent,
@@ -14,15 +14,15 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "../UI/pagination"
+} from "../../UI/pagination"
 import {
   selectUiState,
   setShowCreateRiskDialog,
   setShowDeleteRiskDialog,
   setShowEditRiskDialog,
-} from "../../features/reducers/uiReducers/uiSlice"
-import type { Risk } from "../../types/risk"
-import { CreateRisk, EditRisk } from "../components.risks"
+} from "../../../features/reducers/uiReducers/uiSlice"
+import type { Risk } from "../../../types/risk"
+import { CreateRisk, EditRisk } from "../../components.risks"
 import "./ProductsRisks.css"
 
 const ProductsRisks = () => {

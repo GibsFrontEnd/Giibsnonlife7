@@ -1,15 +1,13 @@
-import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
-const Sidebar: React.FC = () => {
-  const location = useLocation();
-
+const CSUSidebar = () => {
+    const location = useLocation();
   const menuItems = [
-    { path: "", label: "Dashboard", icon: "📊" },
-    { path: "security", label: "Security", icon: "🔒" },
-    { path: "products", label: "Products", icon: "📦" },
-    { path: "features", label: "Features", icon: "⚡" },
-    { path: "settings", label: "Settings", icon: "⚙️" },
+    { path: "enquiries", label: "Enquiries", icon: "🔒" },
+    { path: "customers", label: "Customers", icon: "📦" },
+    { path: "partners", label: "Partners", icon: "⚡" },
+    { path: "messaging", label: "Messaging", icon: "⚙️" },
+    { path: "tickets", label: "TIckets", icon: "⚙️" },
   ];
 
   return (
@@ -20,13 +18,15 @@ const Sidebar: React.FC = () => {
             key={item.path}
             to={item.path}
             className={`flex items-center py-3 px-5 text-white/80 no-underline transition-all duration-200 border-l-3 border-transparent hover:bg-white/10 hover:text-white max-md:justify-center max-md:py-4 max-md:px-2.5 ${
-              location.pathname === item.path 
-                ? "bg-white/15 text-white border-l-orange-500" 
+              location.pathname === item.path
+                ? "bg-white/15 text-white border-l-orange-500"
                 : ""
             }`}
           >
             <span className="mr-3 text-base max-md:mr-0">{item.icon}</span>
-            <span className="text-sm font-medium max-md:hidden">{item.label}</span>
+            <span className="text-sm font-medium max-md:hidden">
+              {item.label}
+            </span>
           </Link>
         ))}
       </nav>
@@ -34,4 +34,4 @@ const Sidebar: React.FC = () => {
   );
 };
 
-export default Sidebar;
+export default CSUSidebar;

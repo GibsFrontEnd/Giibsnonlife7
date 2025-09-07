@@ -1,17 +1,17 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Button } from "../UI/new-button"
-import { useAppDispatch, useAppSelector } from "../../hooks/use-apps"
-import ConfirmationModal from "../Modals/ConfirmationModal"
+import { Button } from "../../UI/new-button"
+import { useAppDispatch, useAppSelector } from "../../../hooks/use-apps"
+import ConfirmationModal from "../../Modals/ConfirmationModal"
 import {
   clearMessages,
   deleteSubRiskSection,
   getAllSubRiskSections,
   checkSubRiskSectionExists,
   selectSubRiskSections,
-} from "../../features/reducers/productReducers/subRiskSectionSlice"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../UI/table"
+} from "../../../features/reducers/productReducers/subRiskSectionSlice"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../UI/table"
 import {
   Pagination,
   PaginationContent,
@@ -19,15 +19,15 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "../UI/pagination"
+} from "../../UI/pagination"
 import {
   selectUiState,
   setShowCreateSubRiskSectionDialog,
   setShowDeleteSubRiskSectionDialog,
   setShowEditSubRiskSectionDialog,
-} from "../../features/reducers/uiReducers/uiSlice"
-import type { SubRiskSection } from "../../types/subRiskSection"
-import { CreateSubRiskSection, EditSubRiskSection } from "../components.subRiskSections"
+} from "../../../features/reducers/uiReducers/uiSlice"
+import type { SubRiskSection } from "../../../types/subRiskSection"
+import { CreateSubRiskSection, EditSubRiskSection } from "../../components.subRiskSections"
 import "./ProductsSubRiskSections.css"
 
 const ProductsSubRiskSections = () => {

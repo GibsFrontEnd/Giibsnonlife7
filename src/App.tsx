@@ -15,6 +15,12 @@ import AdminProducts from "./pages/admin/admin-page.Products";
 import AdminFeatures from "./pages/admin/admin-page.Features";
 import AdminSettings from "./pages/admin/admin-page.Settings";
 import Dashboard from "./pages/Dashboard";
+import CSU from "./pages/CSU";
+import CSUEnquiries from "./pages/csu/csu-page.enquiries";
+import CSUCustomers from "./pages/csu/csu-page.customers";
+import CSUPartners from "./pages/csu/csu-page.partners";
+import CSUMessaging from "./pages/csu/csu-page.messaging";
+import CSUTickets from "./pages/csu/csu-page.tickets";
 
 const App: React.FC = () => {
   useAuth();
@@ -29,6 +35,14 @@ const App: React.FC = () => {
 
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+
+          <Route path="/csu" element={<CSU />}>
+            <Route path="enquiries" element={<CSUEnquiries />} />
+            <Route path="customers" element={<CSUCustomers />} />
+            <Route path="partners" element={<CSUPartners />} />
+            <Route path="messaging" element={<CSUMessaging />} />
+            <Route path="tickets" element={<CSUTickets />} />
+          </Route>
 
           <Route path="/admin" element={<Admin />}>
             <Route index element={<AdminDashboard />} />

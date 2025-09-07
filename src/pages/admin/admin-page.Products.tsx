@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import ProductsSubRiskSections from "@/components/product-page/products.subRiskSections";
-import ProductsRisks from "@/components/product-page/products.risks";
+import ProductsSubRiskSections from "@/components/admin/product-page/products.subRiskSections";
+import ProductsRisks from "@/components/admin/product-page/products.risks";
 import "./AdminProducts.css";
-import ProductSubRisk from "@/components/product-page/product.sub-risk";
-import SubRiskSMIManagement from "@/components/product-page/product.sub-risk-smis";
+import ProductSubRisk from "@/components/admin/product-page/product.sub-risk";
+import SubRiskSMIManagement from "@/components/admin/product-page/product.sub-risk-smis";
 import {
   Tabs,
   TabsContent,

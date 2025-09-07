@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "../../UI/new-button";
-import { Label } from "../../UI/label";
-import { Card, CardContent, CardHeader, CardTitle } from "../../UI/card";
+import { Button } from "../../../UI/new-button";
+import { Label } from "../../../UI/label";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../UI/card";
 import {
   Table,
   TableBody,
@@ -11,11 +11,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../UI/table";
-import { Checkbox } from "../../UI/checkbox";
-import { Badge } from "../../UI/badge";
-import { Switch } from "../../UI/switch";
-import type { SubRiskSMI } from "../../../types/sub-risk-smis";
+} from "../../../UI/table";
+import { Checkbox } from "../../../UI/checkbox";
+import { Badge } from "../../../UI/badge";
+import { Switch } from "../../../UI/switch";
+import type { SubRiskSMI } from "../../../../types/sub-risk-smis";
 import { Edit, Trash2, Eye } from "lucide-react";
 
 interface SubRiskSMITableProps {
