@@ -1,12 +1,6 @@
 .content-area {
   flex: 1;
-  padding: 20px;
   background-color: #f8f9fa;
   overflow-y: auto;
 }
 
-@media (max-width: 768px) {
-  .content-area {
-    padding: 15px;
-  }
-}

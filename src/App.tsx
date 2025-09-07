@@ -1,16 +1,6 @@
 import React from "react";
-import {
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout/Layout";
-import Dashboard from "./pages/Dashboard";
-import Security from "./pages/Security";
-import Products from "./pages/Products";
-import Company from "./pages/Company";
-import Features from "./pages/Features";
-import Settings from "./pages/Settings";
 import "./styles/global.css";
 import { useAuth } from "./hooks/use-auth";
 import { useSelector } from "react-redux";
@@ -18,6 +8,19 @@ import { RootState } from "./features/store";
 import { Toaster } from "./components/UI/toaster";
 import HomePage from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
+import Admin from "./pages/Admin";
+import AdminDashboard from "./pages/admin/admin-page.Dashboard";
+import AdminSecurity from "./pages/admin/admin-page.Security";
+import AdminProducts from "./pages/admin/admin-page.Products";
+import AdminFeatures from "./pages/admin/admin-page.Features";
+import AdminSettings from "./pages/admin/admin-page.Settings";
+import Dashboard from "./pages/Dashboard";
+import CSU from "./pages/CSU";
+import CSUEnquiries from "./pages/csu/csu-page.enquiries";
+import CSUCustomers from "./pages/csu/csu-page.customers";
+import CSUPartners from "./pages/csu/csu-page.partners";
+import CSUMessaging from "./pages/csu/csu-page.messaging";
+import CSUTickets from "./pages/csu/csu-page.tickets";
 
 const App: React.FC = () => {
   useAuth();
@@ -32,11 +35,22 @@ const App: React.FC = () => {
 
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/security" element={<Security />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/company" element={<Company />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/settings" element={<Settings />} />
+
+          <Route path="/csu" element={<CSU />}>
+            <Route path="enquiries" element={<CSUEnquiries />} />
+            <Route path="customers" element={<CSUCustomers />} />
+            <Route path="partners" element={<CSUPartners />} />
+            <Route path="messaging" element={<CSUMessaging />} />
+            <Route path="tickets" element={<CSUTickets />} />
+          </Route>
+
+          <Route path="/admin" element={<Admin />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="security" element={<AdminSecurity />} />
+            <Route path="products" element={<AdminProducts />} />
+            <Route path="features" element={<AdminFeatures />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
         </Route>
 
         <Route

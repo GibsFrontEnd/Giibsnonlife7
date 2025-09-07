@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "../../UI/new-button";
-import { Input } from "../../UI/new-input";
-import { Label } from "../../UI/label";
-import { Card, CardContent, CardHeader, CardTitle } from "../../UI/card";
-import { Switch } from "../../UI/switch";
-import { Checkbox } from "../../UI/checkbox";
+import { Button } from "../../../UI/new-button";
+import { Input } from "../../../UI/new-input";
+import { Label } from "../../../UI/label";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../UI/card";
+import { Switch } from "../../../UI/switch";
+import { Checkbox } from "../../../UI/checkbox";
 
 interface FilterOptions {
   subRiskId?: string;

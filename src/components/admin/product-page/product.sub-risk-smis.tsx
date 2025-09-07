@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import { Button } from "../UI/new-button";
-import { Card, CardContent, CardHeader, CardTitle } from "../UI/card";
+import { Button } from "../../UI/new-button";
+import { Card, CardContent, CardHeader, CardTitle } from "../../UI/card";
 import {
   OutsideDismissDialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "../UI/dialog";
-import { useToast } from "../UI/use-toast";
-import { Toaster } from "../UI/toaster";
-import { SubRiskSMIForm } from "./sub-risk-smi/sub-risk-smi-form";
-import { SubRiskSMITable } from "./sub-risk-smi/sub-risk-smi-table";
-import { SubRiskSMIFilters } from "./sub-risk-smi/sub-risk-smi-filters";
-import { useAppDispatch, useAppSelector } from "../../hooks/use-apps";
+} from "../../UI/dialog";
+import { useToast } from "../../UI/use-toast";
+import { Toaster } from "../../UI/toaster";
+import { SubRiskSMIForm } from "../../admin/product-page/sub-risk-smi/sub-risk-smi-form";
+import { SubRiskSMITable } from "../../admin/product-page/sub-risk-smi/sub-risk-smi-table";
+import { SubRiskSMIFilters } from "../../admin/product-page/sub-risk-smi/sub-risk-smi-filters";
+import { useAppDispatch, useAppSelector } from "../../../hooks/use-apps";
 import {
   getAllSubRiskSMIs,
   getSubRiskSMIById,
@@ -24,18 +24,17 @@ import {
   getActiveSubRiskSMIs,
   getSubRiskSMIsBySMICode,
   getSubRiskSMIsWithFlags,
-/*   checkSubRiskSMIExists,
- */  bulkUpdateActive,
+  bulkUpdateActive,
   bulkUpdateFlags,
   clearMessages,
   clearCurrentSubRiskSMI,
   clearExistsResult,
   selectSubRiskSMIs,
-} from "../../features/reducers/productReducers/subRiskSMISlice";
+} from "../../../features/reducers/productReducers/subRiskSMISlice";
 import type {
   SubRiskSMI,
   SubRiskSMICreateUpdateRequest,
-} from "../../types/sub-risk-smis";
+} from "../../../types/sub-risk-smis";
 import { Plus, RefreshCw } from "lucide-react";
 
 type DialogMode = "create" | "edit" | "view" | null;
@@ -200,7 +199,7 @@ export default function SubRiskSMIManagement() {
     dispatch(getAllSubRiskSMIs());
   };
 
-/*   const handleCheckExists = (id: number) => {
+  /*   const handleCheckExists = (id: number) => {
     dispatch(checkSubRiskSMIExists(id));
   };
  */
@@ -214,8 +213,11 @@ export default function SubRiskSMIManagement() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button   //@ts-ignore
-          onClick={handleRefresh} variant="outline" size="sm">
+          <Button //@ts-ignore
+            onClick={handleRefresh}
+            variant="outline"
+            size="sm"
+          >
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
           </Button>
@@ -285,7 +287,7 @@ export default function SubRiskSMIManagement() {
               SubRisk SMI with ID {existsResult.id}{" "}
               {existsResult.exists ? "exists" : "does not exist"}
             </p>
-            <Button   //@ts-ignore
+            <Button //@ts-ignore
               variant="outline"
               size="sm"
               onClick={() => dispatch(clearExistsResult())}

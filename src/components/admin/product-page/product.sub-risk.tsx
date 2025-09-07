@@ -1,27 +1,27 @@
 import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../../hooks/use-apps";
+import { useAppDispatch, useAppSelector } from "../../../hooks/use-apps";
 import {
   getAllRisks,
   selectRisks,
-} from "../../features/reducers/adminReducers/riskSlice";
-import SearchBar from "../SearchBar";
-import { Button } from "../UI/new-button";
+} from "../../../features/reducers/adminReducers/riskSlice";
+import SearchBar from "../../SearchBar";
+import { Button } from "../../UI/new-button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "../UI/dropdown";
-import { Input } from "../UI/new-input";
-import { Risk } from "../../types/risk";
+} from "../../UI/dropdown";
+import { Input } from "../../UI/new-input";
+import { Risk } from "../../../types/risk";
 import {
   clearMessages,
   clearProducts,
   deleteProduct,
   getAllProducts,
   selectProducts,
-} from "../../features/reducers/productReducers/productSlice";
-import { Card, CardContent } from "../UI/card";
-import { Skeleton } from "../UI/skeleton";
+} from "../../../features/reducers/productReducers/productSlice";
+import { Card, CardContent } from "../../UI/card";
+import { Skeleton } from "../../UI/skeleton";
 import {
   FileText,
   ChevronLeft,
@@ -37,19 +37,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../UI/table";
-import { Alert, AlertDescription } from "../UI/alert";
+} from "../../UI/table";
+import { Alert, AlertDescription } from "../../UI/alert";
 import {
   selectUiState,
   setShowCreateProductDialog,
   setShowDeleteProductDialog,
   setShowEditProductDialog,
-} from "../../features/reducers/uiReducers/uiSlice";
-import ConfirmationModal from "../Modals/ConfirmationModal";
-import { useToast } from "../UI/use-toast";
-import ProductCreateModal from "../Modals/CreateProductModal";
-import ProductEditModal from "../Modals/EditProductModal";
-import { Product } from "../../types/product";
+} from "../../../features/reducers/uiReducers/uiSlice";
+import ConfirmationModal from "../../Modals/ConfirmationModal";
+import { useToast } from "../../UI/use-toast";
+import ProductCreateModal from "../../Modals/CreateProductModal";
+import ProductEditModal from "../../Modals/EditProductModal";
+import { Product } from "../../../types/product";
 
 const ProductSubRisk = () => {
   const { toast } = useToast();

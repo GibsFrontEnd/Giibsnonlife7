@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./UI/dialog"
 import { selectUiState, setShowCreateRiskDialog, setShowEditRiskDialog } from "../features/reducers/uiReducers/uiSlice"
 import { createRisk, updateRisk, selectRisks, clearMessages } from "../features/reducers/adminReducers/riskSlice"
 import type { Risk, CreateRiskRequest, UpdateRiskRequest } from "../types/risk"
-import "./product-page/ProductsRisks.css"
+import "@/components/admin/product-page/ProductsRisks.css"
 export const CreateRisk = () => {
   const dispatch = useAppDispatch()
   const { showCreateRiskDialog } = useAppSelector(selectUiState)

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { Button } from "../UI/new-button";
-import { useAppDispatch, useAppSelector } from "../../hooks/use-apps";
-import ConfirmationModal from "../Modals/ConfirmationModal";
-import SearchBar from "../SearchBar";
+import { Button } from "../../UI/new-button";
+import { useAppDispatch, useAppSelector } from "../../../hooks/use-apps";
+import ConfirmationModal from "../../Modals/ConfirmationModal";
+import SearchBar from "../../SearchBar";
 import {
   clearMessages,
   deleteRole,
   getAllRoles,
   selectRoles,
-} from "../../features/reducers/adminReducers/roleSlice";
+} from "../../../features/reducers/adminReducers/roleSlice";
 import {
   Table,
   TableBody,
@@ -16,7 +16,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../UI/table";
+} from "../../UI/table";
 import {
   Pagination,
   PaginationContent,
@@ -24,15 +24,15 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "../UI/pagination";
+} from "../../UI/pagination";
 import {
   selectUiState,
   setShowCreateRoleDialog,
   setShowDeleteRoleDialog,
   setShowEditRoleDialog,
-} from "../../features/reducers/uiReducers/uiSlice";
-import { Role } from "../../types/role";
-import { CreateRole, EditRole } from "../components.roles";
+} from "../../../features/reducers/uiReducers/uiSlice";
+import { Role } from "../../../types/role";
+import { CreateRole, EditRole } from "../../components.roles";
 
 const SecurityRoles = () => {
   const dispatch = useAppDispatch();

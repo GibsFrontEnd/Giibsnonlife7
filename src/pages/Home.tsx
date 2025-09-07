@@ -12,15 +12,6 @@ const HomePage = () => {
           Login
         </Button>
       </div>
-      {/* <div className="flex-1 h-1/2 md:h-full flex items-center justify-center">
-        <Button
-          asLink
-          to="/register"
-          className="bg-black min-w-[300px] text-white"
-        >
-          Register
-        </Button>
-      </div> */}
     </div>
   );
 };

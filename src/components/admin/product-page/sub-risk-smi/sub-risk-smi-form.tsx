@@ -1,24 +1,32 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { Button } from "../../UI/new-button"
-import { Input } from "../../UI/new-input"
-import { Label } from "../../UI/label"
-import { Card, CardContent, CardHeader, CardTitle } from "../../UI/card"
-import { Switch } from "../../UI/switch"
-import { Textarea } from "../../UI/textarea"
-import type { SubRiskSMI, SubRiskSMICreateUpdateRequest } from "../../../types/sub-risk-smis"
+import { useState, useEffect } from "react";
+import { Button } from "../../../UI/new-button";
+import { Input } from "../../../UI/new-input";
+import { Label } from "../../../UI/label";
+import { Card, CardContent, CardHeader, CardTitle } from "../../../UI/card";
+import { Switch } from "../../../UI/switch";
+import { Textarea } from "../../../UI/textarea";
+import type {
+  SubRiskSMI,
+  SubRiskSMICreateUpdateRequest,
+} from "../../../../types/sub-risk-smis";
 
 interface SubRiskSMIFormProps {
-  subRiskSMI?: SubRiskSMI | null
-  onSubmit: (data: SubRiskSMICreateUpdateRequest) => void
-  onCancel: () => void
-  isLoading?: boolean
+  subRiskSMI?: SubRiskSMI | null;
+  onSubmit: (data: SubRiskSMICreateUpdateRequest) => void;
+  onCancel: () => void;
+  isLoading?: boolean;
 }
 
-export function SubRiskSMIForm({ subRiskSMI, onSubmit, onCancel, isLoading }: SubRiskSMIFormProps) {
+export function SubRiskSMIForm({
+  subRiskSMI,
+  onSubmit,
+  onCancel,
+  isLoading,
+}: SubRiskSMIFormProps) {
   const [formData, setFormData] = useState<SubRiskSMICreateUpdateRequest>({
     smiCode: "",
     sectionCode: "",
@@ -39,7 +47,7 @@ export function SubRiskSMIForm({ subRiskSMI, onSubmit, onCancel, isLoading }: Su
     a5: 0,
     active: 1,
     submittedBy: "current-user",
-  })
+  });
 
   useEffect(() => {
     if (subRiskSMI) {
@@ -64,23 +72,28 @@ export function SubRiskSMIForm({ subRiskSMI, onSubmit, onCancel, isLoading }: Su
         active: subRiskSMI.active || 1,
         submittedBy: subRiskSMI.submittedBy,
         modifiedBy: "current-user",
-      })
+      });
     }
-  }, [subRiskSMI])
+  }, [subRiskSMI]);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSubmit(formData)
-  }
+    e.preventDefault();
+    onSubmit(formData);
+  };
 
-  const handleInputChange = (field: keyof SubRiskSMICreateUpdateRequest, value: string | number) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+  const handleInputChange = (
+    field: keyof SubRiskSMICreateUpdateRequest,
+    value: string | number
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   return (
     <Card className="w-full max-w-4xl">
       <CardHeader>
-        <CardTitle>{subRiskSMI ? "Edit SubRisk SMI" : "Create SubRisk SMI"}</CardTitle>
+        <CardTitle>
+          {subRiskSMI ? "Edit SubRisk SMI" : "Create SubRisk SMI"}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -99,7 +112,9 @@ export function SubRiskSMIForm({ subRiskSMI, onSubmit, onCancel, isLoading }: Su
               <Input
                 id="sectionCode"
                 value={formData.sectionCode}
-                onChange={(e) => handleInputChange("sectionCode", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("sectionCode", e.target.value)
+                }
                 required
               />
             </div>
@@ -117,7 +132,9 @@ export function SubRiskSMIForm({ subRiskSMI, onSubmit, onCancel, isLoading }: Su
               <Input
                 id="sectionName"
                 value={formData.sectionName}
-                onChange={(e) => handleInputChange("sectionName", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("sectionName", e.target.value)
+                }
                 required
               />
             </div>
@@ -126,7 +143,9 @@ export function SubRiskSMIForm({ subRiskSMI, onSubmit, onCancel, isLoading }: Su
               <Input
                 id="subRiskName"
                 value={formData.subRiskName}
-                onChange={(e) => handleInputChange("subRiskName", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("subRiskName", e.target.value)
+                }
                 required
               />
             </div>
@@ -166,7 +185,12 @@ export function SubRiskSMIForm({ subRiskSMI, onSubmit, onCancel, isLoading }: Su
                 type="number"
                 step="0.01"
                 value={formData.rates}
-                onChange={(e) => handleInputChange("rates", Number.parseFloat(e.target.value) || 0)}
+                onChange={(e) =>
+                  handleInputChange(
+                    "rates",
+                    Number.parseFloat(e.target.value) || 0
+                  )
+                }
               />
             </div>
             <div className="space-y-2">
@@ -176,14 +200,21 @@ export function SubRiskSMIForm({ subRiskSMI, onSubmit, onCancel, isLoading }: Su
                 type="number"
                 step="0.01"
                 value={formData.multiplier}
-                onChange={(e) => handleInputChange("multiplier", Number.parseFloat(e.target.value) || 0)}
+                onChange={(e) =>
+                  handleInputChange(
+                    "multiplier",
+                    Number.parseFloat(e.target.value) || 0
+                  )
+                }
               />
             </div>
             <div className="flex items-center space-x-2">
               <Switch
                 id="addSI"
                 checked={formData.addSI === 1}
-                onCheckedChange={(checked) => handleInputChange("addSI", checked ? 1 : 0)}
+                onCheckedChange={(checked) =>
+                  handleInputChange("addSI", checked ? 1 : 0)
+                }
               />
               <Label htmlFor="addSI">Add SI</Label>
             </div>
@@ -191,7 +222,9 @@ export function SubRiskSMIForm({ subRiskSMI, onSubmit, onCancel, isLoading }: Su
               <Switch
                 id="stockItem"
                 checked={formData.stockItem === 1}
-                onCheckedChange={(checked) => handleInputChange("stockItem", checked ? 1 : 0)}
+                onCheckedChange={(checked) =>
+                  handleInputChange("stockItem", checked ? 1 : 0)
+                }
               />
               <Label htmlFor="stockItem">Stock Item</Label>
             </div>
@@ -205,11 +238,15 @@ export function SubRiskSMIForm({ subRiskSMI, onSubmit, onCancel, isLoading }: Su
                   id={`a${num}`}
                   type="number"
                   step="0.01"
-                  value={formData[`a${num}` as keyof SubRiskSMICreateUpdateRequest] as number}
+                  value={
+                    formData[
+                      `a${num}` as keyof SubRiskSMICreateUpdateRequest
+                    ] as number
+                  }
                   onChange={(e) =>
                     handleInputChange(
                       `a${num}` as keyof SubRiskSMICreateUpdateRequest,
-                      Number.parseFloat(e.target.value) || 0,
+                      Number.parseFloat(e.target.value) || 0
                     )
                   }
                 />
@@ -221,23 +258,30 @@ export function SubRiskSMIForm({ subRiskSMI, onSubmit, onCancel, isLoading }: Su
             <Switch
               id="active"
               checked={formData.active === 1}
-              onCheckedChange={(checked) => handleInputChange("active", checked ? 1 : 0)}
+              onCheckedChange={(checked) =>
+                handleInputChange("active", checked ? 1 : 0)
+              }
             />
             <Label htmlFor="active">Active</Label>
           </div>
 
           <div className="flex gap-4">
-            <Button   //@ts-ignore
-            type="submit" disabled={isLoading}>
+            <Button //@ts-ignore
+              type="submit"
+              disabled={isLoading}
+            >
               {isLoading ? "Saving..." : subRiskSMI ? "Update" : "Create"}
             </Button>
-            <Button   //@ts-ignore
-            type="button" variant="outline" onClick={onCancel}>
+            <Button //@ts-ignore
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+            >
               Cancel
             </Button>
           </div>
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }
