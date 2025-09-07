@@ -6,7 +6,6 @@
   flex-direction: column;
   gap: 1.5rem;
   background-color: #f8f9fa;
-  min-height: calc(100vh - 64px);
 }
 
 .pr-risks-header {

@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Features: React.FC = () => {
+const AdminFeatures: React.FC = () => {
   return (
     <div className="features-page">
       <div className="page-header">
@@ -32,4 +32,4 @@ const Features: React.FC = () => {
   )
 }
 
-export default Features
+export default AdminFeatures

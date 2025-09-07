@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Settings: React.FC = () => {
+const AdminSettings: React.FC = () => {
   return (
     <div className="settings-page">
       <div className="page-header">
@@ -27,4 +27,4 @@ const Settings: React.FC = () => {
   )
 }
 
-export default Settings
+export default AdminSettings

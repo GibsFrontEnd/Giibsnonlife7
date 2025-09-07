@@ -1,18 +1,13 @@
 import React, { useState } from "react";
-import CreateUserModal from "../components/Modals/CreateUserModal";
-import CreateRoleModal from "../components/Modals/CreateRoleModal";
-import "./Security.css";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../components/UI/tabs";
-import SecurityUsers from "../components/security-page/security.users";
-import SecurityRoles from "../components/security-page/security.roles";
-import SecurityPermissions from "../components/security-page/security.permissions";
+import CreateUserModal from "@/components/Modals/CreateUserModal";
+import CreateRoleModal from "@/components/Modals/CreateRoleModal";
+import "./AdminSecurity.css";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/UI/tabs";
+import SecurityUsers from "@/components/security-page/security.users";
+import SecurityRoles from "@/components/security-page/security.roles";
+import SecurityPermissions from "@/components/security-page/security.permissions";
 
-const Security: React.FC = () => {
+const AdminSecurity: React.FC = () => {
   const [activeTab, setActiveTab] = useState("Users");
   const [showUserModal, setShowUserModal] = useState(false);
   const [showRoleModal, setShowRoleModal] = useState(false);
@@ -50,7 +45,9 @@ const Security: React.FC = () => {
           ))}
         </TabsList>
         {tabs.map((tab) => (
-          <TabsContent value={tab.title}>{tab.content}</TabsContent>
+          <TabsContent value={tab.title} className="mb-6">
+            {tab.content}
+          </TabsContent>
         ))}
       </Tabs>
 
@@ -69,4 +66,4 @@ const Security: React.FC = () => {
   );
 };
 
-export default Security;
+export default AdminSecurity;

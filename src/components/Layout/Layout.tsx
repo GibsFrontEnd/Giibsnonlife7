@@ -1,23 +1,16 @@
 import React from "react";
-import Sidebar from "./Sidebar";
 import Header from "./Header";
-import "./Layout.css";
 import { Outlet } from "react-router-dom";
-
-// interface LayoutProps {
-//   children: React.ReactNode;
-// }
 
 const Layout: React.FC = () => {
   return (
-    <div className="app">
-      <Sidebar />
-      <div className="main-content">
+    <div className="flex flex-col relative h-screen overflow-y-hidden">
+      <div className="fixed top-0 h-[60px] w-full z-[100]">
         <Header />
-        <main className="content-area">
-          <Outlet />
-        </main>
       </div>
+      <main className="w-full mt-[60px] flex-1 h-full">
+        <Outlet />
+      </main>
     </div>
   );
 };

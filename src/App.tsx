@@ -1,16 +1,6 @@
 import React from "react";
-import {
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout/Layout";
-import Dashboard from "./pages/Dashboard";
-import Security from "./pages/Security";
-import Products from "./pages/Products";
-import Company from "./pages/Company";
-import Features from "./pages/Features";
-import Settings from "./pages/Settings";
 import "./styles/global.css";
 import { useAuth } from "./hooks/use-auth";
 import { useSelector } from "react-redux";
@@ -18,6 +8,13 @@ import { RootState } from "./features/store";
 import { Toaster } from "./components/UI/toaster";
 import HomePage from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
+import Admin from "./pages/Admin";
+import AdminDashboard from "./pages/admin/admin-page.Dashboard";
+import AdminSecurity from "./pages/admin/admin-page.Security";
+import AdminProducts from "./pages/admin/admin-page.Products";
+import AdminFeatures from "./pages/admin/admin-page.Features";
+import AdminSettings from "./pages/admin/admin-page.Settings";
+import Dashboard from "./pages/Dashboard";
 
 const App: React.FC = () => {
   useAuth();
@@ -32,11 +29,14 @@ const App: React.FC = () => {
 
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/security" element={<Security />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/company" element={<Company />} />
-          <Route path="/features" element={<Features />} />
-          <Route path="/settings" element={<Settings />} />
+
+          <Route path="/admin" element={<Admin />}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="security" element={<AdminSecurity />} />
+            <Route path="products" element={<AdminProducts />} />
+            <Route path="features" element={<AdminFeatures />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
         </Route>
 
         <Route
