@@ -1,28 +1,20 @@
 import React, { useState } from "react";
+import "./AdminProducts.css";
 import ProductsSubRiskSections from "@/components/admin/product-page/products.subRiskSections";
 import ProductsRisks from "@/components/admin/product-page/products.risks";
-import "./AdminProducts.css";
 import ProductSubRisk from "@/components/admin/product-page/product.sub-risk";
 import SubRiskSMIManagement from "@/components/admin/product-page/product.sub-risk-smis";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/UI/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/UI/tabs";
+
+const tabs = [
+  { title: "Product", content: <ProductSubRisk /> },
+  { title: "Risks", content: <ProductsRisks /> },
+  { title: "Sub-Risk Sections", content: <ProductsSubRiskSections /> },
+  { title: "Sub-Risk SMI", content: <SubRiskSMIManagement /> },
+];
 
 const AdminProducts: React.FC = () => {
-  const tabs = [
-    { title: "Product", content: <ProductSubRisk /> },
-    { title: "Risks", content: <ProductsRisks /> },
-    { title: "Sub-Risk Sections", content: <ProductsSubRiskSections />},
-    {title: "Sub-Risk SMI", content: <SubRiskSMIManagement /> },
-  ];
   const [activeTab, setActiveTab] = useState(tabs[0]?.title);
-  //@ts-ignore
-  const [searchTerm, setSearchTerm] = useState("");
-    //@ts-ignore
-  const [statusFilter, setStatusFilter] = useState("Active");
 
   return (
     <div className="products-page">
