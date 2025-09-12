@@ -21,6 +21,7 @@ import CSUCustomers from "./pages/csu/csu-page.customers";
 import CSUPartners from "./pages/csu/csu-page.partners";
 import CSUMessaging from "./pages/csu/csu-page.messaging";
 import CSUTickets from "./pages/csu/csu-page.tickets";
+import AdminCompany from "./pages/admin/admin-page.Company";
 
 const App: React.FC = () => {
   useAuth();
@@ -47,6 +48,7 @@ const App: React.FC = () => {
           <Route path="/admin" element={<Admin />}>
             <Route index element={<AdminDashboard />} />
             <Route path="security" element={<AdminSecurity />} />
+            <Route path="company" element={<AdminCompany />} />
             <Route path="products" element={<AdminProducts />} />
             <Route path="features" element={<AdminFeatures />} />
             <Route path="settings" element={<AdminSettings />} />

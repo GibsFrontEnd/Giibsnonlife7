@@ -37,6 +37,11 @@ interface UiState {
   showEditProductDialog: boolean;
   showDeleteProductDialog: boolean;
   showViewProductDetailsDialog: boolean;
+
+  showCreateRegionDialog: boolean;
+  showEditRegionDialog: boolean;
+  showDeleteRegionDialog: boolean;
+  showViewRegionDetailsDialog: boolean;
 }
 
 const initialState: UiState = {
@@ -74,6 +79,11 @@ const initialState: UiState = {
   showEditProductDialog: false,
   showDeleteProductDialog: false,
   showViewProductDetailsDialog: false,
+
+  showCreateRegionDialog: false,
+  showEditRegionDialog: false,
+  showDeleteRegionDialog: false,
+  showViewRegionDetailsDialog: false,
 };
 
 const uiSlice = createSlice({
@@ -172,6 +182,22 @@ const uiSlice = createSlice({
     ) => {
       state.showViewProductDetailsDialog = action.payload;
     },
+
+    setShowCreateRegionDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreateRegionDialog = action.payload;
+    },
+    setShowEditRegionDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditRegionDialog = action.payload;
+    },
+    setShowDeleteRegionDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeleteRegionDialog = action.payload;
+    },
+    setShowViewRegionDetailsDialog: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showViewRegionDetailsDialog = action.payload;
+    },
   },
 });
 
@@ -210,6 +236,11 @@ export const {
   setShowEditProductDialog,
   setShowDeleteProductDialog,
   setShowViewProductDetailsDialog,
+
+  setShowCreateRegionDialog,
+  setShowEditRegionDialog,
+  setShowDeleteRegionDialog,
+  setShowViewRegionDetailsDialog,
 } = uiSlice.actions;
 
 export const selectUiState = (state: { ui: UiState }) => state.ui;
