@@ -42,6 +42,11 @@ interface UiState {
   showEditRegionDialog: boolean;
   showDeleteRegionDialog: boolean;
   showViewRegionDetailsDialog: boolean;
+
+  showCreateBranchDialog: boolean;
+  showEditBranchDialog: boolean;
+  showDeleteBranchDialog: boolean;
+  showViewBranchDetailsDialog: boolean;
 }
 
 const initialState: UiState = {
@@ -84,6 +89,11 @@ const initialState: UiState = {
   showEditRegionDialog: false,
   showDeleteRegionDialog: false,
   showViewRegionDetailsDialog: false,
+
+  showCreateBranchDialog: false,
+  showEditBranchDialog: false,
+  showDeleteBranchDialog: false,
+  showViewBranchDetailsDialog: false,
 };
 
 const uiSlice = createSlice({
@@ -198,6 +208,22 @@ const uiSlice = createSlice({
     ) => {
       state.showViewRegionDetailsDialog = action.payload;
     },
+
+    setShowCreateBranchDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreateBranchDialog = action.payload;
+    },
+    setShowEditBranchDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditBranchDialog = action.payload;
+    },
+    setShowDeleteBranchDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeleteBranchDialog = action.payload;
+    },
+    setShowViewBranchDetailsDialog: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showViewBranchDetailsDialog = action.payload;
+    },
   },
 });
 
@@ -241,6 +267,11 @@ export const {
   setShowEditRegionDialog,
   setShowDeleteRegionDialog,
   setShowViewRegionDetailsDialog,
+
+  setShowCreateBranchDialog,
+  setShowEditBranchDialog,
+  setShowDeleteBranchDialog,
+  setShowViewBranchDetailsDialog,
 } = uiSlice.actions;
 
 export const selectUiState = (state: { ui: UiState }) => state.ui;

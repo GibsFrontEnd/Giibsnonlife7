@@ -19,3 +19,40 @@ export interface Branch {
   modifiedBy: string | null;
   modifiedOn: string | null;
 }
+
+export interface UpdateBranchRequest {
+  branchId: string;
+  data: Branch;
+}
+
+export interface BranchState {
+  branches: Branch[];
+  branch: Branch | null;
+
+  loading: {
+    getAllBranches: boolean;
+    getBranchDetails: boolean;
+    createBranch: boolean;
+    updateBranch: boolean;
+    deleteBranch: boolean;
+  };
+  error: {
+    getAllBranches: unknown;
+    getBranchDetails: unknown;
+    createBranch: unknown;
+    updateBranch: unknown;
+    deleteBranch: unknown;
+  };
+  success: {
+    createBranch: boolean;
+    updateBranch: boolean;
+    deleteBranch: boolean;
+  };
+}
+
+export interface BranchFiltersProps {
+  search: string
+  regionID: string
+  stateID: string
+  active: string
+}
