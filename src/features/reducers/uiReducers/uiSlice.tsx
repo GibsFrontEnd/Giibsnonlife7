@@ -37,6 +37,15 @@ interface UiState {
   showEditProductDialog: boolean;
   showDeleteProductDialog: boolean;
   showViewProductDetailsDialog: boolean;
+
+    // Party types risk dialogs
+    showCreatePartyTypeDialog: boolean;
+    showEditPartyTypeDialog: boolean;
+    showDeletePartyTypeDialog: boolean;
+    showViewPartyTypeDetailsDialog: boolean;
+  
+
+
 }
 
 const initialState: UiState = {
@@ -65,10 +74,19 @@ const initialState: UiState = {
   showDeleteRiskDialog: false,
   showViewRiskDetailsDialog: false,
 
+    // Product Sub risk
   showCreateSubRiskSectionDialog: false,
   showEditSubRiskSectionDialog: false,
   showDeleteSubRiskSectionDialog: false,
   showViewSubRiskSectionDetailsDialog: false,
+  
+   // Product Party Type
+  showCreatePartyTypeDialog: false,
+  showEditPartyTypeDialog: false,
+  showDeletePartyTypeDialog: false,
+  showViewPartyTypeDetailsDialog: false,
+
+  
   // Product Sub risk
   showCreateProductDialog: false,
   showEditProductDialog: false,
@@ -172,6 +190,24 @@ const uiSlice = createSlice({
     ) => {
       state.showViewProductDetailsDialog = action.payload;
     },
+
+    // Product Party type reducers
+    setShowCreatePartyTypeDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreatePartyTypeDialog = action.payload;
+    },
+    setShowEditPartyTypeDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditPartyTypeDialog = action.payload;
+    },
+    setShowDeletePartyTypeDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeletePartyTypeDialog = action.payload;
+    },
+    setShowViewPartyTypeDetailsDialog: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showViewPartyTypeDetailsDialog = action.payload;
+    },
+
   },
 });
 
@@ -210,6 +246,13 @@ export const {
   setShowEditProductDialog,
   setShowDeleteProductDialog,
   setShowViewProductDetailsDialog,
+
+  // product Party Type actions
+  setShowCreatePartyTypeDialog,
+  setShowEditPartyTypeDialog,
+  setShowDeletePartyTypeDialog,
+  setShowViewPartyTypeDetailsDialog,
+
 } = uiSlice.actions;
 
 export const selectUiState = (state: { ui: UiState }) => state.ui;

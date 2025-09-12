@@ -19,8 +19,8 @@ const Header: React.FC = () => {
   ];
 
   return (
-    <header className="bg-white border-b border-gray-200 px-5 flex items-center justify-between h-16 shadow w-full">
-      <div className="font-bold text-lg">GIBS ENTERPRISE 7</div>
+    <header  className="bg-white border-b border-gray-200 px-5 flex items-center justify-between h-16 shadow w-[87%] ml-auto" style={{ backgroundColor: "#feded1" }}>
+      <div className="font-bold text-lg"></div>
 
       <nav className="hidden xl:flex items-center gap-0">
         {navItems.map((item, index) => (

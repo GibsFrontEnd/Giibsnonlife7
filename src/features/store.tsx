@@ -8,6 +8,7 @@ import riskReducer from "./reducers/adminReducers/riskSlice";
 import productReducer from "./reducers/productReducers/productSlice";
 import subRiskSectionReducer from "./reducers/productReducers/subRiskSectionSlice"
 import subRiskSMIReducer from "./reducers/productReducers/subRiskSMISlice";
+import partyTypeReducer from "./reducers/csuReducers/partyTypeSlice";
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
     products: productReducer,
     subRiskSections: subRiskSectionReducer,
     subRiskSMIs: subRiskSMIReducer,
+    partyTypes: partyTypeReducer,
   },
 });
 
