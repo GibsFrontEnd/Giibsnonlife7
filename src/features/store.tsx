@@ -9,6 +9,7 @@ import productReducer from "./reducers/productReducers/productSlice";
 import subRiskSectionReducer from "./reducers/productReducers/subRiskSectionSlice"
 import subRiskSMIReducer from "./reducers/productReducers/subRiskSMISlice";
 import partyTypeReducer from "./reducers/csuReducers/partyTypeSlice";
+import policyReducer from "./reducers/csuReducers/policySlice";
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
     subRiskSections: subRiskSectionReducer,
     subRiskSMIs: subRiskSMIReducer,
     partyTypes: partyTypeReducer,
+    policies: policyReducer,
   },
 });
 

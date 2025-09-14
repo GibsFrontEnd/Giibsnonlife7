@@ -38,6 +38,16 @@ interface UiState {
   showDeleteProductDialog: boolean;
   showViewProductDetailsDialog: boolean;
 
+    // Policy dialogs
+    showCreatePolicyDialog: boolean;
+    showEditPolicyDialog: boolean;
+    showDeletePolicyDialog: boolean;
+    showViewPolicyDetailsDialog: boolean;
+    showRenewPolicyDialog: boolean;
+    showPolicyDetailsDialog: boolean;
+  
+  
+
     // Party types risk dialogs
     showCreatePartyTypeDialog: boolean;
     showEditPartyTypeDialog: boolean;
@@ -80,11 +90,21 @@ const initialState: UiState = {
   showDeleteSubRiskSectionDialog: false,
   showViewSubRiskSectionDetailsDialog: false,
   
-   // Product Party Type
+   //  Party Type
   showCreatePartyTypeDialog: false,
   showEditPartyTypeDialog: false,
   showDeletePartyTypeDialog: false,
   showViewPartyTypeDetailsDialog: false,
+
+     // ENQUIRIES Policy 
+     showCreatePolicyDialog: false,
+     showEditPolicyDialog: false,
+     showDeletePolicyDialog: false,
+     showViewPolicyDetailsDialog: false,
+     showRenewPolicyDialog: false,
+     showPolicyDetailsDialog: false,
+   
+   
 
   
   // Product Sub risk
@@ -208,6 +228,29 @@ const uiSlice = createSlice({
       state.showViewPartyTypeDetailsDialog = action.payload;
     },
 
+     // Product Policy reducers
+     setShowCreatePolicyDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreatePolicyDialog = action.payload;
+    },
+    setShowEditPolicyDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditPolicyDialog = action.payload;
+    },
+    setShowDeletePolicyDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeletePolicyDialog = action.payload;
+    },
+    setShowRenewPolicyDialog: (state, action: PayloadAction<boolean>) => {
+      state.showRenewPolicyDialog = action.payload;
+    },
+    setShowPolicyDetailsDialog: (state, action: PayloadAction<boolean>) => {
+      state.showPolicyDetailsDialog = action.payload;
+    },
+    setShowViewPolicyDetailsDialog: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showViewPartyTypeDetailsDialog = action.payload;
+    },
+
   },
 });
 
@@ -235,17 +278,26 @@ export const {
   setShowDeleteRiskDialog,
   setShowViewRiskDetailsDialog,
 
-  // Risk actions
+  // SubRisk actions
   setShowCreateSubRiskSectionDialog,
   setShowEditSubRiskSectionDialog,
   setShowDeleteSubRiskSectionDialog,
   setShowViewSubRiskSectionDetailsDialog,
 
-  // product sub risk actions
+  // product actions
   setShowCreateProductDialog,
   setShowEditProductDialog,
   setShowDeleteProductDialog,
   setShowViewProductDetailsDialog,
+
+    // Policy actions
+    setShowCreatePolicyDialog,
+    setShowEditPolicyDialog,
+    setShowDeletePolicyDialog,
+    setShowViewPolicyDetailsDialog,
+    setShowRenewPolicyDialog,
+  setShowPolicyDetailsDialog,
+  
 
   // product Party Type actions
   setShowCreatePartyTypeDialog,

@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { Button } from "@/components/UI/new-button"
-import { useAppDispatch, useAppSelector } from "@/hooks/use-apps"
-import SearchBar from "@/components/SearchBar"
+import { Button } from "./UI/new-button"
+import { useAppDispatch, useAppSelector } from "../hooks/use-apps"
+import SearchBar from "./SearchBar"
 import {
   getAllPolicies,
   endorsePolicy,
@@ -11,8 +11,8 @@ import {
   niipUpload,
   selectPolicies,
   setCurrentPolicy,
-} from "@/features/reducers/csuReducers/policySlice"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/UI/table"
+} from "../features/reducers/adminReducers/policySlice"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./UI/table"
 import {
   Pagination,
   PaginationContent,
@@ -20,15 +20,15 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/UI/pagination"
+} from "./UI/pagination"
 import {
   selectUiState,
   setShowCreatePolicyDialog,
   setShowRenewPolicyDialog,
   setShowPolicyDetailsDialog,
-} from "@/features/reducers/uiReducers/uiSlice"
-import type { Policy } from "@/types/policy"
-import { CreatePolicy, RenewPolicy, PolicyDetails } from "../../components.policies"
+} from "../features/reducers/uiReducers/uiSlice"
+import type { Policy } from "../types/policy"
+import { CreatePolicy, RenewPolicy, PolicyDetails } from "./components.policies"
 import "./EnquiriesPolicies.css"
 
 const ITEMS_PER_PAGE = 10
@@ -399,44 +399,25 @@ const EnquiriesPolicies = () => {
               Policies
             </div>
 
-            <Pagination className="pr-pagination-controls">
-    <PaginationContent>
-      <PaginationItem>
-        <PaginationPrevious
-          className="pr-pagination-prev"
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-        />
-      </PaginationItem>
+            <Pagination className="ep-pagination-controls">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    className="ep-pagination-prev"
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  />
+                </PaginationItem>
 
-      {Array.from({ length: totalPages }, (_, i) => i + 1)
-        .filter(
-          (page) =>
-            page >= Math.max(1, currentPage - 2) &&
-            page <= Math.min(totalPages, currentPage + 2),
-        )
-        .map((page) => (
-          <PaginationItem
-            key={page}
-            className="pr-pagination-item"
-          >
-            <PaginationLink
-              isActive={currentPage === page}
-              onClick={() => setCurrentPage(page)}
-              className="pr-pagination-link"
-            >
-              {page}
-            </PaginationLink>
-          </PaginationItem>
-        ))}
+                {renderPageNumbers()}
 
-      <PaginationItem>
-        <PaginationNext
-          className="pr-pagination-next"
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-        />
-      </PaginationItem>
-    </PaginationContent>
-  </Pagination>
+                <PaginationItem>
+                  <PaginationNext
+                    className="ep-pagination-next"
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
         </div>
       )}
