@@ -56,6 +56,15 @@ interface UiState {
   
 
 
+  showCreateRegionDialog: boolean;
+  showEditRegionDialog: boolean;
+  showDeleteRegionDialog: boolean;
+  showViewRegionDetailsDialog: boolean;
+
+  showCreateBranchDialog: boolean;
+  showEditBranchDialog: boolean;
+  showDeleteBranchDialog: boolean;
+  showViewBranchDetailsDialog: boolean;
 }
 
 const initialState: UiState = {
@@ -112,6 +121,16 @@ const initialState: UiState = {
   showEditProductDialog: false,
   showDeleteProductDialog: false,
   showViewProductDetailsDialog: false,
+
+  showCreateRegionDialog: false,
+  showEditRegionDialog: false,
+  showDeleteRegionDialog: false,
+  showViewRegionDetailsDialog: false,
+
+  showCreateBranchDialog: false,
+  showEditBranchDialog: false,
+  showDeleteBranchDialog: false,
+  showViewBranchDetailsDialog: false,
 };
 
 const uiSlice = createSlice({
@@ -251,6 +270,37 @@ const uiSlice = createSlice({
       state.showViewPartyTypeDetailsDialog = action.payload;
     },
 
+    setShowCreateRegionDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreateRegionDialog = action.payload;
+    },
+    setShowEditRegionDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditRegionDialog = action.payload;
+    },
+    setShowDeleteRegionDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeleteRegionDialog = action.payload;
+    },
+    setShowViewRegionDetailsDialog: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showViewRegionDetailsDialog = action.payload;
+    },
+
+    setShowCreateBranchDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreateBranchDialog = action.payload;
+    },
+    setShowEditBranchDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditBranchDialog = action.payload;
+    },
+    setShowDeleteBranchDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeleteBranchDialog = action.payload;
+    },
+    setShowViewBranchDetailsDialog: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showViewBranchDetailsDialog = action.payload;
+    },
   },
 });
 
@@ -305,6 +355,15 @@ export const {
   setShowDeletePartyTypeDialog,
   setShowViewPartyTypeDetailsDialog,
 
+  setShowCreateRegionDialog,
+  setShowEditRegionDialog,
+  setShowDeleteRegionDialog,
+  setShowViewRegionDetailsDialog,
+
+  setShowCreateBranchDialog,
+  setShowEditBranchDialog,
+  setShowDeleteBranchDialog,
+  setShowViewBranchDetailsDialog,
 } = uiSlice.actions;
 
 export const selectUiState = (state: { ui: UiState }) => state.ui;
