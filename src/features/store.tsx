@@ -10,6 +10,7 @@ import subRiskSectionReducer from "./reducers/productReducers/subRiskSectionSlic
 import subRiskSMIReducer from "./reducers/productReducers/subRiskSMISlice";
 import regionReducer from "./reducers/companyReducers/regionSlice";
 import branchReducer from "./reducers/companyReducers/branchSlice";
+import marketingStaffReducer from "./reducers/companyReducers/marketingStaffSlice";
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ export const store = configureStore({
     subRiskSMIs: subRiskSMIReducer,
     regions: regionReducer,
     branches: branchReducer,
+    marketingStaff: marketingStaffReducer,
   },
 });
 
