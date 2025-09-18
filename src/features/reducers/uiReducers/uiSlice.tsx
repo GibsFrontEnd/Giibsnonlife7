@@ -54,7 +54,19 @@ interface UiState {
     showDeletePartyTypeDialog: boolean;
     showViewPartyTypeDetailsDialog: boolean;
   
+    showCreateCustomerDialog: boolean;
+    showEditCustomerDialog: boolean;
+    showDeleteCustomerDialog: boolean;
+    showCustomerDetailsDialog: boolean;
+    showViewCustomerDetailsDialog: boolean;
 
+    showCreateAgentDialog: boolean;
+    showEditAgentDialog: boolean;
+    showDeleteAgentDialog: boolean;
+    showAgentDetailsDialog: boolean;
+    showViewAgentDetailsDialog: boolean;
+
+    
 
   showCreateRegionDialog: boolean;
   showEditRegionDialog: boolean;
@@ -98,6 +110,20 @@ const initialState: UiState = {
   showEditSubRiskSectionDialog: false,
   showDeleteSubRiskSectionDialog: false,
   showViewSubRiskSectionDetailsDialog: false,
+
+  showCreateCustomerDialog: false,
+  showEditCustomerDialog: false,
+  showDeleteCustomerDialog: false,
+  showCustomerDetailsDialog: false,
+  showViewCustomerDetailsDialog: false,
+
+  showCreateAgentDialog: false,
+  showEditAgentDialog: false,
+  showDeleteAgentDialog: false,
+  showAgentDetailsDialog: false,
+  showViewAgentDetailsDialog: false,
+
+
   
    //  Party Type
   showCreatePartyTypeDialog: false,
@@ -286,6 +312,46 @@ const uiSlice = createSlice({
       state.showViewRegionDetailsDialog = action.payload;
     },
 
+    setShowCreateCustomerDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreateCustomerDialog = action.payload;
+    },
+    setShowEditCustomerDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditCustomerDialog = action.payload;
+    },
+    setShowDeleteCustomerDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeleteCustomerDialog = action.payload;
+    },
+    setShowCustomerDetailsDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCustomerDetailsDialog = action.payload;
+    },
+    setShowViewCustomerDetailsDialog: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showViewCustomerDetailsDialog = action.payload;
+    },
+
+    setShowCreateAgentDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreateAgentDialog = action.payload;
+    },
+    setShowEditAgentDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditAgentDialog = action.payload;
+    },
+    setShowDeleteAgentDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeleteAgentDialog = action.payload;
+    },
+    setShowAgentDetailsDialog: (state, action: PayloadAction<boolean>) => {
+      state.showAgentDetailsDialog = action.payload;
+    },
+    setShowViewAgentDetailsDialog: (
+      state,
+      action: PayloadAction<boolean>
+    ) => {
+      state.showViewAgentDetailsDialog = action.payload;
+    },
+
+
+
     setShowCreateBranchDialog: (state, action: PayloadAction<boolean>) => {
       state.showCreateBranchDialog = action.payload;
     },
@@ -340,6 +406,19 @@ export const {
   setShowDeleteProductDialog,
   setShowViewProductDetailsDialog,
 
+  setShowCreateCustomerDialog,
+  setShowEditCustomerDialog,
+  setShowDeleteCustomerDialog,
+  setShowCustomerDetailsDialog, 
+  setShowViewCustomerDetailsDialog,
+
+  setShowCreateAgentDialog,
+  setShowEditAgentDialog,
+  setShowDeleteAgentDialog,
+  setShowAgentDetailsDialog, 
+  setShowViewAgentDetailsDialog,
+
+
     // Policy actions
     setShowCreatePolicyDialog,
     setShowEditPolicyDialog,
@@ -359,6 +438,7 @@ export const {
   setShowEditRegionDialog,
   setShowDeleteRegionDialog,
   setShowViewRegionDetailsDialog,
+
 
   setShowCreateBranchDialog,
   setShowEditBranchDialog,

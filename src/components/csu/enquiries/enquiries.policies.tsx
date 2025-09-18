@@ -344,7 +344,7 @@ const EnquiriesPolicies = () => {
                           >
                             View
                           </Button>
-                          {!isExpired && (
+{/*                           {!isExpired && (
                             <Button
                               className="ep-renew-btn"
                               size="sm"
@@ -354,7 +354,8 @@ const EnquiriesPolicies = () => {
                               Renew
                             </Button>
                           )}
-                          <Button
+ */}                          
+{/*  <Button
                             className="ep-endorse-btn"
                             size="sm"
                             onClick={() => handleEndorsePolicy(policy.policyNo)}
@@ -362,7 +363,8 @@ const EnquiriesPolicies = () => {
                           >
                             Endorse
                           </Button>
-                          <Button
+ */}           
+                <Button
                             className="ep-niip-btn"
                             size="sm"
                             onClick={() => handleNiipUpload(policy.policyNo)}

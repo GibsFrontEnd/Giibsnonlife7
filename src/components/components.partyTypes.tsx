@@ -17,7 +17,7 @@ import {
   updatePartyType,
   selectPartyTypes,
   clearMessages,
-} from "@/features/reducers/csuReducers/partyTypeSlice"
+} from "../features/reducers/adminReducers/partyTypeSlice"
 import type { PartyType, CreatePartyTypeRequest, UpdatePartyTypeRequest } from "../types/partyType"
 import "./components.partyTypes.css"
 

@@ -1,17 +1,17 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { Button } from "@/components/UI/new-button"
-import { useAppDispatch, useAppSelector } from "@/hooks/use-apps"
-import ConfirmationModal from "../../Modals/ConfirmationModal"
-import SearchBar from "../../SearchBar"
+import { Button } from "../../../UI/new-button"
+import { useAppDispatch, useAppSelector } from "../../../../hooks/use-apps"
+import ConfirmationModal from "../../../Modals/ConfirmationModal"
+import SearchBar from "../../../SearchBar"
 import {
   clearMessages,
   deletePartyType,
   getAllPartyTypes,
   selectPartyTypes,
-} from "@/features/reducers/CSUReducers/partyTypeSlice"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/UI/table"
+} from "../../../../features/reducers/adminReducers/partyTypeSlice"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../UI/table"
 import {
   Pagination,
   PaginationContent,
@@ -19,15 +19,15 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "../../UI/pagination"
+} from "../../../UI/pagination"
 import {
   selectUiState,
   setShowCreatePartyTypeDialog,
   setShowDeletePartyTypeDialog,
   setShowEditPartyTypeDialog,
-} from "@/features/reducers/uiReducers/uiSlice"
-import type { PartyType } from "@/types/partyType"
-import { CreatePartyType, EditPartyType } from "@/components/components.partyTypes"
+} from "../../../../features/reducers/uiReducers/uiSlice"
+import type { PartyType } from "../../../../types/partyType"
+import { CreatePartyType, EditPartyType } from "../../../components.partyTypes"
 import "./SecurityPartyTypes.css"
 
 const ITEMS_PER_PAGE = 5

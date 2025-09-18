@@ -8,10 +8,12 @@ import riskReducer from "./reducers/adminReducers/riskSlice";
 import productReducer from "./reducers/productReducers/productSlice";
 import subRiskSectionReducer from "./reducers/productReducers/subRiskSectionSlice"
 import subRiskSMIReducer from "./reducers/productReducers/subRiskSMISlice";
-import partyTypeReducer from "./reducers/csuReducers/partyTypeSlice";
+import partyTypeReducer from "./reducers/adminReducers/partyTypeSlice";
 import policyReducer from "./reducers/csuReducers/policySlice";
 import regionReducer from "./reducers/companyReducers/regionSlice";
 import branchReducer from "./reducers/companyReducers/branchSlice";
+import customerReducer from "./reducers/csuReducers/customerSlice";
+import partyReducer from "./reducers/csuReducers/agentSlice";
 
 export const store = configureStore({
   reducer: {
@@ -28,6 +30,8 @@ export const store = configureStore({
     policies: policyReducer,
     regions: regionReducer,
     branches: branchReducer,
+    customers: customerReducer,
+    parties: partyReducer,
   },
 });
 

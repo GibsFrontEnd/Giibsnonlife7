@@ -1,8 +1,8 @@
 import { useState } from "react";
-import PartyTypes from "@/components/csu/party/party.types";
+import Party from "../../components/csu//partner/agents.agents";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/UI/tabs";
 
-const tabs = [{ title: "PartyTypes", content: <PartyTypes /> }];
+const tabs = [{ title: "Party", content: <Party /> }];
 
 const CSUParty = () => {
   const [activeTab, setActiveTab] = useState(tabs[0]?.title);

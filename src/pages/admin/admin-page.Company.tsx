@@ -8,11 +8,13 @@ import CompanyMarketingStaff from "@/components/admin/company-page/company.marke
 import CompanyBusinessSectors from "@/components/admin/company-page/company.business-sectors";
 import CompanyAutoNumbers from "@/components/admin/company-page/company.auto-numbers";
 import CompanyMailGroup from "@/components/admin/company-page/company.mail-group";
+import PartyTypes from "../../components/admin/product-page/party/party.types";
 
 const tabs = [
   { title: "Settings", content: <CompanySettings /> },
   { title: "Branches", content: <CompanyBranches /> },
   { title: "Regions", content: <CompanyRegions /> },
+  {title: "PartyTypes", content: <PartyTypes />},
   { title: "Units/Groups", content: <CompanyUnitGroups /> },
   { title: "Marketing Staff", content: <CompanyMarketingStaff /> },
   { title: "Business Sectors", content: <CompanyBusinessSectors /> },
