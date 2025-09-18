@@ -29,11 +29,11 @@ export const store = configureStore({
     subRiskSMIs: subRiskSMIReducer,
     partyTypes: partyTypeReducer,
     policies: policyReducer,
+    regions: regionReducer,
     branches: branchReducer,
     customers: customerReducer,
     parties: partyReducer,
     marketingStaff: marketingStaffReducer,
-    regions: regionReducer,
   },
 });
 

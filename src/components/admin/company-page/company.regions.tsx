@@ -1,472 +1,512 @@
-import ConfirmationModal from "@/components/Modals/ConfirmationModal";
-import SearchBar from "@/components/SearchBar";
-import { Alert, AlertDescription } from "@/components/UI/alert";
-import { Card, CardContent } from "@/components/UI/card";
-import { Button } from "@/components/UI/new-button";
-import { Skeleton } from "@/components/UI/skeleton";
+//@ts-nocheck
+"use client"
+
+import { useEffect, useState } from "react"
+import { Button } from "../../UI/new-button"
+import { useAppDispatch, useAppSelector } from "../../../hooks/use-apps"
+import ConfirmationModal from "../../Modals/ConfirmationModal"
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/UI/table";
-import { useToast } from "@/components/UI/use-toast";
-import {
-  clearRegionMessages,
+ 
+ clearMessages,
   deleteRegion,
   getAllRegions,
-  selectRegion,
-} from "@/features/reducers/companyReducers/regionSlice";
+  checkRegionExists,
+  selectRegions,
+} from "../../../features/reducers/productReducers/regionSlice"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../UI/table"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "../../UI/pagination"
 import {
   selectUiState,
   setShowCreateRegionDialog,
   setShowDeleteRegionDialog,
   setShowEditRegionDialog,
-} from "@/features/reducers/uiReducers/uiSlice";
-import { useAppDispatch, useAppSelector } from "@/hooks/use-apps";
-import { Region } from "@/types/regions";
-import {
-  FileText,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  AlertCircle,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { CreateRegionModal, EditRegionModal } from "../../components.region";
+} from "../../../features/reducers/uiReducers/uiSlice"
+import { CreateRegion, EditRegion} from "../../components.region"
 
-const CompanyRegions = () => {
-  const { toast } = useToast();
-  const dispatch = useAppDispatch();
-  const [regionIdToDelete, setRegionIdToDelete] = useState<string | null>(null);
-  const [regionToEdit, setRegionToEdit] = useState<Region | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const { regions, loading, error, success } = useAppSelector(selectRegion);
-  const {
-    showDeleteRegionDialog,
-    showCreateRegionDialog,
-    showEditRegionDialog,
-  } = useAppSelector(selectUiState);
 
-  useEffect(() => {
-    dispatch(getAllRegions());
-  }, [dispatch]);
+// Types
+interface Region {
+  regionID: number
+  region: string
+  manager: string
+  address: string
+  mobilePhone: string
+  landPhone: string
+  email: string
+  fax: string
+  remarks: string
+  deleted: boolean 
+  active: boolean
+  submittedBy: string
+  submittedOn: string
+  modifiedBy: string
+  modifiedOn: string
+}
 
-  useEffect(() => {
-    if (success.deleteRegion) {
-      dispatch(clearRegionMessages());
-      dispatch(getAllRegions());
-      setRegionIdToDelete(null);
-      dispatch(setShowDeleteRegionDialog(false));
-      toast({
-        title: "Region Deleted!",
-        description: "You have been successfully deleted the region.",
-        variant: "success",
-        duration: 3000,
-      });
-    } else if (error.deleteRegion) {
-      dispatch(clearRegionMessages());
-      console.log(error.deleteRegion);
-      toast({
-        description: "Failed to delete region. Please try again.",
-        variant: "destructive",
-        duration: 5000,
-      });
-    }
-  }, [success.deleteRegion, dispatch, error.deleteRegion]);
+const ProductsRegions = () => {
+  const dispatch = useAppDispatch()
 
-  const confirmDeleteRegion = async (regionId: string | null) => {
-    if (regionId === null) {
-      console.log("No Region Id");
-      toast({
-        description: "Please select a region to delete and try again!",
-        variant: "destructive",
-        duration: 5000,
-      });
-      return;
-    }
+// Safe destructuring with fallback values
+  const { 
+    regions = [], 
+    success = {}, 
+    loading = { getAllRegions: false, deleteRegion: false }, 
+    error = {}, 
+    exists = null 
+  } = useAppSelector(selectRegions) || {}
+  const { showDeleteRegionDialog } = useAppSelector(selectUiState)
 
-    dispatch(deleteRegion(regionId));
-  };
+  const [regionToEdit, setRegionToEdit] = useState<Region | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
 
-  const filteredRegions: Region[] = regions.filter((region) => {
-    const term = searchTerm.toLowerCase();
+  // Filter states
+  const [regionIDFilter, setregionIDFilter] = useState("")
+  const [regionFilter, setregionFilter] = useState("")
+  const [emailFilter, setemailFilter] = useState("")
+  const [activeOnlyFilter, setActiveOnlyFilter] = useState(false)
+  const [hasRegionFilter, setHasRegionFilter] = useState(false)
+  const [hasEmailFilter, setHasEmailFilter] = useState(false)
+
+  //@ts-ignore
+ const filteredRegions = (regions || []).filter((region) => {
+    const matchesSearch =
+      region.regionID?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      region.region?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      region.email?.toLowerCase().includes(searchTerm.toLowerCase()) 
+
+
+    const matchesRegionID =
+      !regionIDFilter || region.regionID?.toLowerCase().includes(regionIDFilter.toLowerCase())
+    const matchesRegion =
+      !regionFilter || region.region?.toLowerCase().includes(regionFilter.toLowerCase())
+    const matchesEmail =
+      !emailFilter || region.email?.toLowerCase().includes(emailFilter.toLowerCase())
+
+     const matchesActiveOnly = !activeOnlyFilter || region.active === true
+  const matchesHasRegion =
+    !hasRegionFilter || (region.region && region.region.trim() !== "")
+  const matchesHasEmail =
+    !hasEmailFilter || (region.email && region.email.trim() !== "")
+
     return (
-      region.region?.toLowerCase().includes(term) ||
-      region.manager?.toLowerCase().includes(term) ||
-      region.address?.toLowerCase().includes(term) ||
-      region.email?.toLowerCase().includes(term)
-    );
-  });
+      matchesSearch &&
+      matchesRegionID &&
+      matchesRegion &&
+      matchesEmail &&
+      matchesActiveOnly &&
+      matchesHasRegion &&
+      matchesHasEmail
+    )
+  })
 
-  const pageSize = 10;
-  const totalPages = filteredRegions
-    ? Math.ceil(filteredRegions.length / pageSize)
-    : 0;
+  const [currentPage, setCurrentPage] = useState(1)
+  const rowsPerPage = 3
+  const totalPages = Math.ceil(filteredRegions.length / rowsPerPage)
 
-  const goToPage = (page: number) => {
-    if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
+  const [regionIdToDelete, setRegionIdToDelete] = useState<number | null>(null)
+  const [regionIdToCheck, setRegionIdToCheck] = useState<number | null>(null)
+
+  const currentData = filteredRegions.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
+
+ // Update statistics calculations
+ const safeRegions = regions || []
+const totalRecords = safeRegions.length
+const regionIDCount = safeRegions.filter((region: { active: any }) => region.active).length // active regions
+const regionCount = safeRegions.filter((region: { region: string }) => region.region?.trim()).length // regions with name
+const emailCount = safeRegions.filter((region: { email: string }) => region.email?.trim()).length // regions with email
+  useEffect(() => {
+    dispatch(getAllRegions())
+  }, [dispatch])
+
+  const handleRefresh = () => {
+    dispatch(getAllRegions())
+  }
+
+  const handleApplyFilters = () => {
+    setCurrentPage(1)
+  }
+
+  const handleClearFilters = () => {
+    setSearchTerm("")
+    setregionIDFilter("")
+    setregionFilter("")
+    setemailFilter("")
+    setActiveOnlyFilter(false)
+    setHasRegionFilter(false)
+    setHasEmailFilter(false)
+    setCurrentPage(1)
+  }
+
+  const handleCheckExists = (regionId: number) => {
+    setRegionIdToCheck(regionId)
+    dispatch(checkRegionExists(regionId))
+  }
+
+  const confirmDeleteRegion = async (regionId: number | null) => {
+    if (!regionId) {
+      console.log("No Region Id")
+      return
     }
-  };
+
+    dispatch(deleteRegion(regionId))
+
+    if (success.deleteRegion) {
+      dispatch(clearMessages())
+      setRegionIdToDelete(null)
+      dispatch(setShowDeleteRegionDialog(false))
+    } else if (error.deleteRegion) {
+      console.log(error)
+    }
+  }
+
+  if (error.getAllRegions) {
+    console.error("Error fetching Regions:", error)
+  }
 
   return (
-    <div className="py-4 flex flex-col gap-6 bg-[#f8f9fa] min-h-[calc(100vh_-_64px)]">
-      <div className="w-full flex flex-wrap gap-4 items-center mb-4">
-        <SearchBar
-          placeholder="Search by name or description..."
-          value={searchTerm}
-          onChange={setSearchTerm}
-        />
-        <Button
-          className="bg-primary-blue text-white"
-          onClick={() => dispatch(setShowCreateRegionDialog(true))}
-        >
-          Add New Region
-        </Button>
+    <div className="w-full max-w-7xl mx-auto p-6 space-y-6">
+      {/* Header Section */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="flex items-start justify-between flex-col md:flex-row space-y-4 md:space-y-0">
+          <div className="flex flex-col space-y-1">
+            <h1 className="text-2xl font-bold text-gray-900">Regions Management</h1>
+            <p className="text-sm text-gray-600">Manage your region management data</p>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Button
+              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md font-medium transition-colors disabled:opacity-50"
+              onClick={handleRefresh}
+                //@ts-ignore
+              disabled={loading.getAllRegions}
+            >
+              {loading.getAllRegions ? "Refreshing..." : "Refresh"}
+            </Button>
+            <Button
+              className=" bg-[#8b4b8c] hover:bg-[#735974] text-white px-4 py-2 rounded-md font-medium transition-colors"
+              onClick={() => dispatch(setShowCreateRegionDialog(true))}
+            >
+              Create New
+            </Button>
+            <CreateRegion />
+          </div>
+        </div>
       </div>
-      {error.getAllRegions ? (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>Error loading regions</AlertDescription>
-        </Alert>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center">
+          <div className="text-3xl font-bold text-fuchsia-700">{totalRecords}</div>
+          <div className="text-sm text-gray-600 mt-1">Total Regions</div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center">
+          <div className="text-3xl font-bold text-fuchsia-700">{regionIDCount}</div>
+          <div className="text-sm text-gray-600 mt-1">Active Region ID</div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center">
+          <div className="text-3xl font-bold text-fuchsia-700">{regionCount}</div>
+          <div className="text-sm text-gray-600 mt-1">With Region Name</div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 text-center">
+          <div className="text-3xl font-bold text-fuchsia-700">{emailCount}</div>
+          <div className="text-sm text-gray-600 mt-1">With Email</div>
+        </div>
+      </div>
+
+      {/* Filters Section */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Filters</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-gray-700">Region ID</label>
+            <input
+              type="text"
+              placeholder="Filter by Region ID"
+              value={regionIDFilter}
+              onChange={(e) => setregionIDFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            />
+          </div>
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-gray-700">Region</label>
+            <input
+              type="text"
+              placeholder="Filter by Region "
+              value={regionFilter}
+              onChange={(e) => setregionFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            />
+          </div>
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-gray-700">Email</label>
+            <input
+              type="text"
+              placeholder="Filter by Email"
+              value={emailFilter}
+              onChange={(e) => setemailFilter(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center space-x-6 mb-4 space-y-2 md:space-y-0">
+          <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={activeOnlyFilter}
+              onChange={(e) => setActiveOnlyFilter(e.target.checked)}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <span>Active Only</span>
+          </label>
+          <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={hasRegionFilter}
+              onChange={(e) => setHasRegionFilter(e.target.checked)}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <span>Has Region</span>
+          </label>
+          <label className="flex items-center space-x-2 text-sm text-gray-700 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={hasEmailFilter}
+              onChange={(e) => setHasEmailFilter(e.target.checked)}
+              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <span> Has Email</span>
+          </label>
+        </div>
+
+        <div className="flex items-center space-x-3">
+          <Button 
+            className="bg-[#8b4b8c] hover:bg-[#735974]  text-white px-4 py-2 rounded-md text-sm font-medium transition-colors" 
+            onClick={handleApplyFilters}
+          >
+            Apply Filters
+          </Button>
+          <Button 
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors" 
+            onClick={handleClearFilters}
+          >
+            Clear Filters
+          </Button>
+        </div>
+      </div>
+
+      {/* Search Section */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <input
+          type="text"
+          placeholder="Search by Region ID, Region Name, or Email..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm placeholder-gray-500"
+        />
+      </div>
+
+      {/* Exists Indicator */}
+      {exists !== null && regionIdToCheck && (
+        <div className={`px-4 py-2 rounded-md text-sm font-medium text-center ${
+          exists 
+            ? "bg-green-100 text-green-800 border border-green-200" 
+            : "bg-red-100 text-red-800 border border-red-200"
+        }`}>
+          Region ID {regionIdToCheck} {exists ? "exists" : "does not exist"}
+        </div>
+      )}
+
+      {/* Table Section */}
+      {loading.getAllRegions ||
+      loading.getActiveRegions ||
+      loading.getRegionsByRegion ||
+      loading.getRegionsByEmail ? (
+        <div className="flex items-center justify-center space-x-3 py-12 bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <span>Loading regions...</span>
+        </div>
       ) : (
-        <Card>
-          <CardContent className="p-0">
-            {/* Mobile Card View */}
-            <div className="block lg:hidden">
-              {loading.getAllRegions ? (
-                Array.from({ length: 5 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="p-4 border-b border-blue-100 space-y-3"
-                  >
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-4 w-full" />
-                    <div className="flex justify-between">
-                      <Skeleton className="h-4 w-24" />
-                      <Skeleton className="h-4 w-20" />
-                    </div>
-                  </div>
-                ))
-              ) : filteredRegions.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
-                  <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p className="text-sm font-medium mb-2">
-                    {searchTerm.length > 0
-                      ? "No Region match your filters"
-                      : "No Regions found"}
-                  </p>
-                  <p className="text-xs">
-                    {searchTerm.length > 0
-                      ? "Try adjusting your search criteria to see all regions."
-                      : "Create a new region under this risk or select a risk in the dropdown to get started."}
-                  </p>
-                  {searchTerm.length > 0 && (
-                    <Button //@ts-ignore
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSearchTerm("")}
-                      className="mt-3 text-xs border-blue-300 text-blue-900 hover:bg-blue-50 bg-transparent"
-                    >
-                      Clear Filter
-                    </Button>
-                  )}
-                </div>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <Table className="w-full">
+            <TableHeader>
+              <TableRow className="bg-gray-50">
+                <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S/N</TableHead>
+                <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Region ID</TableHead>
+                <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Region </TableHead>
+                <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Manager</TableHead>
+                 <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mobile Phone</TableHead>
+                <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</TableHead>
+               
+                <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Landphone</TableHead>
+                <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</TableHead>
+                <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fax</TableHead>
+                <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remarks</TableHead>
+                <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Active</TableHead>
+                <TableHead className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-gray-200">
+              {currentData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={11} className="text-center py-8 text-gray-500">
+                    No regions found
+                  </TableCell>
+                </TableRow>
               ) : (
-                filteredRegions.map((region) => (
-                  <div
-                    key={region.regionID}
-                    className="p-4 border-b border-blue-100 cursor-pointer hover:bg-blue-50/50 transition-colors"
-                    // onClick={() => navigate(`${region.regionNo}/detail`)}
-                  >
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          {/* {region.policyNo && (
-                          <div className="text-sm font-medium text-blue-900">
-                            {region.policyNo}
-                          </div>
-                        )} */}
-                          {/* <div className="text-xs text-blue-600">
-                          {region.regionNo}
-                        </div> */}
-                        </div>
-                        {/* {getStatusBadge(region.remarks, region.tag)} */}
-                      </div>
-                    </div>
-                  </div>
+                  //@ts-ignore
+                currentData.map((region, index) => (
+                  <TableRow key={region.regionID} className="hover:bg-gray-50">
+                    <TableCell className="px-4 py-3 text-sm text-gray-900">
+                      {(currentPage - 1) * rowsPerPage + index + 1}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm font-mono text-xs text-gray-600">
+                      {region.regionID}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm text-gray-900">
+                      <strong className="font-semibold text-blue-600">{region.region}</strong>
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm font-medium text-gray-900">
+                      {region.manager}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm text-gray-700">
+                      {region.mobilePhone || "-"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm text-gray-600">
+                      {region.address || "-"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm font-mono text-xs text-gray-600 uppercase">
+                      {region.landPhone|| "-"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-xs">
+                      {region.email || "-"}
+
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm font-mono text-xs text-gray-600">
+                      {region.fax || "-"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-sm font-mono text-xs text-gray-600">
+                      {region.remarks || "-"}
+                    </TableCell>
+                    <TableCell className="px-4 py-3 text-center">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        region.active
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}>
+                        {region.active ? "Active" : "Inactive"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="px-4 py-3 space-x-2">
+                      <Button
+                        className="bg-yellow-50 text-yellow-600 border-yellow-200 hover:bg-yellow-100 px-3 py-1.5 text-xs rounded border font-medium transition-colors"
+                        onClick={() => handleCheckExists(region.regionID)}
+                      >
+                        Check
+                      </Button>
+                      <Button
+                        className="bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 px-3 py-1.5 text-xs rounded border font-medium transition-colors"
+                         onClick={() =>{
+                          setRegionToEdit(region);
+                          dispatch(setShowEditRegionDialog(true));
+                         }}
+            >
+                        Edit
+                      </Button>
+                      <Button   //@ts-ignore
+                        variant="destructive"
+                        className="bg-red-50 text-red-600 border-red-200 hover:bg-red-100 px-3 py-1.5 text-xs rounded border font-medium transition-colors"
+                        onClick={() => {
+                          setRegionIdToDelete(region.regionID)
+                          dispatch(setShowDeleteRegionDialog(true))
+                        }}
+                      >
+                        Delete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ))
               )}
+            </TableBody>
+          </Table>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t">
+            <div className="text-sm text-gray-700">
+              Showing{" "}
+              <span className="font-medium">
+                {filteredRegions.length > 0
+                  ? `${(currentPage - 1) * rowsPerPage + 1} to ${Math.min(
+                      currentPage * rowsPerPage,
+                      filteredRegions.length,
+                    )} of ${filteredRegions.length}`
+                  : "0 to 0 of 0"}
+              </span>{" "}
+              Regions
             </div>
 
-            {/* Desktop Table View */}
-            <div className="hidden lg:block overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-blue-100 hover:bg-blue-50/30">
-                    <TableHead className="min-w-[150px] text-blue-900 font-semibold">
-                      Region
-                    </TableHead>
-                    <TableHead className="min-w-[180px] text-blue-900 font-semibold">
-                      Manager
-                    </TableHead>
-                    <TableHead className="min-w-[120px] text-blue-900 font-semibold">
-                      Address
-                    </TableHead>
-                    <TableHead className="min-w-[120px] text-blue-900 font-semibold">
-                      Email
-                    </TableHead>
-                    <TableHead className="min-w-[100px] text-blue-900 font-semibold">
-                      Action
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {loading.getAllRegions ? (
-                    Array.from({ length: pageSize }).map((_, index) => (
-                      <TableRow key={index} className="border-blue-100">
-                        <TableCell>
-                          <Skeleton className="h-4 w-32" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-40" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-36" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-24" />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton className="h-4 w-20" />
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : filteredRegions.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center p-8">
-                        <div className="p-8 text-center text-gray-500">
-                          <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                          <p className="text-sm font-medium mb-2">
-                            {searchTerm.length > 0
-                              ? "No Region match your filters"
-                              : "No Regions found"}
-                          </p>
-                          <p className="text-xs">
-                            {searchTerm.length > 0
-                              ? "Try adjusting your search criteria to see all regions."
-                              : "Create a new region under this risk or select a risk in the dropdown to get started."}
-                          </p>
-                          {searchTerm.length > 0 && (
-                            <Button //@ts-ignore
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setSearchTerm("")}
-                              className="mt-3 text-xs border-blue-300 text-blue-900 hover:bg-blue-50 bg-transparent"
-                            >
-                              Clear Filter
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredRegions.map((region) => (
-                      <TableRow
-                        key={region.regionID}
-                        className="cursor-pointer hover:bg-blue-50/50 border-blue-100 transition-colors"
+            <Pagination className="flex items-center space-x-1">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    className="px-3 py-1.5 text-sm border rounded hover:bg-gray-100 transition-colors"
+                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  />
+                </PaginationItem>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(
+                    (page) =>
+                      page >= Math.max(1, currentPage - 2) &&
+                      page <= Math.min(totalPages, currentPage + 2),
+                  )
+                  .map((page) => (
+                    <PaginationItem key={page} className="mx-0.5">
+                      <PaginationLink
+                        isActive={currentPage === page}
+                        onClick={() => setCurrentPage(page)}
+                        className="px-3 py-1.5 text-sm border rounded hover:bg-gray-100 transition-colors"
                       >
-                        <TableCell className="font-medium">
-                          {region.region}
-                        </TableCell>
-                        <TableCell>{region.manager}</TableCell>
-                        <TableCell>
-                          {
-                            //@ts-ignore
-                            region.address
-                          }
-                        </TableCell>
-                        <TableCell className="">{region.email}</TableCell>
-                        <TableCell className="flex gap-2 items-center justify-end">
-                          <Button
-                            className="action-button edit"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setRegionToEdit(region);
-                              dispatch(setShowEditRegionDialog(true));
-                            }}
-                          >
-                            Edit
-                          </Button>
-                          <Button //@ts-ignore
-                            variant="destructive"
-                            className="action-button delete"
-                            onClick={() => {
-                              setRegionIdToDelete(region.regionID);
-                              dispatch(setShowDeleteRegionDialog(true));
-                            }}
-                          >
-                            Delete
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
 
-            {/* Pagination */}
-            {regions && totalPages > 1 && (
-              <div className="border-t border-blue-100 p-4 bg-blue-50/30">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="text-sm text-gray-600 order-2 sm:order-1">
-                    Page{" "}
-                    <span className="font-medium text-blue-600">
-                      {currentPage}
-                    </span>{" "}
-                    of <span className="font-medium">{totalPages}</span>
-                    {searchTerm.length > 0 && (
-                      <span className="ml-2 text-xs">(filtered results)</span>
-                    )}
-                  </div>
-                  <div className="flex items-center space-x-1 sm:space-x-2 order-1 sm:order-2">
-                    {/* First Page */}
-                    <Button //@ts-ignore
-                      variant="outline"
-                      size="sm"
-                      onClick={() => goToPage(1)} // @ts-ignore
-                      disabled={currentPage === 1 || loading.getProposals}
-                      className="hidden sm:flex h-8 w-8 p-0 border-blue-300 text-blue-900 hover:bg-blue-50"
-                    >
-                      <ChevronsLeft className="h-4 w-4" />
-                    </Button>
-                    {/* Previous Page */}
-                    <Button //@ts-ignore
-                      variant="outline"
-                      size="sm"
-                      onClick={() => goToPage(currentPage - 1)} // @ts-ignore
-                      disabled={currentPage === 1 || loading.getProposals}
-                      className="h-8 w-8 p-0 border-blue-300 text-blue-900 hover:bg-blue-50"
-                    >
-                      <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-                    </Button>
-                    {/* Page Numbers */}
-                    <div className="flex items-center space-x-1">
-                      {Array.from(
-                        {
-                          length: Math.min(
-                            window.innerWidth < 640 ? 3 : 5,
-                            totalPages
-                          ),
-                        },
-                        (_, i) => {
-                          let pageNum: number;
-                          const maxVisible = window.innerWidth < 640 ? 3 : 5;
-                          if (totalPages <= maxVisible) {
-                            pageNum = i + 1;
-                          } else if (currentPage <= Math.ceil(maxVisible / 2)) {
-                            pageNum = i + 1;
-                          } else if (
-                            currentPage >=
-                            totalPages - Math.floor(maxVisible / 2)
-                          ) {
-                            pageNum = totalPages - maxVisible + 1 + i;
-                          } else {
-                            pageNum =
-                              currentPage - Math.floor(maxVisible / 2) + i;
-                          }
-                          return (
-                            <Button
-                              key={pageNum}
-                              //@ts-ignore
-                              variant={
-                                currentPage === pageNum ? "default" : "outline"
-                              }
-                              size="sm"
-                              onClick={() => goToPage(pageNum)} // @ts-ignore
-                              disabled={loading.getProposals}
-                              className={`h-8 w-8 p-0 text-xs sm:text-sm ${
-                                currentPage === pageNum
-                                  ? "bg-blue-900 hover:bg-blue-900"
-                                  : "border-blue-900 text-blue-900 hover:bg-blue-50"
-                              }`}
-                            >
-                              {pageNum}
-                            </Button>
-                          );
-                        }
-                      )}
-                    </div>
-                    {/* Next Page */}
-                    <Button //@ts-ignore
-                      variant="outline"
-                      size="sm"
-                      onClick={() => goToPage(currentPage + 1)} // @ts-ignore
-                      disabled={
-                        currentPage === totalPages || loading.getAllRegions
-                      }
-                      className="h-8 w-8 p-0 border-blue-300 text-blue-900 hover:bg-blue-50"
-                    >
-                      <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
-                    </Button>
-                    {/* Last Page */}
-                    <Button //@ts-ignore
-                      variant="outline"
-                      size="sm"
-                      onClick={() => goToPage(totalPages)} // @ts-ignore
-                      disabled={
-                        currentPage === totalPages || loading.getAllRegions
-                      }
-                      className="hidden sm:flex h-8 w-8 p-0 border-blue-300 text-blue-900 hover:bg-blue-50"
-                    >
-                      <ChevronsRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                <PaginationItem>
+                  <PaginationNext
+                    className="px-3 py-1.5 text-sm border rounded hover:bg-gray-100 transition-colors"
+                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        </div>
       )}
 
-      {showCreateRegionDialog && (
-        <CreateRegionModal
-          isOpen={showCreateRegionDialog}
-          onClose={() => dispatch(setShowCreateRegionDialog(false))}
-        />
-      )}
-
-      {showEditRegionDialog && (
-        <EditRegionModal
-          isOpen={showEditRegionDialog}
-          onClose={() => {
-            dispatch(setShowEditRegionDialog(false));
-            setRegionToEdit(null);
-          }}
-          region={regionToEdit}
-        />
-      )}
+       <CreateRegion />
+      <EditRegion region={regionToEdit ? { ...regionToEdit, regionID: String(regionToEdit.regionID) } : null} /> 
 
       {showDeleteRegionDialog && (
         <ConfirmationModal
           title="Delete Region"
-          message="Are you sure you want to delete this Region Sub Risk and its related sections, fields and rates? This action cannot be undone."
+          message="Are you sure you want to delete this region? This action cannot be undone."
           confirmText="Delete"
           cancelText="Cancel"
           onConfirm={() => confirmDeleteRegion(regionIdToDelete)}
           onCancel={() => dispatch(setShowDeleteRegionDialog(false))}
-          isLoading={loading.deleteRegion}
+          isLoading={!!loading.deleteRegion}
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default CompanyRegions;
+export default ProductsRegions

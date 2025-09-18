@@ -4,7 +4,6 @@ import ProductsSubRiskSections from "@/components/admin/product-page/products.su
 import ProductsRisks from "@/components/admin/product-page/products.risks";
 import ProductSubRisk from "@/components/admin/product-page/product.sub-risk";
 import SubRiskSMIManagement from "@/components/admin/product-page/product.sub-risk-smis";
-import Region from "@/components/admin/product-page/product.region"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/UI/tabs";
 
 const tabs = [
@@ -12,7 +11,6 @@ const tabs = [
   { title: "Risks", content: <ProductsRisks /> },
   { title: "Sub-Risk Sections", content: <ProductsSubRiskSections /> },
   { title: "Sub-Risk SMI", content: <SubRiskSMIManagement /> },
-  { title: "Region", content: <Region />}
 ];
 
 const AdminProducts: React.FC = () => {

@@ -125,7 +125,7 @@
 }
 
 .ca-submit-btn {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #8b4b8c 0%, #b74eb8 100%);
   color: white;
   border: none;
   padding: 10px 24px;
@@ -136,7 +136,7 @@
 }
 
 .ca-submit-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  background: linear-gradient(135deg, #8b4b8c6d 0%, #8b4b8c97 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }

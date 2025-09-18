@@ -128,7 +128,7 @@
 }
 
 .cc-submit-btn {
-  background: #3b82f6;
+  background: #8b4b8c;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -139,7 +139,7 @@
 }
 
 .cc-submit-btn:hover:not(:disabled) {
-  background: #2563eb;
+  background: #b147b3;
 }
 
 .cc-submit-btn:disabled {
@@ -278,7 +278,7 @@
 }
 
 .ec-submit-btn {
-  background: #3b82f6;
+  background: #8b4b8c;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
