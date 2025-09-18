@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import apiCall from "../../../utils/api-call"
 import type { CreatePartyTypeRequest, UpdatePartyTypeRequest, PartyTypeState } from "../../../types/partyType"

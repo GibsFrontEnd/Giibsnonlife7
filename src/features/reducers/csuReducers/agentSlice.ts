@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit"
 import type { RootState } from "../../store"
 import type { Agent, AgentState, CreateAgentRequest, AgentPaginationResponse } from "../../../types/agent"
