@@ -11,15 +11,15 @@ import CompanyMailGroup from "@/components/admin/company-page/company.mail-group
 import PartyTypes from "../../components/admin/product-page/party/party.types";
 
 const tabs = [
-  { title: "Settings", content: <CompanySettings /> },
   { title: "Branches", content: <CompanyBranches /> },
   { title: "Regions", content: <CompanyRegions /> },
   {title: "PartyTypes", content: <PartyTypes />},
-  { title: "Units/Groups", content: <CompanyUnitGroups /> },
   { title: "Marketing Staff", content: <CompanyMarketingStaff /> },
+  { title: "Units/Groups", content: <CompanyUnitGroups /> },
   { title: "Business Sectors", content: <CompanyBusinessSectors /> },
   { title: "Auto Numbers", content: <CompanyAutoNumbers /> },
   { title: "Mail Group", content: <CompanyMailGroup /> },
+  { title: "Settings", content: <CompanySettings /> },
 ];
 
 const AdminCompany = () => {

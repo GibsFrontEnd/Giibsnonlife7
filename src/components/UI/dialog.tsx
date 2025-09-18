@@ -125,7 +125,7 @@ export const OutsideDismissDialog = ({
 
   if (!open) return null;
 
-  return(
+  return (
     <div
       className="confirmation-modal-overlay"
       onClick={() => dispatch(onOpenChange(false))}
