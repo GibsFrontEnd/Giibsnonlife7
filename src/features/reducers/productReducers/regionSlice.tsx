@@ -69,6 +69,7 @@ interface RegionState {
 
 const initialState: RegionState = {
   regions: [],
+  //@ts-ignore
   loading: {},
   success: {},
   error: {},
