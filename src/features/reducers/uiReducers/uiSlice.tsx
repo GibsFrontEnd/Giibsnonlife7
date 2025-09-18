@@ -7,32 +7,32 @@ interface UiState {
   showDeleteRoleDialog: boolean;
   showViewRoleDetailsDialog: boolean;
 
-  // Permission dialogs (new)
+  // Permission dialogs
   showCreatePermissionDialog: boolean;
   showEditPermissionDialog: boolean;
   showDeletePermissionDialog: boolean;
   showViewPermissionDetailsDialog: boolean;
 
-  // User dialogs (new)
+  // User dialogs
   showCreateUserDialog: boolean;
   showEditUserDialog: boolean;
   showDeleteUserDialog: boolean;
   showViewUserDetailsDialog: boolean;
   showChangePasswordDialog: boolean;
 
-  // Risk dialogs (new)
+  // Risk dialogs
   showCreateRiskDialog: boolean;
   showEditRiskDialog: boolean;
   showDeleteRiskDialog: boolean;
   showViewRiskDetailsDialog: boolean;
 
-  // Risk dialogs (new)
+  // Sub Risk Section dialogs
   showCreateSubRiskSectionDialog: boolean;
   showEditSubRiskSectionDialog: boolean;
   showDeleteSubRiskSectionDialog: boolean;
   showViewSubRiskSectionDetailsDialog: boolean;
 
-  // Product Sub risk dialogs
+  // Product dialogs
   showCreateProductDialog: boolean;
   showEditProductDialog: boolean;
   showDeleteProductDialog: boolean;
@@ -68,6 +68,7 @@ interface UiState {
 
     
 
+  // Region dialogs (NEW - added here)
   showCreateRegionDialog: boolean;
   showEditRegionDialog: boolean;
   showDeleteRegionDialog: boolean;
@@ -99,13 +100,14 @@ const initialState: UiState = {
   showViewUserDetailsDialog: false,
   showChangePasswordDialog: false,
 
-  // Risk dialogs (new)
+  // Risk dialogs
   showCreateRiskDialog: false,
   showEditRiskDialog: false,
   showDeleteRiskDialog: false,
   showViewRiskDetailsDialog: false,
 
     // Product Sub risk
+  // Sub Risk Section dialogs
   showCreateSubRiskSectionDialog: false,
   showEditSubRiskSectionDialog: false,
   showDeleteSubRiskSectionDialog: false,
@@ -143,11 +145,13 @@ const initialState: UiState = {
 
   
   // Product Sub risk
+  // Product dialogs
   showCreateProductDialog: false,
   showEditProductDialog: false,
   showDeleteProductDialog: false,
   showViewProductDetailsDialog: false,
 
+  // Region dialogs (NEW - added here)
   showCreateRegionDialog: false,
   showEditRegionDialog: false,
   showDeleteRegionDialog: false,
@@ -225,7 +229,7 @@ const uiSlice = createSlice({
       state.showViewRiskDetailsDialog = action.payload;
     },
 
-    // Risk reducers
+    // Sub Risk Section reducers
     setShowCreateSubRiskSectionDialog: (state, action: PayloadAction<boolean>) => {
       state.showCreateSubRiskSectionDialog = action.payload;
     },
@@ -239,7 +243,7 @@ const uiSlice = createSlice({
       state.showViewSubRiskSectionDetailsDialog = action.payload;
     },
 
-    // Product sub risk reducers
+    // Product reducers
     setShowCreateProductDialog: (state, action: PayloadAction<boolean>) => {
       state.showCreateProductDialog = action.payload;
     },
@@ -296,6 +300,7 @@ const uiSlice = createSlice({
       state.showViewPartyTypeDetailsDialog = action.payload;
     },
 
+    // Region reducers (NEW - added here)
     setShowCreateRegionDialog: (state, action: PayloadAction<boolean>) => {
       state.showCreateRegionDialog = action.payload;
     },
@@ -376,11 +381,13 @@ export const {
   setShowEditRoleDialog,
   setShowDeleteRoleDialog,
   setShowViewRoleDetailsDialog,
+  
   // permission actions
   setShowCreatePermissionDialog,
   setShowEditPermissionDialog,
   setShowDeletePermissionDialog,
   setShowViewPermissionDetailsDialog,
+  
   // User actions
   setShowCreateUserDialog,
   setShowEditUserDialog,
@@ -395,6 +402,7 @@ export const {
   setShowViewRiskDetailsDialog,
 
   // SubRisk actions
+  // Sub Risk Section actions
   setShowCreateSubRiskSectionDialog,
   setShowEditSubRiskSectionDialog,
   setShowDeleteSubRiskSectionDialog,
@@ -434,6 +442,7 @@ export const {
   setShowDeletePartyTypeDialog,
   setShowViewPartyTypeDetailsDialog,
 
+  // Region actions (NEW - added here)
   setShowCreateRegionDialog,
   setShowEditRegionDialog,
   setShowDeleteRegionDialog,

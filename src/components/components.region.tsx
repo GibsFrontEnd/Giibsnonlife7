@@ -1,52 +1,32 @@
-import { useState, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "@/hooks/use-apps";
+"use client"
+
+import type React from "react"
+import { useEffect, useState } from "react"
+import { useAppDispatch, useAppSelector } from "../hooks/use-apps"
+import { Button } from "./UI/new-button"
+import Input from "./UI/Input"
+import { Label } from "./UI/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./UI/dialog"
 import {
-  clearRegionMessages,
+  selectUiState,
+  setShowCreateRegionDialog,
+  setShowEditRegionDialog,
+} from "../features/reducers/uiReducers/uiSlice"
+import {
   createRegion,
-  getAllRegions,
-  selectRegion,
   updateRegion,
-} from "@/features/reducers/companyReducers/regionSlice";
-import { Region } from "@/types/regions";
-import { Button } from "@/components/UI/new-button";
-import { Input } from "@/components/UI/new-input";
-import { Label } from "@/components/UI/label";
-import { Textarea } from "@/components/UI/textarea";
-import {
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/UI/dialog";
-import { useToast } from "@/components/UI/use-toast";
-import { OutsideDismissDialog } from "@/components/UI/dialog";
-import { generateHash } from "@/utils/minor-utils";
-import useUser from "@/hooks/use-user";
+  selectRegions,
+  clearMessages,
+} from "../features/reducers/productReducers/regionSlice"
+import type { Region, CreateRegionRequest, UpdateRegionRequest } from "../types/region"
 
-interface RegionCreateModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+export const CreateRegion = () => {
+  const dispatch = useAppDispatch()
+  const { showCreateRegionDialog } = useAppSelector(selectUiState)
+  const { loading, success, error } = useAppSelector(selectRegions)
 
-export const CreateRegionModal = ({
-  isOpen,
-  onClose,
-}: RegionCreateModalProps) => {
-  const user = useUser();
-  const { toast } = useToast();
-  const dispatch = useAppDispatch();
-  const { loading, error, success } = useAppSelector(selectRegion);
-
-  const [formData, setFormData] = useState<
-    Omit<
-      Region,
-      | "regionID"
-      | "deleted"
-      | "submittedBy"
-      | "submittedOn"
-      | "modifiedBy"
-      | "modifiedOn"
-    >
-  >({
+  const [formData, setFormData] = useState<CreateRegionRequest>({
+    regionID: "",
     region: "",
     manager: "",
     address: "",
@@ -55,34 +35,50 @@ export const CreateRegionModal = ({
     email: "",
     fax: "",
     remarks: "",
+    deleted: false,
     active: true,
-  });
+    submittedBy: "",
+  })
 
-  const [errors, setErrors] = useState<Partial<Region>>({});
+  const [errors, setErrors] = useState<Partial<CreateRegionRequest>>({})
 
-  useEffect(() => {
-    if (success.createRegion) {
-      dispatch(clearRegionMessages());
-      toast({
-        title: "Region Created!",
-        description: "The region has been successfully created.",
-        variant: "success",
-        duration: 3000,
-      });
-      onClose();
-      resetForm();
-    } else if (error.createRegion) {
-      dispatch(clearRegionMessages());
-      toast({
-        description: "Failed to create region. Please try again.",
-        variant: "destructive",
-        duration: 5000,
-      });
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // Validation
+    const newErrors: Partial<CreateRegionRequest> = {}
+    if (!formData.regionID.trim()) {
+      newErrors.region = "RegionID is required"
     }
-  }, [success.createRegion, error.createRegion, onClose]);
+    if (!formData.region.trim()) {
+      newErrors.region = "Region is required"
+    }
+    if (!formData.manager.trim()) {
+      newErrors.manager = "Manager is required"
+    }
+    if (!formData.address.trim()) {
+      newErrors.address = "Address is required"
+    }
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required"
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email is invalid"
+    }
+    if (!formData.submittedBy.trim()) {
+      newErrors.submittedBy = "Submitted by is required"
+    }
 
-  const resetForm = () => {
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+
+    dispatch(createRegion(formData))
+  }
+
+  const handleClose = () => {
     setFormData({
+      regionID: "",
       region: "",
       manager: "",
       address: "",
@@ -91,252 +87,220 @@ export const CreateRegionModal = ({
       email: "",
       fax: "",
       remarks: "",
-      active: true,
-    });
-    setErrors({});
-  };
-
-  const validateForm = () => {
-    const newErrors: Partial<Region> = {};
-
-    if (!formData.region.trim()) {
-      newErrors.region = "Region name is required";
-    }
-    if (!formData.manager.trim()) {
-      newErrors.manager = "Manager name is required";
-    }
-    if (!formData.address.trim()) {
-      newErrors.address = "Address is required";
-    }
-    if (!formData.mobilePhone.trim()) {
-      newErrors.mobilePhone = "Mobile phone is required";
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    console.log("errors");
-
-    const regionData: Region = {
-      ...formData,
-      regionID: generateHash(),
       deleted: false,
-      submittedBy: user.username || "unknown",
-      submittedOn: new Date().toISOString(),
-      modifiedBy: user.username,
-      modifiedOn: new Date().toISOString(),
-    };
+      active: true,
+      submittedBy: "",
+    })
+    setErrors({})
+    dispatch(setShowCreateRegionDialog(false))
+  }
 
-    dispatch(createRegion(regionData));
-  };
+  const handleChange =
+    (field: keyof CreateRegionRequest) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      let value: any = e.target.value
+      
+      // Handle boolean fields
+      if (field === "deleted" || field === "active") {
+        value = e.target.value === "true"
+      }
+      
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }))
 
-  const handleInputChange = (
-    field: keyof typeof formData,
-    value: string | boolean
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
+      if (errors[field]) {
+        setErrors((prev) => ({
+          ...prev,
+          [field]: undefined,
+        }))
+      }
     }
-  };
 
-  const handleClose = () => {
-    resetForm();
-    onClose();
-  };
+  useEffect(() => {
+    if (success.createRegion) {
+      handleClose()
+      dispatch(clearMessages())
+    }
+  }, [success.createRegion, dispatch])
 
   return (
-    <OutsideDismissDialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+    <Dialog open={showCreateRegionDialog} onOpenChange={handleClose}>
+      <DialogContent className="region-create-dialog max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Region</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 p-6 pt-0">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="region">Region Name *</Label>
+        <form onSubmit={handleSubmit} className="region-form space-y-4 p-6 ">
+          <div className="region-form-row grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="region-form-field">
+              <Label htmlFor="regionID">RegionID *</Label>
+              <Input
+                id="regionID"
+                value={formData.regionID}
+                onChange={handleChange("regionID")}
+                placeholder="Enter region ID"
+                className={errors.regionID  ? "error" : ""}
+              />
+              {errors.region && <span className="region-error-text text-red-500 text-sm">{errors.region}</span>}
+            </div>
+            <div className="region-form-field">
+              <Label htmlFor="region">Region *</Label>
               <Input
                 id="region"
                 value={formData.region}
-                onChange={(e) => handleInputChange("region", e.target.value)}
+                onChange={handleChange("region")}
                 placeholder="Enter region name"
-                className={errors.region ? "border-red-500" : ""}
+                className={errors.region ? "error" : ""}
               />
-              {errors.region && (
-                <p className="text-sm text-red-500">{errors.region}</p>
-              )}
+              {errors.region && <span className="region-error-text text-red-500 text-sm">{errors.region}</span>}
             </div>
 
-            <div className="space-y-2">
+            <div className="region-form-field">
               <Label htmlFor="manager">Manager *</Label>
               <Input
                 id="manager"
                 value={formData.manager}
-                onChange={(e) => handleInputChange("manager", e.target.value)}
+                onChange={handleChange("manager")}
                 placeholder="Enter manager name"
-                className={errors.manager ? "border-red-500" : ""}
+                className={errors.manager ? "error" : ""}
               />
-              {errors.manager && (
-                <p className="text-sm text-red-500">{errors.manager}</p>
-              )}
+              {errors.manager && <span className="region-error-text text-red-500 text-sm">{errors.manager}</span>}
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="region-form-field">
             <Label htmlFor="address">Address *</Label>
-            <Textarea
+            <Input
               id="address"
               value={formData.address}
-              onChange={(e) => handleInputChange("address", e.target.value)}
+              onChange={handleChange("address")}
               placeholder="Enter address"
-              className={errors.address ? "border-red-500" : ""}
-              rows={3}
+              className={errors.address ? "error" : ""}
             />
-            {errors.address && (
-              <p className="text-sm text-red-500">{errors.address}</p>
-            )}
+            {errors.address && <span className="region-error-text text-red-500 text-sm">{errors.address}</span>}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="mobilePhone">Mobile Phone *</Label>
+          <div className="region-form-row grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="region-form-field">
+              <Label htmlFor="mobilePhone">Mobile Phone</Label>
               <Input
                 id="mobilePhone"
                 value={formData.mobilePhone}
-                onChange={(e) =>
-                  handleInputChange("mobilePhone", e.target.value)
-                }
+                onChange={handleChange("mobilePhone")}
                 placeholder="Enter mobile phone"
-                className={errors.mobilePhone ? "border-red-500" : ""}
               />
-              {errors.mobilePhone && (
-                <p className="text-sm text-red-500">{errors.mobilePhone}</p>
-              )}
             </div>
 
-            <div className="space-y-2">
+            <div className="region-form-field">
               <Label htmlFor="landPhone">Land Phone</Label>
               <Input
                 id="landPhone"
                 value={formData.landPhone}
-                onChange={(e) => handleInputChange("landPhone", e.target.value)}
+                onChange={handleChange("landPhone")}
                 placeholder="Enter land phone"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+          <div className="region-form-row grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="region-form-field">
               <Label htmlFor="email">Email *</Label>
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                placeholder="Enter email address"
-                className={errors.email ? "border-red-500" : ""}
+                onChange={handleChange("email")}
+                placeholder="Enter email"
+                className={errors.email ? "error" : ""}
               />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email}</p>
-              )}
+              {errors.email && <span className="region-error-text text-red-500 text-sm">{errors.email}</span>}
             </div>
 
-            <div className="space-y-2">
+            <div className="region-form-field">
               <Label htmlFor="fax">Fax</Label>
               <Input
                 id="fax"
                 value={formData.fax}
-                onChange={(e) => handleInputChange("fax", e.target.value)}
-                placeholder="Enter fax number"
+                onChange={handleChange("fax")}
+                placeholder="Enter fax"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="region-form-field">
             <Label htmlFor="remarks">Remarks</Label>
-            <Textarea
+            <textarea
               id="remarks"
               value={formData.remarks}
-              onChange={(e) => handleInputChange("remarks", e.target.value)}
-              placeholder="Enter any remarks"
-              rows={2}
+              onChange={handleChange("remarks")}
+              placeholder="Enter remarks"
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows={3}
             />
           </div>
 
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="active"
-              checked={formData.active}
-              onChange={(e) => handleInputChange("active", e.target.checked)}
-              className="rounded border-gray-300"
-            />
-            <Label htmlFor="active">Active</Label>
+          <div className="region-form-row grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="region-form-field">
+              <Label htmlFor="active">Active Status</Label>
+              <select
+                id="active"
+                value={formData.active ? "true" : "false"}
+                onChange={handleChange("active")}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+
+            <div className="region-form-field">
+              <Label htmlFor="submittedBy">Submitted By *</Label>
+              <Input
+                id="submittedBy"
+                value={formData.submittedBy}
+                onChange={handleChange("submittedBy")}
+                placeholder="Enter submitted by"
+                className={errors.submittedBy ? "error" : ""}
+              />
+              {errors.submittedBy && <span className="region-error-text text-red-500 text-sm">{errors.submittedBy}</span>}
+            </div>
           </div>
 
-          <div className="gap-2 flex">
+          {error.createRegion && (
+            <div className="region-error-message text-red-500 p-2 bg-red-50 rounded-md">{error.createRegion}</div>
+          )}
+
+          <div className="region-form-actions flex justify-end gap-3 mt-6">
             <Button
+              type="button"
               variant="outline"
-              onClick={handleClose} // @ts-ignore
+              onClick={handleClose}
               disabled={loading.createRegion}
             >
               Cancel
             </Button>
-            <Button // @ts-ignore
+            <Button
               type="submit"
-              className="flex-1 bg-primary-blue text-white relative inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
               disabled={loading.createRegion}
+              className="bg-green-600 hover:bg-green-700"
             >
               {loading.createRegion ? "Creating..." : "Create Region"}
             </Button>
           </div>
         </form>
       </DialogContent>
-    </OutsideDismissDialog>
-  );
-};
-
-interface RegionEditModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  region: Region | null;
+    </Dialog>
+  )
 }
 
-export const EditRegionModal = ({
-  isOpen,
-  onClose,
-  region,
-}: RegionEditModalProps) => {
-  const user = useUser();
-  const { toast } = useToast();
-  const dispatch = useAppDispatch();
-  const { loading, error, success } = useAppSelector(selectRegion);
+export const EditRegion = ({ region }: { region: Region | null }) => {
+  const dispatch = useAppDispatch()
+  const { showEditRegionDialog } = useAppSelector(selectUiState)
+  const { loading, success, error } = useAppSelector(selectRegions)
 
-  const [formData, setFormData] = useState<
-    Omit<
-      Region,
-      | "regionID"
-      | "deleted"
-      | "submittedBy"
-      | "submittedOn"
-      | "modifiedBy"
-      | "modifiedOn"
-    >
-  >({
+  const [formData, setFormData] = useState<UpdateRegionRequest>({
+    regionID: "",
     region: "",
     manager: "",
     address: "",
@@ -345,14 +309,18 @@ export const EditRegionModal = ({
     email: "",
     fax: "",
     remarks: "",
+    deleted: false,
     active: true,
-  });
+    submittedBy: "",
+    modifiedBy: "",
+  })
 
-  const [errors, setErrors] = useState<Partial<Region>>({});
+  const [errors, setErrors] = useState<Partial<UpdateRegionRequest>>({})
 
   useEffect(() => {
     if (region) {
       setFormData({
+        regionID: region.regionID || "",
         region: region.region || "",
         manager: region.manager || "",
         address: region.address || "",
@@ -361,35 +329,50 @@ export const EditRegionModal = ({
         email: region.email || "",
         fax: region.fax || "",
         remarks: region.remarks || "",
-        active: region.active !== undefined ? region.active : true,
-      });
+        deleted: region.deleted || false,
+        active: region.active || true,
+        submittedBy: region.submittedBy || "",
+        modifiedBy: "",
+      })
     }
-  }, [region]);
+  }, [region])
 
-  useEffect(() => {
-    if (success.updateRegion) {
-      dispatch(clearRegionMessages());
-      dispatch(getAllRegions());
-      toast({
-        title: "Region Updated!",
-        description: "The region has been successfully updated.",
-        variant: "success",
-        duration: 3000,
-      });
-      onClose();
-      resetForm();
-    } else if (error.updateRegion) {
-      dispatch(clearRegionMessages());
-      toast({
-        description: "Failed to update region. Please try again.",
-        variant: "destructive",
-        duration: 5000,
-      });
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!region) return
+
+    // Validation
+    const newErrors: Partial<UpdateRegionRequest> = {}
+    if (!formData.region.trim()) {
+      newErrors.region = "Region is required"
     }
-  }, [success.updateRegion, error.updateRegion, onClose]);
+    if (!formData.manager.trim()) {
+      newErrors.manager = "Manager is required"
+    }
+    if (!formData.address.trim()) {
+      newErrors.address = "Address is required"
+    }
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required"
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email is invalid"
+    }
+    if (!formData.modifiedBy.trim()) {
+      newErrors.modifiedBy = "Modified by is required"
+    }
 
-  const resetForm = () => {
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
+    }
+
+    dispatch(updateRegion(formData))
+  }
+
+  const handleClose = () => {
     setFormData({
+      regionID: "",
       region: "",
       manager: "",
       address: "",
@@ -398,221 +381,214 @@ export const EditRegionModal = ({
       email: "",
       fax: "",
       remarks: "",
+      deleted: false,
       active: true,
-    });
-    setErrors({});
-  };
+      submittedBy: "",
+      modifiedBy: "",
+    })
+    setErrors({})
+    dispatch(setShowEditRegionDialog(false))
+  }
 
-  const validateForm = () => {
-    const newErrors: Partial<Region> = {};
+  const handleChange =
+    (field: keyof UpdateRegionRequest) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      let value: any = e.target.value
+      
+      // Handle boolean fields
+      if (field === "deleted" || field === "active") {
+        value = e.target.value === "true"
+      }
+      
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }))
 
-    if (!formData.region.trim()) {
-      newErrors.region = "Region name is required";
-    }
-    if (!formData.manager.trim()) {
-      newErrors.manager = "Manager name is required";
-    }
-    if (!formData.address.trim()) {
-      newErrors.address = "Address is required";
-    }
-    if (!formData.mobilePhone.trim()) {
-      newErrors.mobilePhone = "Mobile phone is required";
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm() || !region) {
-      return;
+      if (errors[field]) {
+        setErrors((prev) => ({
+          ...prev,
+          [field]: undefined,
+        }))
+      }
     }
 
-    const updatedRegionData: Region = {
-      ...region,
-      ...formData,
-      modifiedBy: user.username,
-      modifiedOn: new Date().toISOString(),
-    };
-
-    dispatch(
-      updateRegion({
-        regionId: region.regionID,
-        data: updatedRegionData,
-      })
-    );
-  };
-
-  const handleInputChange = (
-    field: keyof typeof formData,
-    value: string | boolean
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
+  useEffect(() => {
+    if (success.updateRegion) {
+      handleClose()
+      dispatch(clearMessages())
     }
-  };
-
-  const handleClose = () => {
-    resetForm();
-    onClose();
-  };
+  }, [success.updateRegion, dispatch])
 
   return (
-    <OutsideDismissDialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+    <Dialog open={showEditRegionDialog} onOpenChange={handleClose}>
+      <DialogContent className="region-edit-dialog max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Region</DialogTitle>
+          <DialogTitle>Edit Region - {region?.regionID}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 p-6 pt-0">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="region">Region Name *</Label>
+        <form onSubmit={handleSubmit} className="region-form space-y-4 p-6 ">
+          <div className="region-form-row grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="region-form-field">
+              <Label htmlFor="editRegion">Region *</Label>
               <Input
-                id="region"
+                id="editRegion"
                 value={formData.region}
-                onChange={(e) => handleInputChange("region", e.target.value)}
+                onChange={handleChange("region")}
                 placeholder="Enter region name"
-                className={errors.region ? "border-red-500" : ""}
+                className={errors.region ? "error" : ""}
               />
-              {errors.region && (
-                <p className="text-sm text-red-500">{errors.region}</p>
-              )}
+              {errors.region && <span className="region-error-text text-red-500 text-sm">{errors.region}</span>}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="manager">Manager *</Label>
+            <div className="region-form-field">
+              <Label htmlFor="editManager">Manager *</Label>
               <Input
-                id="manager"
+                id="editManager"
                 value={formData.manager}
-                onChange={(e) => handleInputChange("manager", e.target.value)}
+                onChange={handleChange("manager")}
                 placeholder="Enter manager name"
-                className={errors.manager ? "border-red-500" : ""}
+                className={errors.manager ? "error" : ""}
               />
-              {errors.manager && (
-                <p className="text-sm text-red-500">{errors.manager}</p>
-              )}
+              {errors.manager && <span className="region-error-text text-red-500 text-sm">{errors.manager}</span>}
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="address">Address *</Label>
-            <Textarea
-              id="address"
+          <div className="region-form-field">
+            <Label htmlFor="editAddress">Address *</Label>
+            <Input
+              id="editAddress"
               value={formData.address}
-              onChange={(e) => handleInputChange("address", e.target.value)}
+              onChange={handleChange("address")}
               placeholder="Enter address"
-              className={errors.address ? "border-red-500" : ""}
-              rows={3}
+              className={errors.address ? "error" : ""}
             />
-            {errors.address && (
-              <p className="text-sm text-red-500">{errors.address}</p>
-            )}
+            {errors.address && <span className="region-error-text text-red-500 text-sm">{errors.address}</span>}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="mobilePhone">Mobile Phone *</Label>
+          <div className="region-form-row grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="region-form-field">
+              <Label htmlFor="editMobilePhone">Mobile Phone</Label>
               <Input
-                id="mobilePhone"
+                id="editMobilePhone"
                 value={formData.mobilePhone}
-                onChange={(e) =>
-                  handleInputChange("mobilePhone", e.target.value)
-                }
+                onChange={handleChange("mobilePhone")}
                 placeholder="Enter mobile phone"
-                className={errors.mobilePhone ? "border-red-500" : ""}
               />
-              {errors.mobilePhone && (
-                <p className="text-sm text-red-500">{errors.mobilePhone}</p>
-              )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="landPhone">Land Phone</Label>
+            <div className="region-form-field">
+              <Label htmlFor="editLandPhone">Land Phone</Label>
               <Input
-                id="landPhone"
+                id="editLandPhone"
                 value={formData.landPhone}
-                onChange={(e) => handleInputChange("landPhone", e.target.value)}
+                onChange={handleChange("landPhone")}
                 placeholder="Enter land phone"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
+          <div className="region-form-row grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="region-form-field">
+              <Label htmlFor="editEmail">Email *</Label>
               <Input
-                id="email"
+                id="editEmail"
                 type="email"
                 value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                placeholder="Enter email address"
-                className={errors.email ? "border-red-500" : ""}
+                onChange={handleChange("email")}
+                placeholder="Enter email"
+                className={errors.email ? "error" : ""}
               />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email}</p>
-              )}
+              {errors.email && <span className="region-error-text text-red-500 text-sm">{errors.email}</span>}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="fax">Fax</Label>
+            <div className="region-form-field">
+              <Label htmlFor="editFax">Fax</Label>
               <Input
-                id="fax"
+                id="editFax"
                 value={formData.fax}
-                onChange={(e) => handleInputChange("fax", e.target.value)}
-                placeholder="Enter fax number"
+                onChange={handleChange("fax")}
+                placeholder="Enter fax"
               />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="remarks">Remarks</Label>
-            <Textarea
-              id="remarks"
+          <div className="region-form-field">
+            <Label htmlFor="editRemarks">Remarks</Label>
+            <textarea
+              id="editRemarks"
               value={formData.remarks}
-              onChange={(e) => handleInputChange("remarks", e.target.value)}
-              placeholder="Enter any remarks"
-              rows={2}
+              onChange={handleChange("remarks")}
+              placeholder="Enter remarks"
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows={3}
             />
           </div>
 
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="active"
-              checked={formData.active}
-              onChange={(e) => handleInputChange("active", e.target.checked)}
-              className="rounded border-gray-300"
-            />
-            <Label htmlFor="active">Active</Label>
+          <div className="region-form-row grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="region-form-field">
+              <Label htmlFor="editActive">Active Status</Label>
+              <select
+                id="editActive"
+                value={formData.active ? "true" : "false"}
+                onChange={handleChange("active")}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
+            </div>
+
+            <div className="region-form-field">
+              <Label htmlFor="editDeleted">Deleted Status</Label>
+              <select
+                id="editDeleted"
+                value={formData.deleted ? "true" : "false"}
+                onChange={handleChange("deleted")}
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="false">Not Deleted</option>
+                <option value="true">Deleted</option>
+              </select>
+            </div>
           </div>
 
-          <div className="gap-2 flex">
+          <div className="region-form-row grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="region-form-field">
+              <Label htmlFor="editModifiedBy">Modified By *</Label>
+              <Input
+                id="editModifiedBy"
+                value={formData.modifiedBy}
+                onChange={handleChange("modifiedBy")}
+                placeholder="Enter modified by"
+                className={errors.modifiedBy ? "error" : ""}
+              />
+              {errors.modifiedBy && <span className="region-error-text text-red-500 text-sm">{errors.modifiedBy}</span>}
+            </div>
+          </div>
+
+          {error.updateRegion && (
+            <div className="region-error-message text-red-500 p-2 bg-red-50 rounded-md">{error.updateRegion}</div>
+          )}
+
+          <div className="region-form-actions flex justify-end gap-3 mt-6">
             <Button
+              type="button"
               variant="outline"
-              onClick={handleClose} // @ts-ignore
+              onClick={handleClose}
               disabled={loading.updateRegion}
             >
               Cancel
             </Button>
-            <Button // @ts-ignore
+            <Button
               type="submit"
-              className="flex-1 bg-primary-blue text-white"
               disabled={loading.updateRegion}
+              className="bg-green-600 hover:bg-green-700"
             >
               {loading.updateRegion ? "Updating..." : "Update Region"}
             </Button>
           </div>
         </form>
       </DialogContent>
-    </OutsideDismissDialog>
-  );
-};
+    </Dialog>
+  )
+}
