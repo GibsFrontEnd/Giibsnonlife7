@@ -22,7 +22,7 @@ import {
   PaginationPrevious,
 } from "./UI/pagination"
 import {
-  selectUiState,
+  // selectUiState,
   setShowCreatePolicyDialog,
   setShowRenewPolicyDialog,
   setShowPolicyDetailsDialog,
