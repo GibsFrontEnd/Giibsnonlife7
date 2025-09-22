@@ -18,7 +18,7 @@ import {
 } from "@/components/UI/new-select";
 import { Textarea } from "@/components/UI/textarea";
 import { Switch } from "@/components/UI/switch";
-import { Branch } from "@/types/branches";
+import type { Branch } from "@/types/branches";
 import { Loader2 } from "lucide-react";
 import {
   createBranch,

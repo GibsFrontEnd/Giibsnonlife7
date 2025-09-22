@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Branch, BranchFiltersProps } from "@/types/branches";
+import type { Branch, BranchFiltersProps } from "@/types/branches";
 import {
   Table,
   TableBody,
