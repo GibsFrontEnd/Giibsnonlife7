@@ -31,7 +31,7 @@ import {
   setShowDeleteRoleDialog,
   setShowEditRoleDialog,
 } from "../../../features/reducers/uiReducers/uiSlice";
-import { Role } from "../../../types/role";
+import type { Role } from "../../../types/role";
 import { CreateRole, EditRole } from "../../components.roles";
 
 const SecurityRoles = () => {

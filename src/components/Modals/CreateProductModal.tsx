@@ -16,7 +16,7 @@ import {
 } from "../UI/dialog";
 import { useToast } from "../UI/use-toast";
 import { OutsideDismissDialog } from "../UI/dialog";
-import { ProductCreateUpdateRequest } from "../../types/product";
+import type { ProductCreateUpdateRequest } from "../../types/product";
 
 interface ProductCreateModalProps {
   isOpen: boolean;

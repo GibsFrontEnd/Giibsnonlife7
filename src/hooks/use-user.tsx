@@ -2,7 +2,7 @@ import { useState } from "react";
 import { store } from "../features/store";
 import { setTokenExpired } from "../features/reducers/authReducers/authSlice";
 import { decryptData } from "../utils/encrypt-utils";
-import { LocalUser } from "../types/user";
+import type { LocalUser } from "../types/user";
 
 const useUser = () => {
   // @ts-ignore

@@ -12,7 +12,7 @@ import { Input } from "@/components/UI/new-input";
 import { Label } from "@/components/UI/label";
 import { Switch } from "@/components/UI/switch";
 import { updateMktStaff, clearMarketingStaffMessages, selectMarketingStaff } from '@/features/reducers/companyReducers/marketingStaffSlice'
-import { MktStaff, UpdateMktStaffRequest } from '@/types/marketing-staff'
+import type { MktStaff, UpdateMktStaffRequest } from '@/types/marketing-staff'
 
 interface MarketingStaffEditDialogProps {
   open: boolean

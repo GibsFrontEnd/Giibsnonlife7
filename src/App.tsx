@@ -4,7 +4,7 @@ import Layout from "./components/Layout/Layout";
 import "./styles/global.css";
 import { useAuth } from "./hooks/use-auth";
 import { useSelector } from "react-redux";
-import { RootState } from "./features/store";
+import type { RootState } from "./features/store";
 import { Toaster } from "./components/UI/toaster";
 import HomePage from "./pages/Home";
 import LoginPage from "./pages/LoginPage";

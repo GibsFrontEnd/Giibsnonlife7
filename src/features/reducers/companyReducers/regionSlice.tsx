@@ -1,4 +1,4 @@
-import { Region, RegionState, UpdateRegionRequest } from "@/types/regions";
+import type { Region, RegionState, UpdateRegionRequest } from "@/types/regions";
 import apiCall from "@/utils/api-call";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 

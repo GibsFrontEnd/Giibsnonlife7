@@ -12,7 +12,7 @@ import {
   DropdownMenuItem,
 } from "../../UI/dropdown";
 import { Input } from "../../UI/new-input";
-import { Risk } from "../../../types/risk";
+import type { Risk } from "../../../types/risk";
 import {
   clearMessages,
   clearProducts,
@@ -49,7 +49,7 @@ import ConfirmationModal from "../../Modals/ConfirmationModal";
 import { useToast } from "../../UI/use-toast";
 import ProductCreateModal from "../../Modals/CreateProductModal";
 import ProductEditModal from "../../Modals/EditProductModal";
-import { Product } from "../../../types/product";
+import type { Product } from "../../../types/product";
 
 const ProductSubRisk = () => {
   const { toast } = useToast();

@@ -26,7 +26,7 @@ import {
   selectRoles,
   updateRole,
 } from "../features/reducers/adminReducers/roleSlice";
-import { Role } from "../types/role";
+import type { Role } from "../types/role";
 import { useToast } from "./UI/use-toast";
 
 const createRoleSchema = z.object({

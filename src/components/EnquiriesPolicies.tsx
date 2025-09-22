@@ -11,7 +11,7 @@ import {
   niipUpload,
   selectPolicies,
   setCurrentPolicy,
-} from "../features/reducers/adminReducers/policySlice"
+} from "../features/reducers/csuReducers/policySlice"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./UI/table"
 import {
   Pagination,
@@ -36,8 +36,8 @@ const SEARCH_DEBOUNCE_MS = 300
 
 const EnquiriesPolicies = () => {
   const dispatch = useAppDispatch()
-  const { policies, success, loading, error, niipResponse } = useAppSelector(selectPolicies)
-  const { showCreatePolicyDialog, showRenewPolicyDialog, showPolicyDetailsDialog } = useAppSelector(selectUiState)
+  const { policies, loading, niipResponse } = useAppSelector(selectPolicies)
+  // const { showCreatePolicyDialog, showRenewPolicyDialog, showPolicyDetailsDialog } = useAppSelector(selectUiState)
 
   const [searchTerm, setSearchTerm] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
@@ -70,7 +70,7 @@ const EnquiriesPolicies = () => {
   }
 
   // Filter policies based on search and status
-  const filteredPolicies = policies.filter((policy) => {
+  const filteredPolicies = policies.filter((policy: any) => {
     if (!debouncedSearch && statusFilter === "all") return true
 
     const searchLower = debouncedSearch.toLowerCase()
@@ -99,9 +99,9 @@ const EnquiriesPolicies = () => {
   // Statistics
   const stats = {
     total: policies.length,
-    active: policies.filter((p) => !isPolicyExpired(p.endDate)).length,
-    expired: policies.filter((p) => isPolicyExpired(p.endDate)).length,
-    totalPremium: policies.reduce((sum, p) => sum + p.premium, 0),
+    active: policies.filter((p: any) => !isPolicyExpired(p.endDate)).length,
+    expired: policies.filter((p: any) => isPolicyExpired(p.endDate)).length,
+    totalPremium: policies.reduce((sum: any, p: any) => sum + p.premium, 0),
   }
 
   const handleViewPolicy = (policy: Policy) => {
@@ -248,7 +248,7 @@ const EnquiriesPolicies = () => {
           <SearchBar
             placeholder="Search by policy number, customer, product, or agent..."
             value={searchTerm}
-            onChange={setSearchTerm}
+            onChange={setSearchTerm} // @ts-ignore
             className="ep-search-bar"
           />
         </div>
@@ -300,7 +300,7 @@ const EnquiriesPolicies = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                currentData.map((policy, index) => {
+                currentData.map((policy: any, index: number) => {
                   const globalIndex = startIndex + index
                   const isExpired = isPolicyExpired(policy.endDate)
                   return (

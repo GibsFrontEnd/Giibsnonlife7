@@ -9,7 +9,7 @@ import {
 } from "@/components/UI/dialog";
 import { Button } from "@/components/UI/new-button";
 import { deleteMktStaff, clearMarketingStaffMessages, selectMarketingStaff } from '@/features/reducers/companyReducers/marketingStaffSlice'
-import { MktStaff } from '@/types/marketing-staff'
+import type { MktStaff } from '@/types/marketing-staff'
 
 interface MarketingStaffDeleteDialogProps {
     open: boolean

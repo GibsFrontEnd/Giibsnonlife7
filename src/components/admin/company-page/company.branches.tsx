@@ -4,7 +4,7 @@ import {
   selectBranch,
 } from "@/features/reducers/companyReducers/branchSlice";
 import { useAppDispatch, useAppSelector } from "@/hooks/use-apps";
-import { BranchFiltersProps } from "@/types/branches";
+import type { BranchFiltersProps } from "@/types/branches";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { BranchesTable } from "./branches/branch-table"

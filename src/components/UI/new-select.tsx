@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, ReactNode } from "react";
+import { createContext, useState, useContext, type ReactNode } from "react";
 import { cn } from "../../utils/class-names";
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
 
