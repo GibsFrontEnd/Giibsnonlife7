@@ -1,11 +1,53 @@
-import * as CryptoJS from "crypto-js"
+import * as CryptoJS from "crypto-js";
 
-const SECRET_KEY = import.meta.env.VITE_SECRET_KEY;
+// Safe runtime access to environment variables
+const getEnvironmentVariable = (key: string): string | undefined => {
+  try {
+    // Try different ways to access environment variables
+    if (typeof window !== 'undefined' && (window as any)[key]) {
+      return (window as any)[key];
+    }
+    
+    if (typeof globalThis !== 'undefined' && (globalThis as any)[key]) {
+      return (globalThis as any)[key];
+    }
+    
+    const importMeta = (globalThis as any).importMeta || (global as any).importMeta;
+    if (importMeta?.env?.[key]) {
+      return importMeta.env[key];
+    }
+    
+    // Try process.env as fallback
+    if (typeof process !== 'undefined' && process.env?.[key]) {
+      return process.env[key];
+    }
+    
+    return undefined;
+  } catch (error) {
+    console.warn(`Failed to access environment variable ${key}:`, error);
+    return undefined;
+  }
+};
 
-// Validate that the secret key exists
-if (!SECRET_KEY) {
-  throw new Error("VITE_SECRET_KEY environment variable is not set");
-}
+// Get secret key with validation
+const getSecretKey = (): string => {
+  const key = getEnvironmentVariable('VITE_SECRET_KEY');
+  
+  if (!key) {
+    // For development, you can use a default key
+    // In production, this should throw an error
+    const isDevelopment = getEnvironmentVariable('NODE_ENV') !== 'production';
+    
+    if (isDevelopment) {
+      console.warn('VITE_SECRET_KEY not found, using development fallback');
+      return 'development-secret-key-change-in-production';
+    } else {
+      throw new Error('VITE_SECRET_KEY environment variable is required in production');
+    }
+  }
+  
+  return key;
+};
 
 const encryptData = (data: any): string | null => {
   try {
@@ -15,7 +57,8 @@ const encryptData = (data: any): string | null => {
       return null;
     }
 
-    return CryptoJS.AES.encrypt(JSON.stringify(data), SECRET_KEY).toString();
+    const secretKey = getSecretKey();
+    return CryptoJS.AES.encrypt(JSON.stringify(data), secretKey).toString();
   } catch (error) {
     console.error("Encryption failed:", error);
     return null;
@@ -35,8 +78,10 @@ const decryptData = (encryptedData: any): any => {
       return null;
     }
 
+    const secretKey = getSecretKey();
+    
     // Perform decryption
-    const bytes = CryptoJS.AES.decrypt(encryptedData, SECRET_KEY);
+    const bytes = CryptoJS.AES.decrypt(encryptedData, secretKey);
     
     // Check if decryption produced valid bytes
     if (!bytes || bytes.sigBytes <= 0) {
