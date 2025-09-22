@@ -1,6 +1,4 @@
 //@ts-nocheck
-"use client"
-
 import type React from "react"
 import { useEffect, useState } from "react"
 import { useAppDispatch, useAppSelector } from "../hooks/use-apps"
@@ -29,58 +27,119 @@ export const CreateCustomer = () => {
   const { loading, success, error } = useAppSelector(selectCustomers)
 
   const [formData, setFormData] = useState<CreateCustomerRequest>({
-    title: "",
-    lastName: "",
-    firstName: "",
-    otherName: "",
+    title: "string",
+    lastName: "string",
+    firstName: "string",
+    otherName: "string",
     gender: "MALE",
-    email: "",
-    address: "",
-    phoneLine1: "",
-    phoneLine2: "",
-    isOrg: false,
-    orgName: "",
-    orgRegNumber: "",
-    orgRegDate: "",
-    taxIdNumber: "",
-    cityLGA: "",
-    stateID: "",
-    nationality: "",
-    dateOfBirth: "",
+    email: "user@example.com",
+    address: "string",
+    phoneLine1: "0",
+    phoneLine2: "0",
+    isOrg: true,
+    orgName: "string",
+    orgRegNumber: "string",
+    orgRegDate: "2025-09-22",
+    taxIdNumber: "string",
+    cityLGA: "string",
+    stateID: "string",
+    nationality: "string",
+    dateOfBirth: "2025-09-22",
     kycType: "NOT_AVAILABLE",
-    kycNumber: "",
-    kycIssueDate: "",
-    kycExpiryDate: "",
+    kycNumber: "string",
+    kycIssueDate: "2025-09-22",
+    kycExpiryDate: "2025-09-22",
     nextOfKin: {
-      title: "",
-      lastName: "",
-      firstName: "",
-      otherName: "",
+      title: "string",
+      lastName: "string",
+      firstName: "string",
+      otherName: "string",
       gender: "MALE",
-      email: "",
-      address: "",
-      phoneLine1: "",
-      phoneLine2: "",
+      email: "user@example.com",
+      address: "string",
+      phoneLine1: "0",
+      phoneLine2: "0",
     },
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const handleSubmit = (e: React.FormEvent) => {
+    console.log(formData)
+
     e.preventDefault()
 
     const newErrors: Record<string, string> = {}
 
+    // Customer type specific validation
     if (formData.isOrg) {
+      // Organization validation
       if (!formData.orgName.trim()) newErrors.orgName = "Organization name is required"
+      if (!formData.orgRegNumber.trim()) newErrors.orgRegNumber = "Registration number is required"
+      if (!formData.orgRegDate.trim()) newErrors.orgRegDate = "Registration date is required"
+      if (!formData.taxIdNumber.trim()) newErrors.taxIdNumber = "Tax ID number is required"
     } else {
+      // Individual validation
       if (!formData.firstName.trim()) newErrors.firstName = "First name is required"
       if (!formData.lastName.trim()) newErrors.lastName = "Last name is required"
+      if (!formData.title.trim()) newErrors.title = "Title is required"
+      if (!formData.gender.trim()) newErrors.gender = "Gender is required"
+      if (!formData.dateOfBirth.trim()) newErrors.dateOfBirth = "Date of birth is required"
+      if (!formData.nationality.trim()) newErrors.nationality = "Nationality is required"
+
+      // Next of Kin validation for individuals
+      if (!formData.nextOfKin.firstName.trim()) newErrors.nextOfKinFirstName = "Next of kin first name is required"
+      if (!formData.nextOfKin.lastName.trim()) newErrors.nextOfKinLastName = "Next of kin last name is required"
+      if (!formData.nextOfKin.phoneLine1.trim()) newErrors.nextOfKinPhoneLine1 = "Next of kin primary phone is required"
+      if (!formData.nextOfKin.address.trim()) newErrors.nextOfKinAddress = "Next of kin address is required"
+      if (formData.nextOfKin.email && !/\S+@\S+\.\S+/.test(formData.nextOfKin.email)) {
+        newErrors.nextOfKinEmail = "Please enter a valid next of kin email address"
+      }
     }
 
+    // Common field validation
     if (!formData.address.trim()) newErrors.address = "Address is required"
+    if (!formData.phoneLine1.trim()) newErrors.phoneLine1 = "Primary phone is required"
+    if (!formData.cityLGA.trim()) newErrors.cityLGA = "City/LGA is required"
+    if (!formData.stateID.trim()) newErrors.stateID = "State is required"
+
+    // Email validation (optional but must be valid if provided)
     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Please enter a valid email address"
+    }
+
+    // KYC validation
+    if (formData.kycType !== "NOT_AVAILABLE") {
+      if (!formData.kycNumber.trim()) newErrors.kycNumber = "KYC number is required when KYC type is selected"
+      if (!formData.kycIssueDate.trim()) newErrors.kycIssueDate = "KYC issue date is required when KYC type is selected"
+      if (!formData.kycExpiryDate.trim())
+        newErrors.kycExpiryDate = "KYC expiry date is required when KYC type is selected"
+    }
+
+    // Phone number validation
+    const phoneRegex = /^[0-9+\-\s()]+$/
+    if (formData.phoneLine1 && !phoneRegex.test(formData.phoneLine1)) {
+      newErrors.phoneLine1 = "Please enter a valid phone number"
+    }
+    if (formData.phoneLine2 && !phoneRegex.test(formData.phoneLine2)) {
+      newErrors.phoneLine2 = "Please enter a valid phone number"
+    }
+
+    // Date validation
+    if (formData.dateOfBirth) {
+      const birthDate = new Date(formData.dateOfBirth)
+      const today = new Date()
+      if (birthDate >= today) {
+        newErrors.dateOfBirth = "Date of birth must be in the past"
+      }
+    }
+
+    if (formData.kycIssueDate && formData.kycExpiryDate) {
+      const issueDate = new Date(formData.kycIssueDate)
+      const expiryDate = new Date(formData.kycExpiryDate)
+      if (issueDate >= expiryDate) {
+        newErrors.kycExpiryDate = "KYC expiry date must be after issue date"
+      }
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -88,7 +147,46 @@ export const CreateCustomer = () => {
       return
     }
 
-    dispatch(createCustomer(formData))
+    // Create payload based on customer type
+    let payload: any = {
+      title: formData.title,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      otherName: formData.otherName,
+      gender: formData.gender,
+      nationality: formData.nationality,
+      dateOfBirth: formData.dateOfBirth,
+      nextOfKin: formData.nextOfKin,
+      email: formData.email,
+      address: formData.address,
+      phoneLine1: formData.phoneLine1,
+      phoneLine2: formData.phoneLine2,
+      cityLGA: formData.cityLGA,
+      stateID: formData.stateID,
+      kycType: formData.kycType,
+      kycNumber: formData.kycNumber,
+      kycIssueDate: formData.kycIssueDate,
+      kycExpiryDate: formData.kycExpiryDate,
+      isOrg: formData.isOrg,
+    }
+
+    if (formData.isOrg) {
+      // Organization fields only
+      payload = {
+        ...payload,
+        orgName: formData.orgName,
+        orgRegNumber: formData.orgRegNumber,
+        orgRegDate: formData.orgRegDate,
+        taxIdNumber: formData.taxIdNumber,
+      }
+    } else {
+      // Individual fields only
+      payload = {
+        ...payload
+      }
+    }
+
+    dispatch(createCustomer(payload))
   }
 
   const handleClose = () => {
@@ -144,8 +242,10 @@ export const CreateCustomer = () => {
       setFormData((prev) => ({ ...prev, [field]: value }))
     }
 
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }))
+    // Clear error when user starts typing
+    const errorKey = nested ? `${nested}${field.charAt(0).toUpperCase() + field.slice(1)}` : field
+    if (errors[errorKey]) {
+      setErrors((prev) => ({ ...prev, [errorKey]: "" }))
     }
   }
 
@@ -207,42 +307,48 @@ export const CreateCustomer = () => {
                     {errors.orgName && <span className="cc-error-text">{errors.orgName}</span>}
                   </div>
                   <div className="cc-form-field">
-                    <Label htmlFor="orgRegNumber">Registration Number</Label>
+                    <Label htmlFor="orgRegNumber">Registration Number *</Label>
                     <Input
                       id="orgRegNumber"
                       value={formData.orgRegNumber}
                       onChange={(e) => handleInputChange("orgRegNumber", e.target.value)}
                       placeholder="Enter registration number"
+                      className={errors.orgRegNumber ? "cc-error" : ""}
                     />
+                    {errors.orgRegNumber && <span className="cc-error-text">{errors.orgRegNumber}</span>}
                   </div>
                   <div className="cc-form-field">
-                    <Label htmlFor="orgRegDate">Registration Date</Label>
+                    <Label htmlFor="orgRegDate">Registration Date *</Label>
                     <Input
                       id="orgRegDate"
                       type="date"
                       value={formData.orgRegDate}
                       onChange={(e) => handleInputChange("orgRegDate", e.target.value)}
+                      className={errors.orgRegDate ? "cc-error" : ""}
                     />
+                    {errors.orgRegDate && <span className="cc-error-text">{errors.orgRegDate}</span>}
                   </div>
                   <div className="cc-form-field">
-                    <Label htmlFor="taxIdNumber">Tax ID Number</Label>
+                    <Label htmlFor="taxIdNumber">Tax ID Number *</Label>
                     <Input
                       id="taxIdNumber"
                       value={formData.taxIdNumber}
                       onChange={(e) => handleInputChange("taxIdNumber", e.target.value)}
                       placeholder="Enter tax ID number"
+                      className={errors.taxIdNumber ? "cc-error" : ""}
                     />
+                    {errors.taxIdNumber && <span className="cc-error-text">{errors.taxIdNumber}</span>}
                   </div>
                 </>
               ) : (
                 <>
                   <div className="cc-form-field">
-                    <Label htmlFor="title">Title</Label>
+                    <Label htmlFor="title">Title *</Label>
                     <select
                       id="title"
                       value={formData.title}
                       onChange={(e) => handleInputChange("title", e.target.value)}
-                      className="cc-select"
+                      className={`cc-select ${errors.title ? "cc-error" : ""}`}
                     >
                       <option value="">Select Title</option>
                       <option value="Mr">Mr</option>
@@ -251,6 +357,7 @@ export const CreateCustomer = () => {
                       <option value="Dr">Dr</option>
                       <option value="Prof">Prof</option>
                     </select>
+                    {errors.title && <span className="cc-error-text">{errors.title}</span>}
                   </div>
                   <div className="cc-form-field">
                     <Label htmlFor="firstName">First Name *</Label>
@@ -284,34 +391,39 @@ export const CreateCustomer = () => {
                     />
                   </div>
                   <div className="cc-form-field">
-                    <Label htmlFor="gender">Gender</Label>
+                    <Label htmlFor="gender">Gender *</Label>
                     <select
                       id="gender"
                       value={formData.gender}
                       onChange={(e) => handleInputChange("gender", e.target.value)}
-                      className="cc-select"
+                      className={`cc-select ${errors.gender ? "cc-error" : ""}`}
                     >
                       <option value="MALE">Male</option>
                       <option value="FEMALE">Female</option>
                     </select>
+                    {errors.gender && <span className="cc-error-text">{errors.gender}</span>}
                   </div>
                   <div className="cc-form-field">
-                    <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                    <Label htmlFor="dateOfBirth">Date of Birth *</Label>
                     <Input
                       id="dateOfBirth"
                       type="date"
                       value={formData.dateOfBirth}
                       onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                      className={errors.dateOfBirth ? "cc-error" : ""}
                     />
+                    {errors.dateOfBirth && <span className="cc-error-text">{errors.dateOfBirth}</span>}
                   </div>
                   <div className="cc-form-field">
-                    <Label htmlFor="nationality">Nationality</Label>
+                    <Label htmlFor="nationality">Nationality *</Label>
                     <Input
                       id="nationality"
                       value={formData.nationality}
                       onChange={(e) => handleInputChange("nationality", e.target.value)}
                       placeholder="Enter nationality"
+                      className={errors.nationality ? "cc-error" : ""}
                     />
+                    {errors.nationality && <span className="cc-error-text">{errors.nationality}</span>}
                   </div>
                 </>
               )}
@@ -335,13 +447,15 @@ export const CreateCustomer = () => {
                 {errors.email && <span className="cc-error-text">{errors.email}</span>}
               </div>
               <div className="cc-form-field">
-                <Label htmlFor="phoneLine1">Primary Phone</Label>
+                <Label htmlFor="phoneLine1">Primary Phone *</Label>
                 <Input
                   id="phoneLine1"
                   value={formData.phoneLine1}
                   onChange={(e) => handleInputChange("phoneLine1", e.target.value)}
                   placeholder="Enter primary phone number"
+                  className={errors.phoneLine1 ? "cc-error" : ""}
                 />
+                {errors.phoneLine1 && <span className="cc-error-text">{errors.phoneLine1}</span>}
               </div>
               <div className="cc-form-field">
                 <Label htmlFor="phoneLine2">Secondary Phone</Label>
@@ -350,25 +464,31 @@ export const CreateCustomer = () => {
                   value={formData.phoneLine2}
                   onChange={(e) => handleInputChange("phoneLine2", e.target.value)}
                   placeholder="Enter secondary phone number"
+                  className={errors.phoneLine2 ? "cc-error" : ""}
                 />
+                {errors.phoneLine2 && <span className="cc-error-text">{errors.phoneLine2}</span>}
               </div>
               <div className="cc-form-field">
-                <Label htmlFor="stateID">State</Label>
+                <Label htmlFor="stateID">State *</Label>
                 <Input
                   id="stateID"
                   value={formData.stateID}
                   onChange={(e) => handleInputChange("stateID", e.target.value)}
                   placeholder="Enter state"
+                  className={errors.stateID ? "cc-error" : ""}
                 />
+                {errors.stateID && <span className="cc-error-text">{errors.stateID}</span>}
               </div>
               <div className="cc-form-field">
-                <Label htmlFor="cityLGA">City/LGA</Label>
+                <Label htmlFor="cityLGA">City/LGA *</Label>
                 <Input
                   id="cityLGA"
                   value={formData.cityLGA}
                   onChange={(e) => handleInputChange("cityLGA", e.target.value)}
                   placeholder="Enter city or LGA"
+                  className={errors.cityLGA ? "cc-error" : ""}
                 />
+                {errors.cityLGA && <span className="cc-error-text">{errors.cityLGA}</span>}
               </div>
             </div>
 
@@ -396,7 +516,7 @@ export const CreateCustomer = () => {
                   id="kycType"
                   value={formData.kycType}
                   onChange={(e) => handleInputChange("kycType", e.target.value)}
-                  className="cc-select"
+                  className={`cc-select ${errors.kycType ? "cc-error" : ""}`}
                 >
                   <option value="NOT_AVAILABLE">Not Available</option>
                   <option value="PASSPORT">Passport</option>
@@ -404,6 +524,7 @@ export const CreateCustomer = () => {
                   <option value="NATIONAL_ID">National ID</option>
                   <option value="VOTERS_CARD">Voter's Card</option>
                 </select>
+                {errors.kycType && <span className="cc-error-text">{errors.kycType}</span>}
               </div>
               <div className="cc-form-field">
                 <Label htmlFor="kycNumber">KYC Number</Label>
@@ -412,7 +533,9 @@ export const CreateCustomer = () => {
                   value={formData.kycNumber}
                   onChange={(e) => handleInputChange("kycNumber", e.target.value)}
                   placeholder="Enter KYC number"
+                  className={errors.kycNumber ? "cc-error" : ""}
                 />
+                {errors.kycNumber && <span className="cc-error-text">{errors.kycNumber}</span>}
               </div>
               <div className="cc-form-field">
                 <Label htmlFor="kycIssueDate">KYC Issue Date</Label>
@@ -421,7 +544,9 @@ export const CreateCustomer = () => {
                   type="date"
                   value={formData.kycIssueDate}
                   onChange={(e) => handleInputChange("kycIssueDate", e.target.value)}
+                  className={errors.kycIssueDate ? "cc-error" : ""}
                 />
+                {errors.kycIssueDate && <span className="cc-error-text">{errors.kycIssueDate}</span>}
               </div>
               <div className="cc-form-field">
                 <Label htmlFor="kycExpiryDate">KYC Expiry Date</Label>
@@ -430,13 +555,14 @@ export const CreateCustomer = () => {
                   type="date"
                   value={formData.kycExpiryDate}
                   onChange={(e) => handleInputChange("kycExpiryDate", e.target.value)}
+                  className={errors.kycExpiryDate ? "cc-error" : ""}
                 />
+                {errors.kycExpiryDate && <span className="cc-error-text">{errors.kycExpiryDate}</span>}
               </div>
             </div>
           </div>
 
           {/* Next of Kin (for individuals) */}
-          {!formData.isOrg && (
             <div className="cc-form-section">
               <h3 className="cc-section-title">Next of Kin</h3>
               <div className="cc-form-grid">
@@ -457,21 +583,34 @@ export const CreateCustomer = () => {
                   </select>
                 </div>
                 <div className="cc-form-field">
-                  <Label htmlFor="nokFirstName">First Name</Label>
+                  <Label htmlFor="nokFirstName">First Name *</Label>
                   <Input
                     id="nokFirstName"
                     value={formData.nextOfKin.firstName}
                     onChange={(e) => handleInputChange("firstName", e.target.value, "nextOfKin")}
                     placeholder="Enter first name"
+                    className={errors.nextOfKinFirstName ? "cc-error" : ""}
                   />
+                  {errors.nextOfKinFirstName && <span className="cc-error-text">{errors.nextOfKinFirstName}</span>}
                 </div>
                 <div className="cc-form-field">
-                  <Label htmlFor="nokLastName">Last Name</Label>
+                  <Label htmlFor="nokLastName">Last Name *</Label>
                   <Input
                     id="nokLastName"
                     value={formData.nextOfKin.lastName}
                     onChange={(e) => handleInputChange("lastName", e.target.value, "nextOfKin")}
                     placeholder="Enter last name"
+                    className={errors.nextOfKinLastName ? "cc-error" : ""}
+                  />
+                  {errors.nextOfKinLastName && <span className="cc-error-text">{errors.nextOfKinLastName}</span>}
+                </div>
+                <div className="cc-form-field">
+                  <Label htmlFor="nokOtherName">Other Name</Label>
+                  <Input
+                    id="nokOtherName"
+                    value={formData.nextOfKin.otherName}
+                    onChange={(e) => handleInputChange("otherName", e.target.value, "nextOfKin")}
+                    placeholder="Enter other name"
                   />
                 </div>
                 <div className="cc-form-field">
@@ -494,31 +633,44 @@ export const CreateCustomer = () => {
                     value={formData.nextOfKin.email}
                     onChange={(e) => handleInputChange("email", e.target.value, "nextOfKin")}
                     placeholder="Enter email address"
+                    className={errors.nextOfKinEmail ? "cc-error" : ""}
                   />
+                  {errors.nextOfKinEmail && <span className="cc-error-text">{errors.nextOfKinEmail}</span>}
                 </div>
                 <div className="cc-form-field">
-                  <Label htmlFor="nokPhone">Phone</Label>
+                  <Label htmlFor="nokPhone1">Primary Phone *</Label>
                   <Input
-                    id="nokPhone"
+                    id="nokPhone1"
                     value={formData.nextOfKin.phoneLine1}
                     onChange={(e) => handleInputChange("phoneLine1", e.target.value, "nextOfKin")}
-                    placeholder="Enter phone number"
+                    placeholder="Enter primary phone number"
+                    className={errors.nextOfKinPhoneLine1 ? "cc-error" : ""}
+                  />
+                  {errors.nextOfKinPhoneLine1 && <span className="cc-error-text">{errors.nextOfKinPhoneLine1}</span>}
+                </div>
+                <div className="cc-form-field">
+                  <Label htmlFor="nokPhone2">Secondary Phone</Label>
+                  <Input
+                    id="nokPhone2"
+                    value={formData.nextOfKin.phoneLine2}
+                    onChange={(e) => handleInputChange("phoneLine2", e.target.value, "nextOfKin")}
+                    placeholder="Enter secondary phone number"
                   />
                 </div>
               </div>
               <div className="cc-form-field">
-                <Label htmlFor="nokAddress">Address</Label>
+                <Label htmlFor="nokAddress">Address *</Label>
                 <textarea
                   id="nokAddress"
                   value={formData.nextOfKin.address}
                   onChange={(e) => handleInputChange("address", e.target.value, "nextOfKin")}
                   placeholder="Enter address"
-                  className="cc-textarea"
+                  className={`cc-textarea ${errors.nextOfKinAddress ? "cc-error" : ""}`}
                   rows={2}
                 />
+                {errors.nextOfKinAddress && <span className="cc-error-text">{errors.nextOfKinAddress}</span>}
               </div>
             </div>
-          )}
 
           {error.createCustomer && <div className="cc-error-message">{error.createCustomer}</div>}
 
@@ -625,16 +777,40 @@ export const EditCustomer = () => {
 
     const newErrors: Record<string, string> = {}
 
+    // Customer type specific validation
     if (formData.isOrg) {
+      // Organization validation
       if (!formData.orgName.trim()) newErrors.orgName = "Organization name is required"
+      if (!formData.orgRegNumber.trim()) newErrors.orgRegNumber = "Registration number is required"
+      if (!formData.orgRegDate.trim()) newErrors.orgRegDate = "Registration date is required"
+      if (!formData.taxIdNumber.trim()) newErrors.taxIdNumber = "Tax ID number is required"
     } else {
+      // Individual validation
       if (!formData.firstName.trim()) newErrors.firstName = "First name is required"
       if (!formData.lastName.trim()) newErrors.lastName = "Last name is required"
+      if (!formData.title.trim()) newErrors.title = "Title is required"
+      if (!formData.gender.trim()) newErrors.gender = "Gender is required"
+      if (!formData.dateOfBirth.trim()) newErrors.dateOfBirth = "Date of birth is required"
+      if (!formData.nationality.trim()) newErrors.nationality = "Nationality is required"
     }
 
+    // Common field validation
     if (!formData.address.trim()) newErrors.address = "Address is required"
+    if (!formData.phoneLine1.trim()) newErrors.phoneLine1 = "Primary phone is required"
+    if (!formData.cityLGA.trim()) newErrors.cityLGA = "City/LGA is required"
+    if (!formData.stateID.trim()) newErrors.stateID = "State is required"
+
+    // Email validation (optional but must be valid if provided)
     if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Please enter a valid email address"
+    }
+
+    // KYC validation
+    if (formData.kycType !== "NOT_AVAILABLE") {
+      if (!formData.kycNumber.trim()) newErrors.kycNumber = "KYC number is required when KYC type is selected"
+      if (!formData.kycIssueDate.trim()) newErrors.kycIssueDate = "KYC issue date is required when KYC type is selected"
+      if (!formData.kycExpiryDate.trim())
+        newErrors.kycExpiryDate = "KYC expiry date is required when KYC type is selected"
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -642,7 +818,45 @@ export const EditCustomer = () => {
       return
     }
 
-    dispatch(updateCustomer({ customerID: currentCustomer.customerID, customerData: formData }))
+    // Create payload based on customer type
+    let payload: any = {
+      title: formData.title,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      otherName: formData.otherName,
+      gender: formData.gender,
+      nationality: formData.nationality,
+      dateOfBirth: formData.dateOfBirth,
+      nextOfKin: formData.nextOfKin,
+      email: formData.email,
+      address: formData.address,
+      phoneLine1: formData.phoneLine1,
+      phoneLine2: formData.phoneLine2,
+      cityLGA: formData.cityLGA,
+      stateID: formData.stateID,
+      kycType: formData.kycType,
+      kycNumber: formData.kycNumber,
+      kycIssueDate: formData.kycIssueDate,
+      kycExpiryDate: formData.kycExpiryDate,
+      isOrg: formData.isOrg,
+    }
+
+    if (formData.isOrg) {
+      // Organization fields only
+      payload = {
+        ...payload,
+        orgName: formData.orgName,
+        orgRegNumber: formData.orgRegNumber,
+        orgRegDate: formData.orgRegDate,
+        taxIdNumber: formData.taxIdNumber,
+      }
+    } else {
+      // Individual fields only
+      payload = {
+        ...payload      }
+    }
+
+    dispatch(updateCustomer({ customerID: currentCustomer.customerID, customerData: payload }))
   }
 
   const handleClose = () => {
@@ -663,8 +877,10 @@ export const EditCustomer = () => {
       setFormData((prev) => ({ ...prev, [field]: value }))
     }
 
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }))
+    // Clear error when user starts typing
+    const errorKey = nested ? `${nested}${field.charAt(0).toUpperCase() + field.slice(1)}` : field
+    if (errors[errorKey]) {
+      setErrors((prev) => ({ ...prev, [errorKey]: "" }))
     }
   }
 
@@ -713,42 +929,48 @@ export const EditCustomer = () => {
                     {errors.orgName && <span className="ec-error-text">{errors.orgName}</span>}
                   </div>
                   <div className="ec-form-field">
-                    <Label htmlFor="editOrgRegNumber">Registration Number</Label>
+                    <Label htmlFor="editOrgRegNumber">Registration Number *</Label>
                     <Input
                       id="editOrgRegNumber"
                       value={formData.orgRegNumber}
                       onChange={(e) => handleInputChange("orgRegNumber", e.target.value)}
                       placeholder="Enter registration number"
+                      className={errors.orgRegNumber ? "ec-error" : ""}
                     />
+                    {errors.orgRegNumber && <span className="ec-error-text">{errors.orgRegNumber}</span>}
                   </div>
                   <div className="ec-form-field">
-                    <Label htmlFor="editOrgRegDate">Registration Date</Label>
+                    <Label htmlFor="editOrgRegDate">Registration Date *</Label>
                     <Input
                       id="editOrgRegDate"
                       type="date"
                       value={formData.orgRegDate}
                       onChange={(e) => handleInputChange("orgRegDate", e.target.value)}
+                      className={errors.orgRegDate ? "ec-error" : ""}
                     />
+                    {errors.orgRegDate && <span className="ec-error-text">{errors.orgRegDate}</span>}
                   </div>
                   <div className="ec-form-field">
-                    <Label htmlFor="editTaxIdNumber">Tax ID Number</Label>
+                    <Label htmlFor="editTaxIdNumber">Tax ID Number *</Label>
                     <Input
                       id="editTaxIdNumber"
                       value={formData.taxIdNumber}
                       onChange={(e) => handleInputChange("taxIdNumber", e.target.value)}
                       placeholder="Enter tax ID number"
+                      className={errors.taxIdNumber ? "ec-error" : ""}
                     />
+                    {errors.taxIdNumber && <span className="ec-error-text">{errors.taxIdNumber}</span>}
                   </div>
                 </>
               ) : (
                 <>
                   <div className="ec-form-field">
-                    <Label htmlFor="editTitle">Title</Label>
+                    <Label htmlFor="editTitle">Title *</Label>
                     <select
                       id="editTitle"
                       value={formData.title}
                       onChange={(e) => handleInputChange("title", e.target.value)}
-                      className="ec-select"
+                      className={`ec-select ${errors.title ? "ec-error" : ""}`}
                     >
                       <option value="">Select Title</option>
                       <option value="Mr">Mr</option>
@@ -757,6 +979,7 @@ export const EditCustomer = () => {
                       <option value="Dr">Dr</option>
                       <option value="Prof">Prof</option>
                     </select>
+                    {errors.title && <span className="ec-error-text">{errors.title}</span>}
                   </div>
                   <div className="ec-form-field">
                     <Label htmlFor="editFirstName">First Name *</Label>
@@ -790,34 +1013,39 @@ export const EditCustomer = () => {
                     />
                   </div>
                   <div className="ec-form-field">
-                    <Label htmlFor="editGender">Gender</Label>
+                    <Label htmlFor="editGender">Gender *</Label>
                     <select
                       id="editGender"
                       value={formData.gender}
                       onChange={(e) => handleInputChange("gender", e.target.value)}
-                      className="ec-select"
+                      className={`ec-select ${errors.gender ? "ec-error" : ""}`}
                     >
                       <option value="MALE">Male</option>
                       <option value="FEMALE">Female</option>
                     </select>
+                    {errors.gender && <span className="ec-error-text">{errors.gender}</span>}
                   </div>
                   <div className="ec-form-field">
-                    <Label htmlFor="editDateOfBirth">Date of Birth</Label>
+                    <Label htmlFor="editDateOfBirth">Date of Birth *</Label>
                     <Input
                       id="editDateOfBirth"
                       type="date"
                       value={formData.dateOfBirth}
                       onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                      className={errors.dateOfBirth ? "ec-error" : ""}
                     />
+                    {errors.dateOfBirth && <span className="ec-error-text">{errors.dateOfBirth}</span>}
                   </div>
                   <div className="ec-form-field">
-                    <Label htmlFor="editNationality">Nationality</Label>
+                    <Label htmlFor="editNationality">Nationality *</Label>
                     <Input
                       id="editNationality"
                       value={formData.nationality}
                       onChange={(e) => handleInputChange("nationality", e.target.value)}
                       placeholder="Enter nationality"
+                      className={errors.nationality ? "ec-error" : ""}
                     />
+                    {errors.nationality && <span className="ec-error-text">{errors.nationality}</span>}
                   </div>
                 </>
               )}
@@ -841,13 +1069,15 @@ export const EditCustomer = () => {
                 {errors.email && <span className="ec-error-text">{errors.email}</span>}
               </div>
               <div className="ec-form-field">
-                <Label htmlFor="editPhoneLine1">Primary Phone</Label>
+                <Label htmlFor="editPhoneLine1">Primary Phone *</Label>
                 <Input
                   id="editPhoneLine1"
                   value={formData.phoneLine1}
                   onChange={(e) => handleInputChange("phoneLine1", e.target.value)}
                   placeholder="Enter primary phone number"
+                  className={errors.phoneLine1 ? "ec-error" : ""}
                 />
+                {errors.phoneLine1 && <span className="ec-error-text">{errors.phoneLine1}</span>}
               </div>
               <div className="ec-form-field">
                 <Label htmlFor="editPhoneLine2">Secondary Phone</Label>
@@ -859,22 +1089,26 @@ export const EditCustomer = () => {
                 />
               </div>
               <div className="ec-form-field">
-                <Label htmlFor="editStateID">State</Label>
+                <Label htmlFor="editStateID">State *</Label>
                 <Input
                   id="editStateID"
                   value={formData.stateID}
                   onChange={(e) => handleInputChange("stateID", e.target.value)}
                   placeholder="Enter state"
+                  className={errors.stateID ? "ec-error" : ""}
                 />
+                {errors.stateID && <span className="ec-error-text">{errors.stateID}</span>}
               </div>
               <div className="ec-form-field">
-                <Label htmlFor="editCityLGA">City/LGA</Label>
+                <Label htmlFor="editCityLGA">City/LGA *</Label>
                 <Input
                   id="editCityLGA"
                   value={formData.cityLGA}
                   onChange={(e) => handleInputChange("cityLGA", e.target.value)}
                   placeholder="Enter city or LGA"
+                  className={errors.cityLGA ? "ec-error" : ""}
                 />
+                {errors.cityLGA && <span className="ec-error-text">{errors.cityLGA}</span>}
               </div>
             </div>
 
@@ -918,7 +1152,9 @@ export const EditCustomer = () => {
                   value={formData.kycNumber}
                   onChange={(e) => handleInputChange("kycNumber", e.target.value)}
                   placeholder="Enter KYC number"
+                  className={errors.kycNumber ? "ec-error" : ""}
                 />
+                {errors.kycNumber && <span className="ec-error-text">{errors.kycNumber}</span>}
               </div>
               <div className="ec-form-field">
                 <Label htmlFor="editKycIssueDate">KYC Issue Date</Label>
@@ -927,7 +1163,9 @@ export const EditCustomer = () => {
                   type="date"
                   value={formData.kycIssueDate}
                   onChange={(e) => handleInputChange("kycIssueDate", e.target.value)}
+                  className={errors.kycIssueDate ? "ec-error" : ""}
                 />
+                {errors.kycIssueDate && <span className="ec-error-text">{errors.kycIssueDate}</span>}
               </div>
               <div className="ec-form-field">
                 <Label htmlFor="editKycExpiryDate">KYC Expiry Date</Label>
@@ -936,7 +1174,9 @@ export const EditCustomer = () => {
                   type="date"
                   value={formData.kycExpiryDate}
                   onChange={(e) => handleInputChange("kycExpiryDate", e.target.value)}
+                  className={errors.kycExpiryDate ? "ec-error" : ""}
                 />
+                {errors.kycExpiryDate && <span className="ec-error-text">{errors.kycExpiryDate}</span>}
               </div>
             </div>
           </div>
@@ -1148,6 +1388,10 @@ export const CustomerDetails = () => {
                     {`${currentCustomer.nextOfKin.title || ""} ${currentCustomer.nextOfKin.firstName || ""} ${currentCustomer.nextOfKin.lastName || ""}`.trim() ||
                       "N/A"}
                   </span>
+                </div>
+                <div className="cd-info-item">
+                  <span className="cd-label">Other Name:</span>
+                  <span className="cd-value">{currentCustomer.nextOfKin.otherName || "N/A"}</span>
                 </div>
                 <div className="cd-info-item">
                   <span className="cd-label">Gender:</span>
