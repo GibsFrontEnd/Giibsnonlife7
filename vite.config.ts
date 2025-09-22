@@ -10,4 +10,8 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  build: {
+    // Force esbuild minifier to avoid native lightningcss binary on Render
+    minify: "esbuild",
+  },
 });
