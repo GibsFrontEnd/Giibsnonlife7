@@ -11,7 +11,7 @@ import {
 } from "@/components/UI/new-select";
 import { Button } from "@/components/UI/new-button";
 import { Search, Filter, X } from "lucide-react";
-import { BranchFiltersProps as BranchFP } from "@/types/branches";
+import type { BranchFiltersProps as BranchFP } from "@/types/branches";
 import SearchBar from "@/components/SearchBar";
 
 interface BranchFiltersProps {

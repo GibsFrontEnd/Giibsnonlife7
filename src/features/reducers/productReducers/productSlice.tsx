@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import apiCall from "../../../utils/api-call";
-import {
+import type {
   ProductCreateUpdateRequest,
   ProductState,
 } from "../../../types/product";
