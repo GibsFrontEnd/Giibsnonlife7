@@ -68,7 +68,7 @@ const ProductSubRisk = () => {
   const {
     risks,
     loading: riskLoading,
-      //@ts-ignore
+    //@ts-ignore
     error: riskError,
   } = useAppSelector(selectRisks);
   const { products, loading, error, success } = useAppSelector(selectProducts);
@@ -81,12 +81,23 @@ const ProductSubRisk = () => {
   const pageSize = 10;
   const totalPages = risks ? Math.ceil(risks.length / pageSize) : 0;
 
-  useEffect(() => {  //@ts-ignore
+  useEffect(() => {
+    //@ts-ignore
     dispatch(getAllRisks());
   }, [dispatch]);
 
   useEffect(() => {
     dispatch(clearProducts());
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(
+      getAllProducts({
+        riskId: "",
+        pageNumber: currentPage,
+        pageSize,
+      })
+    );
   }, [dispatch]);
 
   useEffect(() => {
@@ -156,7 +167,7 @@ const ProductSubRisk = () => {
       return;
     }
 
-      //@ts-ignore
+    //@ts-ignore
     dispatch(deleteProduct(productId));
   };
 
@@ -181,7 +192,7 @@ const ProductSubRisk = () => {
   };
 
   return (
-    <div className="py-4 flex flex-col gap-6 bg-[#f8f9fa] min-h-[calc(100vh_-_64px)]">
+    <div className="py-4 flex flex-col gap-6 mb-12 bg-[#f8f9fa] min-h-[calc(100vh_-_64px)]">
       <div className="w-full flex flex-wrap gap-4 items-center mb-4">
         <div className="flex-1">
           <DropdownMenu>
@@ -273,7 +284,7 @@ const ProductSubRisk = () => {
                       : "Create a new product under this risk or select a risk in the dropdown to get started."}
                   </p>
                   {searchTerm.length > 0 && (
-                    <Button   //@ts-ignore
+                    <Button //@ts-ignore
                       variant="outline"
                       size="sm"
                       onClick={() => setSearchTerm("")}
@@ -375,7 +386,7 @@ const ProductSubRisk = () => {
                               : "Create a new product under this risk or select a risk in the dropdown to get started."}
                           </p>
                           {searchTerm.length > 0 && (
-                            <Button   //@ts-ignore
+                            <Button //@ts-ignore
                               variant="outline"
                               size="sm"
                               onClick={() => setSearchTerm("")}
@@ -399,15 +410,19 @@ const ProductSubRisk = () => {
                         </TableCell>
                         <TableCell>{product.productName}</TableCell>
                         <TableCell>
-                          {  //@ts-ignore
-                          product.sections ? product.sections.length : 0}
+                          {
+                            //@ts-ignore
+                            product.sections ? product.sections.length : 0
+                          }
                         </TableCell>
                         <TableCell className="">
                           {product.fields ? product.fields.length : 0}
                         </TableCell>
                         <TableCell className="">
-                          {  //@ts-ignore
-                          product.rates ? product.rates.length : 0}
+                          {
+                            //@ts-ignore
+                            product.rates ? product.rates.length : 0
+                          }
                         </TableCell>
                         <TableCell className="flex gap-2 items-center justify-end">
                           <Button
@@ -420,7 +435,7 @@ const ProductSubRisk = () => {
                           >
                             Edit
                           </Button>
-                          <Button   //@ts-ignore
+                          <Button //@ts-ignore
                             variant="destructive"
                             className="action-button delete"
                             onClick={() => {
@@ -454,7 +469,7 @@ const ProductSubRisk = () => {
                   </div>
                   <div className="flex items-center space-x-1 sm:space-x-2 order-1 sm:order-2">
                     {/* First Page */}
-                    <Button   //@ts-ignore
+                    <Button //@ts-ignore
                       variant="outline"
                       size="sm"
                       onClick={() => goToPage(1)} // @ts-ignore
@@ -464,7 +479,7 @@ const ProductSubRisk = () => {
                       <ChevronsLeft className="h-4 w-4" />
                     </Button>
                     {/* Previous Page */}
-                    <Button   //@ts-ignore
+                    <Button //@ts-ignore
                       variant="outline"
                       size="sm"
                       onClick={() => goToPage(currentPage - 1)} // @ts-ignore
@@ -500,8 +515,8 @@ const ProductSubRisk = () => {
                           }
                           return (
                             <Button
-                              key={pageNum} 
-                                //@ts-ignore
+                              key={pageNum}
+                              //@ts-ignore
                               variant={
                                 currentPage === pageNum ? "default" : "outline"
                               }
@@ -521,7 +536,7 @@ const ProductSubRisk = () => {
                       )}
                     </div>
                     {/* Next Page */}
-                    <Button   //@ts-ignore
+                    <Button //@ts-ignore
                       variant="outline"
                       size="sm"
                       onClick={() => goToPage(currentPage + 1)} // @ts-ignore
@@ -533,7 +548,7 @@ const ProductSubRisk = () => {
                       <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
                     </Button>
                     {/* Last Page */}
-                    <Button   //@ts-ignore
+                    <Button //@ts-ignore
                       variant="outline"
                       size="sm"
                       onClick={() => goToPage(totalPages)} // @ts-ignore
@@ -556,7 +571,7 @@ const ProductSubRisk = () => {
         <ProductCreateModal
           isOpen={showCreateProductDialog}
           onClose={() => dispatch(setShowCreateProductDialog(false))}
-            //@ts-ignore
+          //@ts-ignore
           riskId={selectedRisk?.riskID || ""}
         />
       )}
