@@ -54,16 +54,16 @@ const Customers = () => {
 
   const filteredCustomers = customers.filter((customer) => {
     const matchesSearch =
-      customer.customerID.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.orgName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (customer.firstName && customer.firstName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (customer.lastName && customer.lastName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (customer.email && customer.email.toLowerCase().includes(searchTerm.toLowerCase()))
+    (customer.customerID?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (customer.orgName?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (customer.firstName?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (customer.lastName?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+    (customer.email?.toLowerCase() || "").includes(searchTerm.toLowerCase());
 
     const matchesFilter =
       filterType === "all" ||
-      (filterType === "organization" && customer.isOrg) ||
-      (filterType === "individual" && !customer.isOrg)
+      (filterType === "organization" && customer.InsuredType == "Corporate") ||
+      (filterType === "individual" && customer.InsuredType != "Corporate")
 
     return matchesSearch && matchesFilter
   })
@@ -94,7 +94,7 @@ const Customers = () => {
   }
 
   const getCustomerDisplayName = (customer: any) => {
-    if (customer.isOrg) {
+    if (customer.InsuredType == "Corporate") {
       return customer.orgName || "Unknown Organization"
     }
     return `${customer.firstName || ""} ${customer.lastName || ""}`.trim() || "Unknown Individual"
@@ -107,8 +107,8 @@ const Customers = () => {
 
   const getCustomerStats = () => {
     const total = customers.length
-    const organizations = customers.filter((c) => c.isOrg).length
-    const individuals = customers.filter((c) => !c.isOrg).length
+    const organizations = customers.filter((c) => c.insuredType == "Corporate").length
+    const individuals = customers.filter((c) => c.insuredType == "Individual").length
     const withEmail = customers.filter((c) => c.email && c.email.trim() !== "").length
 
     return { total, organizations, individuals, withEmail }
@@ -297,8 +297,8 @@ const Customers = () => {
                     </div>
                   </td>
                   <td className="sc-table-cell">
-                    <span className={`sc-type-badge ${customer.isOrg ? "sc-org" : "sc-individual"}`}>
-                      {customer.isOrg ? "Organization" : "Individual"}
+                    <span className={`sc-type-badge ${customer.InsuredType == "Corporate" ? "sc-org" : "sc-individual"}`}>
+                      {customer.InsuredType == "Corporate" ? "Organization" : "Individual"}
                     </span>
                   </td>
                   <td className="sc-table-cell">

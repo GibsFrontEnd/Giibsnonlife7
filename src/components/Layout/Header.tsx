@@ -8,7 +8,7 @@ const Header: React.FC = () => {
   const navItems = [
     { title: "Home", link: "/dashboard" },
     { title: "CSU", link: "/csu" },
-    { title: "Quotation", link: "/quotation" },
+    { title: "Quotation", link: "/quotations" },
     { title: "Underwriting", link: "/underwriting" },
     { title: "Claims", link: "/claims" },
     { title: "Reinsurance", link: "/re-insurance" },

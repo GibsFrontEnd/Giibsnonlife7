@@ -38,46 +38,68 @@ interface UiState {
   showDeleteProductDialog: boolean;
   showViewProductDetailsDialog: boolean;
 
-    // Policy dialogs
-    showCreatePolicyDialog: boolean;
-    showEditPolicyDialog: boolean;
-    showDeletePolicyDialog: boolean;
-    showViewPolicyDetailsDialog: boolean;
-    showRenewPolicyDialog: boolean;
-    showPolicyDetailsDialog: boolean;
-  
-  
+  // Policy dialogs
+  showCreatePolicyDialog: boolean;
+  showEditPolicyDialog: boolean;
+  showDeletePolicyDialog: boolean;
+  showViewPolicyDetailsDialog: boolean;
+  showRenewPolicyDialog: boolean;
+  showPolicyDetailsDialog: boolean;
 
-    // Party types risk dialogs
-    showCreatePartyTypeDialog: boolean;
-    showEditPartyTypeDialog: boolean;
-    showDeletePartyTypeDialog: boolean;
-    showViewPartyTypeDetailsDialog: boolean;
-  
-    showCreateCustomerDialog: boolean;
-    showEditCustomerDialog: boolean;
-    showDeleteCustomerDialog: boolean;
-    showCustomerDetailsDialog: boolean;
-    showViewCustomerDetailsDialog: boolean;
+  // Party type dialogs
+  showCreatePartyTypeDialog: boolean;
+  showEditPartyTypeDialog: boolean;
+  showDeletePartyTypeDialog: boolean;
+  showViewPartyTypeDetailsDialog: boolean;
 
-    showCreateAgentDialog: boolean;
-    showEditAgentDialog: boolean;
-    showDeleteAgentDialog: boolean;
-    showAgentDetailsDialog: boolean;
-    showViewAgentDetailsDialog: boolean;
+  // Customer dialogs
+  showCreateCustomerDialog: boolean;
+  showEditCustomerDialog: boolean;
+  showDeleteCustomerDialog: boolean;
+  showCustomerDetailsDialog: boolean;
+  showViewCustomerDetailsDialog: boolean;
 
-    
+  // Agent dialogs
+  showCreateAgentDialog: boolean;
+  showEditAgentDialog: boolean;
+  showDeleteAgentDialog: boolean;
+  showAgentDetailsDialog: boolean;
+  showViewAgentDetailsDialog: boolean;
 
-  // Region dialogs (NEW - added here)
+  // Region dialogs
   showCreateRegionDialog: boolean;
   showEditRegionDialog: boolean;
   showDeleteRegionDialog: boolean;
   showViewRegionDetailsDialog: boolean;
 
+  // Branch dialogs
   showCreateBranchDialog: boolean;
   showEditBranchDialog: boolean;
   showDeleteBranchDialog: boolean;
   showViewBranchDetailsDialog: boolean;
+
+  // Company dialogs (NEW)
+  showCreateCompanyDialog: boolean;
+  showEditCompanyDialog: boolean;
+  showDeleteCompanyDialog: boolean;
+  showViewCompanyDetailsDialog: boolean;
+
+  // Quotation / Proposal / Quote dialogs (merged from File 1)
+  showCreateProposalDialog: boolean;
+  showEditProposalDialog: boolean;
+  showDeleteProposalDialog: boolean;
+  showViewProposalDetailsDialog: boolean;
+
+  showCreateQuoteDialog: boolean;
+  showEditQuoteDialog: boolean;
+  showDeleteQuoteDialog: boolean;
+  showViewQuoteDetailsDialog: boolean;
+
+  showQuoteEditorDialog: boolean;
+  showSectionEditorDialog: boolean;
+  showConvertToPolicyDialog: boolean;
+
+  // ... add any other dialogs here as needed
 }
 
 const initialState: UiState = {
@@ -106,61 +128,78 @@ const initialState: UiState = {
   showDeleteRiskDialog: false,
   showViewRiskDetailsDialog: false,
 
-    // Product Sub risk
   // Sub Risk Section dialogs
   showCreateSubRiskSectionDialog: false,
   showEditSubRiskSectionDialog: false,
   showDeleteSubRiskSectionDialog: false,
   showViewSubRiskSectionDetailsDialog: false,
 
+  // Customer dialogs
   showCreateCustomerDialog: false,
   showEditCustomerDialog: false,
   showDeleteCustomerDialog: false,
   showCustomerDetailsDialog: false,
   showViewCustomerDetailsDialog: false,
 
+  // Agent dialogs
   showCreateAgentDialog: false,
   showEditAgentDialog: false,
   showDeleteAgentDialog: false,
   showAgentDetailsDialog: false,
   showViewAgentDetailsDialog: false,
 
-
-  
-   //  Party Type
+  // Party type dialogs
   showCreatePartyTypeDialog: false,
   showEditPartyTypeDialog: false,
   showDeletePartyTypeDialog: false,
   showViewPartyTypeDetailsDialog: false,
 
-     // ENQUIRIES Policy 
-     showCreatePolicyDialog: false,
-     showEditPolicyDialog: false,
-     showDeletePolicyDialog: false,
-     showViewPolicyDetailsDialog: false,
-     showRenewPolicyDialog: false,
-     showPolicyDetailsDialog: false,
-   
-   
+  // Policy dialogs
+  showCreatePolicyDialog: false,
+  showEditPolicyDialog: false,
+  showDeletePolicyDialog: false,
+  showViewPolicyDetailsDialog: false,
+  showRenewPolicyDialog: false,
+  showPolicyDetailsDialog: false,
 
-  
-  // Product Sub risk
   // Product dialogs
   showCreateProductDialog: false,
   showEditProductDialog: false,
   showDeleteProductDialog: false,
   showViewProductDetailsDialog: false,
 
-  // Region dialogs (NEW - added here)
+  // Region dialogs
   showCreateRegionDialog: false,
   showEditRegionDialog: false,
   showDeleteRegionDialog: false,
   showViewRegionDetailsDialog: false,
 
+  // Branch dialogs
   showCreateBranchDialog: false,
   showEditBranchDialog: false,
   showDeleteBranchDialog: false,
   showViewBranchDetailsDialog: false,
+
+  // Company dialogs (NEW)
+  showCreateCompanyDialog: false,
+  showEditCompanyDialog: false,
+  showDeleteCompanyDialog: false,
+  showViewCompanyDetailsDialog: false,
+
+  // Quotation / Proposal / Quote dialogs (merged from File 1)
+  showCreateProposalDialog: false,
+  showEditProposalDialog: false,
+  showDeleteProposalDialog: false,
+  showViewProposalDetailsDialog: false,
+
+  showCreateQuoteDialog: false,
+  showEditQuoteDialog: false,
+  showDeleteQuoteDialog: false,
+  showViewQuoteDetailsDialog: false,
+
+  showQuoteEditorDialog: false,
+  showSectionEditorDialog: false,
+  showConvertToPolicyDialog: false,
 };
 
 const uiSlice = createSlice({
@@ -260,7 +299,7 @@ const uiSlice = createSlice({
       state.showViewProductDetailsDialog = action.payload;
     },
 
-    // Product Party type reducers
+    // Party type reducers
     setShowCreatePartyTypeDialog: (state, action: PayloadAction<boolean>) => {
       state.showCreatePartyTypeDialog = action.payload;
     },
@@ -277,8 +316,8 @@ const uiSlice = createSlice({
       state.showViewPartyTypeDetailsDialog = action.payload;
     },
 
-     // Product Policy reducers
-     setShowCreatePolicyDialog: (state, action: PayloadAction<boolean>) => {
+    // Policy reducers
+    setShowCreatePolicyDialog: (state, action: PayloadAction<boolean>) => {
       state.showCreatePolicyDialog = action.payload;
     },
     setShowEditPolicyDialog: (state, action: PayloadAction<boolean>) => {
@@ -293,14 +332,15 @@ const uiSlice = createSlice({
     setShowPolicyDetailsDialog: (state, action: PayloadAction<boolean>) => {
       state.showPolicyDetailsDialog = action.payload;
     },
+    // FIXED: correctly set the policy details view flag
     setShowViewPolicyDetailsDialog: (
       state,
       action: PayloadAction<boolean>
     ) => {
-      state.showViewPartyTypeDetailsDialog = action.payload;
+      state.showViewPolicyDetailsDialog = action.payload;
     },
 
-    // Region reducers (NEW - added here)
+    // Region reducers
     setShowCreateRegionDialog: (state, action: PayloadAction<boolean>) => {
       state.showCreateRegionDialog = action.payload;
     },
@@ -317,6 +357,7 @@ const uiSlice = createSlice({
       state.showViewRegionDetailsDialog = action.payload;
     },
 
+    // Customer reducers
     setShowCreateCustomerDialog: (state, action: PayloadAction<boolean>) => {
       state.showCreateCustomerDialog = action.payload;
     },
@@ -336,6 +377,7 @@ const uiSlice = createSlice({
       state.showViewCustomerDetailsDialog = action.payload;
     },
 
+    // Agent reducers
     setShowCreateAgentDialog: (state, action: PayloadAction<boolean>) => {
       state.showCreateAgentDialog = action.payload;
     },
@@ -355,8 +397,7 @@ const uiSlice = createSlice({
       state.showViewAgentDetailsDialog = action.payload;
     },
 
-
-
+    // Branch reducers
     setShowCreateBranchDialog: (state, action: PayloadAction<boolean>) => {
       state.showCreateBranchDialog = action.payload;
     },
@@ -372,6 +413,63 @@ const uiSlice = createSlice({
     ) => {
       state.showViewBranchDetailsDialog = action.payload;
     },
+
+    // ----------------------------
+    // Company reducers (NEW)
+    // ----------------------------
+    setShowCreateCompanyDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreateCompanyDialog = action.payload;
+    },
+    setShowEditCompanyDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditCompanyDialog = action.payload;
+    },
+    setShowDeleteCompanyDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeleteCompanyDialog = action.payload;
+    },
+    setShowViewCompanyDetailsDialog: (state, action: PayloadAction<boolean>) => {
+      state.showViewCompanyDetailsDialog = action.payload;
+    },
+
+    // ----------------------------
+    // Quotation / Proposal / Quote reducers (from File 1)
+    // ----------------------------
+    setShowCreateProposalDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreateProposalDialog = action.payload;
+    },
+    setShowEditProposalDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditProposalDialog = action.payload;
+    },
+    setShowDeleteProposalDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeleteProposalDialog = action.payload;
+    },
+    setShowViewProposalDetailsDialog: (state, action: PayloadAction<boolean>) => {
+      state.showViewProposalDetailsDialog = action.payload;
+    },
+
+    setShowCreateQuoteDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreateQuoteDialog = action.payload;
+    },
+    setShowEditQuoteDialog: (state, action: PayloadAction<boolean>) => {
+      state.showEditQuoteDialog = action.payload;
+    },
+    setShowDeleteQuoteDialog: (state, action: PayloadAction<boolean>) => {
+      state.showDeleteQuoteDialog = action.payload;
+    },
+    setShowViewQuoteDetailsDialog: (state, action: PayloadAction<boolean>) => {
+      state.showViewQuoteDetailsDialog = action.payload;
+    },
+
+    setShowQuoteEditorDialog: (state, action: PayloadAction<boolean>) => {
+      state.showQuoteEditorDialog = action.payload;
+    },
+    setShowSectionEditorDialog: (state, action: PayloadAction<boolean>) => {
+      state.showSectionEditorDialog = action.payload;
+    },
+    setShowConvertToPolicyDialog: (state, action: PayloadAction<boolean>) => {
+      state.showConvertToPolicyDialog = action.payload;
+    },
+
+    // ... add other reducers as needed
   },
 });
 
@@ -381,28 +479,27 @@ export const {
   setShowEditRoleDialog,
   setShowDeleteRoleDialog,
   setShowViewRoleDetailsDialog,
-  
+
   // permission actions
   setShowCreatePermissionDialog,
   setShowEditPermissionDialog,
   setShowDeletePermissionDialog,
   setShowViewPermissionDetailsDialog,
-  
-  // User actions
+
+  // user actions
   setShowCreateUserDialog,
   setShowEditUserDialog,
   setShowDeleteUserDialog,
   setShowViewUserDetailsDialog,
   setShowChangePasswordDialog,
 
-  // Risk actions
+  // risk actions
   setShowCreateRiskDialog,
   setShowEditRiskDialog,
   setShowDeleteRiskDialog,
   setShowViewRiskDetailsDialog,
 
-  // SubRisk actions
-  // Sub Risk Section actions
+  // sub-risk actions
   setShowCreateSubRiskSectionDialog,
   setShowEditSubRiskSectionDialog,
   setShowDeleteSubRiskSectionDialog,
@@ -414,45 +511,66 @@ export const {
   setShowDeleteProductDialog,
   setShowViewProductDetailsDialog,
 
+  // customer actions
   setShowCreateCustomerDialog,
   setShowEditCustomerDialog,
   setShowDeleteCustomerDialog,
-  setShowCustomerDetailsDialog, 
+  setShowCustomerDetailsDialog,
   setShowViewCustomerDetailsDialog,
 
+  // agent actions
   setShowCreateAgentDialog,
   setShowEditAgentDialog,
   setShowDeleteAgentDialog,
-  setShowAgentDetailsDialog, 
+  setShowAgentDetailsDialog,
   setShowViewAgentDetailsDialog,
 
-
-    // Policy actions
-    setShowCreatePolicyDialog,
-    setShowEditPolicyDialog,
-    setShowDeletePolicyDialog,
-    setShowViewPolicyDetailsDialog,
-    setShowRenewPolicyDialog,
+  // policy actions
+  setShowCreatePolicyDialog,
+  setShowEditPolicyDialog,
+  setShowDeletePolicyDialog,
+  setShowViewPolicyDetailsDialog,
+  setShowRenewPolicyDialog,
   setShowPolicyDetailsDialog,
-  
 
-  // product Party Type actions
+  // party type actions
   setShowCreatePartyTypeDialog,
   setShowEditPartyTypeDialog,
   setShowDeletePartyTypeDialog,
   setShowViewPartyTypeDetailsDialog,
 
-  // Region actions (NEW - added here)
+  // region actions
   setShowCreateRegionDialog,
   setShowEditRegionDialog,
   setShowDeleteRegionDialog,
   setShowViewRegionDetailsDialog,
 
-
+  // branch actions
   setShowCreateBranchDialog,
   setShowEditBranchDialog,
   setShowDeleteBranchDialog,
   setShowViewBranchDetailsDialog,
+
+  // Company actions (NEW)
+  setShowCreateCompanyDialog,
+  setShowEditCompanyDialog,
+  setShowDeleteCompanyDialog,
+  setShowViewCompanyDetailsDialog,
+
+  // Quotation / Proposal / Quote actions (from File 1)
+  setShowCreateProposalDialog,
+  setShowEditProposalDialog,
+  setShowDeleteProposalDialog,
+  setShowViewProposalDetailsDialog,
+
+  setShowCreateQuoteDialog,
+  setShowEditQuoteDialog,
+  setShowDeleteQuoteDialog,
+  setShowViewQuoteDetailsDialog,
+
+  setShowQuoteEditorDialog,
+  setShowSectionEditorDialog,
+  setShowConvertToPolicyDialog,
 } = uiSlice.actions;
 
 export const selectUiState = (state: { ui: UiState }) => state.ui;

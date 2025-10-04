@@ -1,15 +1,16 @@
 export interface Customer {
-  customerID: string
+  insuredID: string
   title: string
   lastName: string | null
   firstName: string | null
+  fullName:string | null
   otherName: string | null
   gender: "MALE" | "FEMALE"
   email: string | null
   address: string
   phoneLine1: string | null
   phoneLine2: string | null
-  isOrg: boolean
+  insuredType: string
   orgName: string
   orgRegNumber: string
   orgRegDate: string

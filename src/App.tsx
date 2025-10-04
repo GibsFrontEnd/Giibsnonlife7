@@ -22,6 +22,12 @@ import CSUMessaging from "./pages/csu/csu-page.messaging";
 import CSUTickets from "./pages/csu/csu-page.tickets";
 import CSUParty from "./pages/csu/csu-page.party";
 import AdminCompany from "./pages/admin/admin-page.Company";
+import Quotations from "./pages/Quotations";
+import QuoteQuotations from "./pages/quotation/quotation-page.quotations";
+import EditProposal from "./components/quotations/quotes/EditProposal";
+import CreateProposal from "./components/quotations/quotes/CreateProposal";
+import QuoteCreator from "./components/quotations/quotes/QuoteCreator";
+
 
 const App: React.FC = () => {
   useAuth();
@@ -44,6 +50,17 @@ const App: React.FC = () => {
             <Route path="messaging" element={<CSUMessaging />} />
             <Route path="tickets" element={<CSUTickets />} />
           </Route>
+          <Route path="/quotations" element={<Quotations />}>
+            <Route path="quotes" element={<QuoteQuotations />} />
+            <Route path="create" element={<CreateProposal />} />
+            <Route path="edit/:proposalNo" element={<EditProposal />} />
+            <Route path="quote/:proposalNo" element={<QuoteCreator />} />
+            <Route path="customers" element={<CSUCustomers />} />
+            <Route path="partners" element={<CSUParty />} />
+            <Route path="messaging" element={<CSUMessaging />} />
+            <Route path="tickets" element={<CSUTickets />} />
+          </Route>
+
 
           <Route path="/admin" element={<Admin />}>
             <Route index element={<AdminDashboard />} />

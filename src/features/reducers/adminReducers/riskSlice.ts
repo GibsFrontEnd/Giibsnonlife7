@@ -17,11 +17,9 @@ const encryptedToken = localStorage.getItem("token");
 const API_BASE_URL = "https://core-api.newgibsonline.com/api";
 
 // You'll need to get this token from your auth system
-const getAuthToken = () => {
-  return decryptData(encryptedToken);
-};
-
-// Async thunks
+  const AUTH_TOKEN = decryptData(encryptedToken);
+  
+  // Async thunks
 export const getAllRisks = createAsyncThunk(
   "risks/getAllRisks",
   async (
@@ -38,7 +36,7 @@ export const getAllRisks = createAsyncThunk(
           method: "GET",
           headers: {
             accept: "application/json",
-            Authorization: `Bearer ${getAuthToken()}`,
+            Authorization: `Bearer ${AUTH_TOKEN}`,
           },
         }
       );
@@ -63,7 +61,7 @@ export const getRiskById = createAsyncThunk(
         method: "GET",
         headers: {
           accept: "application/json",
-          Authorization: `Bearer ${getAuthToken()}`,
+          Authorization: `Bearer ${AUTH_TOKEN}`,
         },
       });
 
@@ -87,7 +85,7 @@ export const createRisk = createAsyncThunk(
         method: "POST",
         headers: {
           accept: "application/json",
-          Authorization: `Bearer ${getAuthToken()}`,
+          Authorization: `Bearer ${AUTH_TOKEN}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(riskData),
@@ -116,7 +114,7 @@ export const updateRisk = createAsyncThunk(
         method: "PUT",
         headers: {
           accept: "application/json",
-          Authorization: `Bearer ${getAuthToken()}`,
+          Authorization: `Bearer ${AUTH_TOKEN}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(riskData),
@@ -142,7 +140,7 @@ export const deleteRisk = createAsyncThunk(
         method: "DELETE",
         headers: {
           accept: "application/json",
-          Authorization: `Bearer ${getAuthToken()}`,
+          Authorization: `Bearer ${AUTH_TOKEN}`,
         },
       });
 

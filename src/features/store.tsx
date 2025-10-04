@@ -14,7 +14,9 @@ import branchReducer from "./reducers/companyReducers/branchSlice";
 import customerReducer from "./reducers/csuReducers/customerSlice";
 import partyReducer from "./reducers/csuReducers/agentSlice";
 import marketingStaffReducer from "./reducers/companyReducers/marketingStaffSlice";
-import regionReducer from './reducers//productReducers/regionSlice';
+import regionReducer from './reducers/productReducers/regionSlice';
+import quoteReducer from './reducers/quoteReducers/quotationSlice'
+import companySlice from "./reducers/companyReducers/companySlice";
 
 export const store = configureStore({
   reducer: {
@@ -34,6 +36,8 @@ export const store = configureStore({
     customers: customerReducer,
     parties: partyReducer,
     marketingStaff: marketingStaffReducer,
+    quotations: quoteReducer,
+    companies: companySlice,
   },
 });
 

@@ -14,7 +14,7 @@ type DialogProps = {
   height?: string;
 };
 
-export const Dialog = ({ open, onOpenChange, children, maxWidth = "640px", height = "max-content" }: DialogProps) => {
+export const Dialog = ({ open, onOpenChange, children, maxWidth = "800px", height = "max-content" }: DialogProps) => {
   if (!open) return null;
 
   return ReactDOM.createPortal(

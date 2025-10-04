@@ -17,9 +17,16 @@ export const getAllProducts = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await apiCall.get(
-        `/products?pageNumber=${pageNumber}&pageSize=${pageSize}&riskId=${riskId}`
+      if(riskId == ""){
+      var response = await apiCall.get(
+        `/products?pageNumber=${pageNumber}&pageSize=${pageSize}`
       );
+    }
+      else{
+        var response = await apiCall.get(
+          `/products?pageNumber=${pageNumber}&pageSize=${pageSize}&riskId=${riskId}`
+        );
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error);

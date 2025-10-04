@@ -11,26 +11,51 @@ const API_BASE_URL = "https://core-api.newgibsonline.com/api";
   const AUTH_TOKEN = decryptData(encryptedToken);
 
 // Async thunks
-export const getAllCustomers = createAsyncThunk("customers/getAllCustomers", async (_, { rejectWithValue }) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/customers`, {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        Authorization: "Bearer "+AUTH_TOKEN,
-      },
-    })
+interface GetCustomersParams {
+  pageNumber?: number;
+  pageSize?: number;
+  searchTerm?: string;
+}
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+export const getAllCustomers = createAsyncThunk<
+  Customer[],
+  GetCustomersParams | undefined,
+  { rejectValue: string }
+>(
+  "customers/getAllCustomers",
+  async (params = {}, { rejectWithValue }) => {
+    try {
+      const { pageNumber = 1, pageSize = 50, searchTerm = "" } = params;
+
+      const query = new URLSearchParams({
+        pageNumber: pageNumber.toString(),
+        pageSize: pageSize.toString(),
+        searchTerm,
+      }).toString();
+
+      const response = await fetch(`${API_BASE_URL}/customers?${query}`, {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          Authorization: "Bearer " + AUTH_TOKEN,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log(data.data);
+
+      return data.data as Customer[];
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to fetch customers"
+      );
     }
-
-    const data = await response.json()
-    return data as Customer[]
-  } catch (error) {
-    return rejectWithValue(error instanceof Error ? error.message : "Failed to fetch customers")
   }
-})
+);
 
 export const createCustomer = createAsyncThunk(
   "customers/createCustomer",
