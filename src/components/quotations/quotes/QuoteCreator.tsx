@@ -1,4 +1,4 @@
-// QuoteCreator.tsx (use client)
+//@ts-nocheck
 import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
@@ -172,6 +172,8 @@ const QuoteCreator = () => {
 
     Promise.resolve(dispatch(getSectionsSummary(proposalNo) as any))
       .then((res: any) => {
+        console.log(res);
+        
         const payload = res?.payload ?? res
         if (!payload) return
         if (sectionsFetchIdRef.current === fetchId) {
@@ -225,6 +227,34 @@ const QuoteCreator = () => {
       if (currentCalculation.remarks) setRemarks(currentCalculation.remarks)
     }
   }, [currentCalculation])
+
+  useEffect(() => {
+    const sectionInputs = calculationBreakdown?.inputs?.sectionInputs
+    if (!sectionInputs?.length) return
+  
+    setLocalSections((prev) => {
+      const safePrev = Array.isArray(prev) ? prev : []
+  
+      const incoming = sectionInputs.map((s: any) => ({
+        sectionID: s.sectionID,
+        sectionName: s.sectionName,
+        location: s.location ?? "",
+        sectionSumInsured: s.sectionSumInsured ?? 0,
+        sectionPremium: s.sectionPremium ?? 0,
+        sectionNetPremium: s.sectionNetPremium ?? 0,
+        riskItems: s.riskItems ?? [],
+      }))
+  
+      const existingIDs = new Set(safePrev.map((p) => p.sectionID))
+      const merged = [
+        ...safePrev,
+        ...incoming.filter((s) => !existingIDs.has(s.sectionID)),
+      ]
+  
+      return merged
+    })
+  }, [calculationBreakdown])
+  
 
   // initialize coverDays from currentProposal (if present)
   useEffect(() => {
@@ -281,14 +311,20 @@ const QuoteCreator = () => {
 
   // LOCAL-only save / delete logic
   const handleSaveSection = async (section: QuoteSection) => {
+    console.log(localSections);
+    
     setLocalSections((prev) => {
       const list = prev ? [...prev] : []
-      const idx = list.findIndex((s) => s.sectionID === section.sectionID)
+      const idx = list.findIndex((s) => s.location === section.location)
       if (idx >= 0) {
         list[idx] = section
       } else {
         list.push(section)
+        console.log(section);
+        
       }
+      console.log(JSON.stringify(list));
+      
       return list
     })
 
@@ -319,7 +355,7 @@ const QuoteCreator = () => {
   const handleDeleteSection = async (sectionId: string) => {
     if (!window.confirm("Are you sure you want to delete this section?")) return
 
-    setLocalSections((prev) => (prev ? prev.filter((s) => s.sectionID !== sectionId) : null))
+    setLocalSections((prev) => (prev ? prev.filter((s) => s.location !== sectionId) : null))
     setLocalSectionsSummary((prev: any) => {
       if (!prev) return prev
       return { ...prev, sections: (prev.sections || []).filter((s: any) => s.sectionID !== sectionId) }
@@ -687,7 +723,6 @@ const QuoteCreator = () => {
 
   // convenience: run pro-rata then top-level calculate to persist final totals
   const handleProRataAndCalculate = async () => {
-    await handleCalculateProRata()
     await handleCalculate()
   }
 
@@ -838,10 +873,10 @@ const QuoteCreator = () => {
                         {lastCalc && <div className="qc-section-lastcalc">Last calculated: {new Date(lastCalc).toLocaleString()}</div>}
                       </div>
                       <div className="qc-section-actions">
-                        <Button onClick={() => handleEditSection(id)} size="sm" variant="outline">
+                        <Button onClick={() => handleEditSection(location)} size="sm" variant="outline">
                           Edit
                         </Button>
-                        <Button onClick={() => handleDeleteSection(id)} size="sm" variant="outline" className="qc-delete-btn">
+                        <Button onClick={() => handleDeleteSection(location)} size="sm" variant="outline" className="qc-delete-btn">
                           Delete
                         </Button>
                       </div>
@@ -997,7 +1032,7 @@ const QuoteCreator = () => {
           </div>
 
           {/* coverDays input for pro-rata */}
-          <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{ marginTop: 30,marginBottom:30, display: "flex", alignItems: "center", gap: 8,width:"40%" }}>
             <Label htmlFor="coverDaysSmall">Cover Days</Label>
             <Input
               id="coverDaysSmall"
@@ -1016,16 +1051,16 @@ const QuoteCreator = () => {
             <Button onClick={handleApplyProposalAdjustments} size="sm" variant="outline">
               Apply Proposal Adjustments
             </Button>
-            <Button onClick={handleApplyAndCalculate} size="sm">
+{/*             <Button onClick={handleApplyAndCalculate} size="sm">
               Apply & Calculate Proposal
             </Button>
-            <Button onClick={handleCalculateProRata} size="sm" variant="outline">
+ */}            <Button onClick={handleCalculateProRata} size="sm" variant="outline">
               Calculate Pro-Rata
             </Button>
-            <Button onClick={handleProRataAndCalculate} size="sm">
+{/*             <Button onClick={handleProRataAndCalculate} size="sm">
               Pro-Rata & Calculate Proposal
             </Button>
-          </div>
+ */}          </div>
 
           {/* Show proposal-adjustments response (if present) */}
           {proposalAdjustmentsResult && (
@@ -1129,7 +1164,14 @@ const QuoteCreator = () => {
       </div>
     </div>
   </div>
-)}        </div>
+)}     
+          <div style={{ marginTop: 12, display: "flex", gap: 8, justifyContent:"flex-end", }}>
+            <Button onClick={handleProRataAndCalculate} size="sm">
+              Calculate Final Quotation
+            </Button>
+          </div>
+
+</div>
 
         {/* Calculation results & breakdown */}
         {currentCalculation && (
@@ -1481,7 +1523,7 @@ const QuoteCreator = () => {
             setEditingSectionId(null)
           }}
           onSave={handleSaveSection}
-          section={editingSectionId ? (localSections || sections).find((s) => s.sectionID === editingSectionId) : undefined}
+          section={editingSectionId ? (calculationBreakdown?.inputs.sectionInputs || localSections || sections).find((s) => s.location === editingSectionId) : undefined}
           productId={proposalProductId || ""}
           onCalculateFullRiskArray={handleReceiveFullRiskArray}
         />

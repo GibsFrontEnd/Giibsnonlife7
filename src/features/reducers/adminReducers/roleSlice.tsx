@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import apiCall from "../../../utils/api-call";
-import { RoleCreateUpdateRequest, RoleState } from "../../../types/role";
+import type { RoleCreateUpdateRequest, RoleState } from "../../../types/role";
 
 export const getAllRoles = createAsyncThunk(
   "roles/getAllRoles",

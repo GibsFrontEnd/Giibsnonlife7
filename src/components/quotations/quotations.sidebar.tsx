@@ -4,10 +4,10 @@ const quoteSidebar = () => {
   const location = useLocation();
   const menuItems = [
     { path: "quotes", label: "Quotations", icon: "🔒" },
-    { path: "customers", label: "Customers", icon: "📦" },
-    { path: "partners", label: "Partners", icon: "⚡" },
-    { path: "messaging", label: "Messaging", icon: "⚙️" },
-    { path: "tickets", label: "Tickets", icon: "🎫" },
+    { path: "quotes", label: "Customers", icon: "📦" },
+    { path: "quotes", label: "Partners", icon: "⚡" },
+    { path: "quotes", label: "Messaging", icon: "⚙️" },
+    { path: "quotes", label: "Tickets", icon: "🎫" },
   ];
 
   // helper to check active even for nested routes (e.g. /enquiries/123)

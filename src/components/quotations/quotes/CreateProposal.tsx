@@ -1,4 +1,4 @@
-"use client"
+//@ts-nocheck
 
 import { useEffect, useRef, useState } from "react"
 import { useDispatch } from "react-redux"

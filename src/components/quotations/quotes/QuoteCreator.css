@@ -71,6 +71,10 @@
   padding: 1.5rem;
 }
 
+.qc-sections-summary>h4{
+  margin: 20px 0;
+}
+
 .qc-sections-header {
   display: flex;
   justify-content: space-between;

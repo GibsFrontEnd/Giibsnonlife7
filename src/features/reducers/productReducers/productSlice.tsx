@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import apiCall from "../../../utils/api-call";
-import {
+import type {
   ProductCreateUpdateRequest,
   ProductState,
 } from "../../../types/product";
@@ -17,12 +17,11 @@ export const getAllProducts = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      if(riskId == ""){
-      var response = await apiCall.get(
-        `/products?pageNumber=${pageNumber}&pageSize=${pageSize}`
-      );
-    }
-      else{
+      if (riskId == "") {
+        var response = await apiCall.get(
+          `/products?pageNumber=${pageNumber}&pageSize=${pageSize}`
+        );
+      } else {
         var response = await apiCall.get(
           `/products?pageNumber=${pageNumber}&pageSize=${pageSize}&riskId=${riskId}`
         );

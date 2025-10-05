@@ -12,12 +12,21 @@ import type {
 import type { RootState } from "../../store";
 import { decryptData } from "../../../utils/encrypt-utils";
 
-const encryptedToken = localStorage.getItem("token");
+// helper: read and decrypt token on demand
+const getAuthToken = () => {
+  try {
+    const encryptedToken = localStorage.getItem("token");
+    if (!encryptedToken) return null;
+    return decryptData(encryptedToken);
+  } catch (err) {
+    console.warn("Failed to get token", err);
+    return null;
+  }
+};
 
 const API_BASE_URL = "https://core-api.newgibsonline.com/api";
 
 // You'll need to get this token from your auth system
-  const AUTH_TOKEN = decryptData(encryptedToken);
   
   // Async thunks
 export const getAllRisks = createAsyncThunk(
@@ -29,7 +38,8 @@ export const getAllRisks = createAsyncThunk(
     }: { pageNumber?: number; pageSize?: number } = {},
     { rejectWithValue }
   ) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
       const response = await fetch(
         `${API_BASE_URL}/risks?PageNumber=${pageNumber}&PageSize=${pageSize}`,
         {
@@ -56,7 +66,9 @@ export const getAllRisks = createAsyncThunk(
 export const getRiskById = createAsyncThunk(
   "risks/getRiskById",
   async (riskId: string, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/risks/${riskId}`, {
         method: "GET",
         headers: {
@@ -80,7 +92,9 @@ export const getRiskById = createAsyncThunk(
 export const createRisk = createAsyncThunk(
   "risks/createRisk",
   async (riskData: CreateRiskRequest, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/risks`, {
         method: "POST",
         headers: {
@@ -109,7 +123,9 @@ export const updateRisk = createAsyncThunk(
     { id, riskData }: { id: string; riskData: UpdateRiskRequest },
     { rejectWithValue }
   ) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/risks/${id}`, {
         method: "PUT",
         headers: {
@@ -135,7 +151,9 @@ export const updateRisk = createAsyncThunk(
 export const deleteRisk = createAsyncThunk(
   "risks/deleteRisk",
   async (riskId: string, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/risks/${riskId}`, {
         method: "DELETE",
         headers: {

@@ -19,7 +19,7 @@ const Header: React.FC = () => {
   ];
 
   return (
-    <header  className="bg-white border-b border-gray-200 px-5 flex items-center justify-between h-16 shadow w-[87%] ml-auto" style={{ backgroundColor: "#feded1" }}>
+    <header  className="bg-white border-b border-gray-200 px-5 flex items-center justify-between h-16 shadow ml-auto" style={{ backgroundColor: "rgb(255, 206, 187)" }}>
       <div className="font-bold text-lg"></div>
 
       <nav className="hidden xl:flex items-center gap-0">

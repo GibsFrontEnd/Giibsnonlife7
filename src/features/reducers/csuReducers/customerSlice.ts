@@ -3,12 +3,20 @@ import type { RootState } from "../../store"
 import type { Customer, CustomerState, CreateCustomerRequest, CustomerPolicy } from "../../../types/customer"
 import { decryptData } from "../../../utils/encrypt-utils";
 
-const encryptedToken = localStorage.getItem("token");
 
 const API_BASE_URL = "https://core-api.newgibsonline.com/api";
 
 // You'll need to get this token from your auth system
-  const AUTH_TOKEN = decryptData(encryptedToken);
+const getAuthToken = () => {
+  try {
+    const encryptedToken = localStorage.getItem("token");
+    if (!encryptedToken) return null;
+    return decryptData(encryptedToken);
+  } catch (err) {
+    console.warn("Failed to get token", err);
+    return null;
+  }
+};
 
 // Async thunks
 interface GetCustomersParams {
@@ -24,7 +32,9 @@ export const getAllCustomers = createAsyncThunk<
 >(
   "customers/getAllCustomers",
   async (params = {}, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const { pageNumber = 1, pageSize = 50, searchTerm = "" } = params;
 
       const query = new URLSearchParams({
@@ -60,7 +70,9 @@ export const getAllCustomers = createAsyncThunk<
 export const createCustomer = createAsyncThunk(
   "customers/createCustomer",
   async (customerData: CreateCustomerRequest, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/customers`, {
         method: "POST",
         headers: {
@@ -89,7 +101,9 @@ export const updateCustomer = createAsyncThunk(
     { customerID, customerData }: { customerID: string; customerData: CreateCustomerRequest },
     { rejectWithValue },
   ) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/customers/${customerID}`, {
         method: "PUT",
         headers: {
@@ -115,7 +129,9 @@ export const updateCustomer = createAsyncThunk(
 export const deleteCustomer = createAsyncThunk(
   "customers/deleteCustomer",
   async (customerID: string, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/customers/${customerID}`, {
         method: "DELETE",
         headers: {
@@ -138,7 +154,9 @@ export const deleteCustomer = createAsyncThunk(
 export const getCustomerPolicies = createAsyncThunk(
   "customers/getCustomerPolicies",
   async (customerID: string, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/customers/${customerID}/policies`, {
         method: "GET",
         headers: {
@@ -249,11 +267,11 @@ const customerSlice = createSlice({
       .addCase(updateCustomer.fulfilled, (state, action) => {
         state.loading.updateCustomer = false
         state.success.updateCustomer = true
-        const index = state.customers.findIndex((c) => c.customerID === action.payload.customerID)
+        const index = state.customers.findIndex((c) => c.insuredID === action.payload.customerID)
         if (index !== -1) {
           state.customers[index] = action.payload.customerData
         }
-        if (state.currentCustomer?.customerID === action.payload.customerID) {
+        if (state.currentCustomer?.insuredID === action.payload.customerID) {
           state.currentCustomer = action.payload.customerData
         }
       })
@@ -272,8 +290,8 @@ const customerSlice = createSlice({
       .addCase(deleteCustomer.fulfilled, (state, action) => {
         state.loading.deleteCustomer = false
         state.success.deleteCustomer = true
-        state.customers = state.customers.filter((c) => c.customerID !== action.payload)
-        if (state.currentCustomer?.customerID === action.payload) {
+        state.customers = state.customers.filter((c) => c.insuredID !== action.payload)
+        if (state.currentCustomer?.insuredID === action.payload) {
           state.currentCustomer = null
         }
       })

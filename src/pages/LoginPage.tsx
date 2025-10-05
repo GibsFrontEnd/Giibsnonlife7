@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input, Password } from "../components/UI/new-input";
 import { useToast } from "../components/UI/use-toast";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { SERVER_URL } from "../utils/constants";
 import axios from "axios";
 import { store } from "../features/store";
@@ -36,10 +36,11 @@ const LoginPage = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-/*     if (token) {
+    /*     if (token) {
       navigate("/dashboard", { replace: true });
     }
- */  }, [navigate]);
+ */
+  }, [navigate]);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -117,111 +118,203 @@ const LoginPage = () => {
   };
 
   return (
-    <main className="container mx-auto py-6 md:py-10 px-4 flex flex-col items-center justify-center min-h-[80vh]">
-      <div className="max-w-md w-full">
-        <h1 className="text-2xl md:text-3xl font-bold text-center mb-2">
-          Welcome Back
+    // <main className="container mx-auto py-6 md:py-10 px-4 flex flex-col items-center justify-center min-h-[80vh]">
+    //   <div className="max-w-md w-full">
+    //     <h1 className="text-2xl md:text-3xl font-bold text-center mb-2">
+    //       Welcome Back
+    //     </h1>
+    //     <p className="text-muted-foreground text-center mb-6">
+    //       Sign in to your account to continue
+    //     </p>
+    //     <Card>
+    //       <CardContent className="p-6">
+    //         <Form {...form}>
+    //           <form
+    //             onSubmit={form.handleSubmit(onSubmit)}
+    //             className="space-y-6"
+    //           >
+    //             <FormField
+    //               control={form.control}
+    //               name="username"
+    //               render={({ field }) => (
+    //                 <FormItem>
+    //                   <FormLabel>Username</FormLabel>
+    //                   <FormControl>
+    //                     <Input
+    //                       placeholder="your.username"
+    //                       type="text"
+    //                       autoComplete="username"
+    //                       {...field}
+    //                     />
+    //                   </FormControl>
+    //                   <FormMessage />
+    //                 </FormItem>
+    //               )}
+    //             />
+
+    //             <FormField
+    //               control={form.control}
+    //               name="password"
+    //               render={({ field }) => (
+    //                 <FormItem>
+    //                   <FormLabel>Password</FormLabel>
+    //                   <Password
+    //                     value={field.value}
+    //                     onChange={field.onChange}
+    //                     placeholder="Enter your password"
+    //                     // @ts-ignore
+    //                     autoComplete="current-password"
+    //                   />
+    //                   <FormMessage />
+    //                 </FormItem>
+    //               )}
+    //             />
+
+    //             <div className="flex items-center justify-between">
+    //               {/* <FormField
+    //                     control={form.control}
+    //                     name="rememberMe"
+    //                     render={({ field }) => (
+    //                       <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+    //                         <FormControl>
+    //                           <Checkbox
+    //                             checked={field.value}
+    //                             onCheckedChange={field.onChange}
+    //                           />
+    //                         </FormControl>
+    //                         <FormLabel className="text-sm font-normal cursor-pointer">
+    //                           Remember me
+    //                         </FormLabel>
+    //                       </FormItem>
+    //                     )}
+    //                   /> */}
+
+    //               {/* <Button
+    //                 variant="link"
+    //                 className="p-0 h-auto text-sm"
+    //                 asLink
+    //                 to="/"
+    //               >
+    //                 Forgot password?
+    //               </Button> */}
+    //             </div>
+
+    //             <Button
+    //               // @ts-ignore
+    //               type="submit"
+    //               className="w-full bg-primary-blue text-white"
+    //               loading={isLoading}
+    //               disabled={isLoading}
+    //             >
+    //               Sign in
+    //             </Button>
+    //           </form>
+    //         </Form>
+    //       </CardContent>
+    //     </Card>
+
+    //     {/* <div className="mt-6 text-center">
+    //           <p className="text-sm text-muted-foreground">
+    //             Don&apos;t have an account?{" "}
+    //             <Button variant="link" to="/register" asLink className="p-0">
+    //               Register here
+    //             </Button>
+    //           </p>
+    //         </div> */}
+    //   </div>
+    // </main>
+    <div className="w-full flex flex-col md:flex-row justify-center items-center min-h-screen gap-12 px-10 md:px-20 py-5 bg-gradient-to-b from-primary-vividBlueBg to-background overflow-auto">
+      <div className="md:flex-1 flex flex-col justify-center items-center">
+        <h1 className="font-sans text-left text-3xl lg:text-5xl text-neutral-darkCharcoal leading-tight lg:leading-[1.2] mb-4 max-w-5xl mx-auto">
+          Welcome back to{" "}
+          <span className="bg-gradient-to-r from-[#dc2626] to-[#9254DE] bg-clip-text text-transparent">
+            GIBS Enterprise
+          </span>
         </h1>
-        <p className="text-muted-foreground text-center mb-6">
-          Sign in to your account to continue
+        <p className="mt-2 text-left text-neutral-darkCharcoal">
+          Log in to your account to manage policies, streamline HR, and handle
+          insurance operations seamlessly
         </p>
-        <Card>
-          <CardContent className="p-6">
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
-              >
-                <FormField
-                  control={form.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Username</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="your.username"
-                          type="text"
-                          autoComplete="username"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 w-full mt-6"
+          >
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Username</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="your.username"
+                      type="text"
+                      autoComplete="username"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <Password
-                        value={field.value}
-                        onChange={field.onChange}
-                        placeholder="Enter your password"
-                        // @ts-ignore
-                        autoComplete="current-password"
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <Password
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Enter your password"
+                    // @ts-ignore
+                    autoComplete="current-password"
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-                <div className="flex items-center justify-between">
-                  {/* <FormField
-                        control={form.control}
-                        name="rememberMe"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormLabel className="text-sm font-normal cursor-pointer">
-                              Remember me
-                            </FormLabel>
-                          </FormItem>
-                        )}
-                      /> */}
-
-                  {/* <Button
-                    variant="link"
-                    className="p-0 h-auto text-sm"
-                    asLink
-                    to="/"
-                  >
-                    Forgot password?
-                  </Button> */}
-                </div>
-
-                <Button
-                  // @ts-ignore
-                  type="submit"
-                  className="w-full bg-primary-blue text-white"
-                  loading={isLoading}
-                  disabled={isLoading}
-                >
-                  Sign in
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-
-        {/* <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                Don&apos;t have an account?{" "}
-                <Button variant="link" to="/register" asLink className="p-0">
-                  Register here
-                </Button>
-              </p>
-            </div> */}
+            <Button
+              // @ts-ignore
+              type="submit"
+              className="w-full bg-primary-blue text-white"
+              loading={isLoading}
+              disabled={isLoading}
+            >
+              Sign in
+            </Button>
+          </form>
+        </Form>
       </div>
-    </main>
+      <div className="md:flex-1">
+        <div className="bg-neutral-softWhite shadow-navShadow hidden md:block p-6 rounded-lg border border-neutral-lightGray">
+          <span className="text-xs font-semibold text-destructive bg-red-100 px-3 py-1 rounded-full">
+            WHAT’S NEW
+          </span>
+          <div className="border relative overflow-hidden rounded-md mt-6">
+            <img
+              src="src\assets\dash_image.png"
+              className="rounded-lg relative z-10 w-full h-auto"
+              alt={"alt"}
+            />
+          </div>
+          <p className="mt-4 text-neutral-darkCharcoal">
+            GIBS Enterprise is now live! Experience seamless operations with
+            enterprise-grade HR, intelligent insurance management, and smart
+            proposals
+          </p>
+          <Link
+            to="/"
+            className="mt-4 inline-block text-primary-vividBlue font-semibold hover:underline"
+          >
+            Check Us Out →
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 };
 

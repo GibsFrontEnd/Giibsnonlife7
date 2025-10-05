@@ -9,12 +9,14 @@ import CompanyBusinessSectors from "@/components/admin/company-page/company.busi
 import CompanyAutoNumbers from "@/components/admin/company-page/company.auto-numbers";
 import CompanyMailGroup from "@/components/admin/company-page/company.mail-group";
 import PartyTypes from "../../components/admin/product-page/party/party.types";
+import CompanyMarketingChannels from "@/components/admin/company-page/company.marketing-channels";
 
 const tabs = [
   { title: "Branches", content: <CompanyBranches /> },
   { title: "Regions", content: <CompanyRegions /> },
   {title: "PartyTypes", content: <PartyTypes />},
   { title: "Marketing Staff", content: <CompanyMarketingStaff /> },
+  { title: "Marketing Channels", content: <CompanyMarketingChannels /> },
   { title: "Units/Groups", content: <CompanyUnitGroups /> },
   { title: "Business Sectors", content: <CompanyBusinessSectors /> },
   { title: "Auto Numbers", content: <CompanyAutoNumbers /> },
@@ -36,7 +38,7 @@ const AdminCompany = () => {
             <TabsTrigger
               key={tab.title}
               value={tab.title}
-              className="flex-1 min-w-[100px] hover:bg-neutral-200"
+              className="flex-1 min-w-[150px] hover:bg-neutral-200"
             >
               {tab.title}
             </TabsTrigger>

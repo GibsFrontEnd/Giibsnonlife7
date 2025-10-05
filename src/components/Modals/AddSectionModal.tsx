@@ -1,4 +1,4 @@
-"use client"
+//@ts-nocheck
 
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -314,8 +314,6 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
     }
 
     // capture sectionID early for callback
-    const sectionIdForCallback = formData.sectionID
-
     try {
       const resp = await (dispatch(calculateRiskItems(payload)) as any).unwrap()
       if (resp && Array.isArray(resp.calculatedItems)) {
@@ -375,7 +373,6 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
         }))
         
 
-        // NEW: notify parent (QuoteCreator) with the full calculated risk array for this section
       }
     } catch (err: any) {
       alert(err?.message || "Failed to calculate all items")
@@ -388,27 +385,41 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
     }
   }
 
-  const handleSave = () => {
-    if (!formData.sectionName) {
-      alert("Please select a section name")
-      return
-    }
-    try {
-      if (onCalculateFullRiskArray) {
-        const prepared = (formData.riskItems || []).map((mi) => ({
-          ...mi,
-          sectionID: mi.sectionID ?? formData.sectionID,
-        }))
-        onCalculateFullRiskArray(formData.sectionID, prepared)
-      }
-    } catch (cbErr) {
-      console.warn("onCalculateFullRiskArray callback failed:", cbErr)
-    }
-
-    onSave(formData)
-    console.log(formData);
+const handleSave = () => {
+  if (!formData.sectionName) {
+    alert("Please select a section name")
+    return
   }
 
+  // Use location as the basis of the "unique" id, append a short random suffix.
+  // If location is empty, fall back to 'loc' so the id is still valid.
+  const locBase = (formData.location || "").trim() || "loc"
+  const suffix = Math.random().toString(36).slice(2, 8) // 6 chars
+  const generatedId = `${locBase}-${suffix}`
+
+  // Don't mutate formData directly — create an updated copy to pass up
+  const updatedSection: QuoteSection = {
+    ...formData,
+    sectionID: generatedId,
+  }
+
+  // If parent wants the calculated risk array, ensure each item has the sectionID
+  try {
+    if (onCalculateFullRiskArray) {
+      const prepared = (updatedSection.riskItems || []).map((mi) => ({
+        ...mi,
+        sectionID: mi.sectionID ?? updatedSection.sectionID,
+      }))
+      onCalculateFullRiskArray(updatedSection.sectionID, prepared)
+    }
+  } catch (cbErr) {
+    console.warn("onCalculateFullRiskArray callback failed:", cbErr)
+  }
+
+  // Finally call onSave with the updated section
+  onSave(updatedSection)
+  console.log("Saved section:", updatedSection)
+}
   const formatCurrency = (amount: number): string =>
     new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", minimumFractionDigits: 2 }).format(amount)
 
@@ -516,6 +527,9 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
                             {applyingMap[keyFor(index)] ? "Applying..." : "Apply"}
                           </Button>
                           <Button onClick={() => handleRemoveItem(index)} size="sm" variant="outline" className="remove-btn">Remove</Button>
+                          <button className="link-btn" onClick={() => toggleCollapse(index)} aria-label={item._collapsed ? "Expand item" : "Collapse item"}>
+                        {item._collapsed ? "Expand ▾" : "Collapse ▴"}
+                      </button>
                         </div>
                       </footer>
                     </>
@@ -645,6 +659,9 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
                             {applyingMap[keyFor(index)] ? "Applying..." : "Apply"}
                           </Button>
                           <Button onClick={() => handleRemoveItem(index)} size="sm" variant="outline" className="remove-btn">Remove</Button>
+                          <button className="link-btn" onClick={() => toggleCollapse(index)} aria-label={item._collapsed ? "Expand item" : "Collapse item"}>
+                        {item._collapsed ? "Expand ▾" : "Collapse ▴"}
+                      </button>
                         </div>
                       </footer>
                     </>
@@ -678,6 +695,9 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
           </div>
 
           <div className="modal-actions">
+          <Button onClick={handleCalculateAllItems} size="default" variant="outline" disabled={!!applyingMap["ALL"]}>
+                  {applyingMap["ALL"] ? "Calculating..." : "Calculate All"}
+                </Button>
             <Button onClick={handleSave}>Save Section</Button>
             <Button onClick={onClose} variant="outline">Cancel</Button>
           </div>

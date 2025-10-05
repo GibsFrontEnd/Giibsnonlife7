@@ -1,4 +1,4 @@
-// features/reducers/quoteReducers/quotationSlice.ts
+//@ts-nocheck
 import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit"
 import type {
   QuotationState,
@@ -16,9 +16,17 @@ import type {
 } from "../../../types/quotation"
 import { decryptData } from "../../../utils/encrypt-utils"
 
-const encryptedToken = localStorage.getItem("token")
 const API_BASE_URL = "https://core-api.newgibsonline.com/api"
-const AUTH_TOKEN = decryptData(encryptedToken)
+const getAuthToken = () => {
+  try {
+    const encryptedToken = localStorage.getItem("token");
+    if (!encryptedToken) return null;
+    return decryptData(encryptedToken);
+  } catch (err) {
+    console.warn("Failed to get token", err);
+    return null;
+  }
+};
 
 // Helper for fetch errors
 const handleFetchError = async (res: Response) => {
@@ -40,7 +48,9 @@ export const fetchProposals = createAsyncThunk<
   },
   { rejectValue: string }
 >("quotations/fetchProposals", async (args, { rejectWithValue }) => {
-  try {
+      try {
+const AUTH_TOKEN = getAuthToken();
+
     const { page = 1, pageSize = 50, sortBy = "TransDate", sortDirection = "DESC", riskClass = "" } = args
     let url = `${API_BASE_URL}/Quotation?page=${page}&pageSize=${pageSize}&sortBy=${sortBy}&sortDirection=${sortDirection}`
     if (riskClass) url += `&riskClass=${riskClass}`
@@ -62,7 +72,9 @@ export const fetchProposals = createAsyncThunk<
 export const getProposalByNumber = createAsyncThunk<Proposal, string, { rejectValue: string }>(
   "quotations/getProposalByNumber",
   async (proposalNo, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}?proposalNo=${proposalNo}`, {
         method: "GET",
         headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}` },
@@ -80,7 +92,9 @@ export const getProposalByNumber = createAsyncThunk<Proposal, string, { rejectVa
 export const createProposal = createAsyncThunk<Proposal, CreateProposalRequest, { rejectValue: string }>(
   "quotations/createProposal",
   async (proposalData, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Quotation`, {
         method: "POST",
         headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
@@ -101,7 +115,9 @@ export const updateProposal = createAsyncThunk<
   { proposalNo: string; proposalData: UpdateProposalRequest },
   { rejectValue: string }
 >("quotations/updateProposal", async ({ proposalNo, proposalData }, { rejectWithValue }) => {
-  try {
+      try {
+const AUTH_TOKEN = getAuthToken();
+
     const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}?proposalNo=${proposalNo}`, {
       method: "PUT",
       headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
@@ -119,7 +135,9 @@ export const updateProposal = createAsyncThunk<
 export const deleteProposal = createAsyncThunk<string, string, { rejectValue: string }>(
   "quotations/deleteProposal",
   async (proposalNo, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}?proposalNo=${proposalNo}`, {
         method: "DELETE",
         headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}` },
@@ -138,7 +156,9 @@ export const calculateComplete = createAsyncThunk<
   { proposalNo: string; calculationData: CompleteCalculationRequest },
   { rejectValue: string }
 >("quotations/calculateComplete", async ({ proposalNo, calculationData }, { rejectWithValue }) => {
-  try {
+      try {
+const AUTH_TOKEN = getAuthToken();
+
     const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}/calculate/fire/complete`, {
       method: "POST",
       headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
@@ -158,7 +178,9 @@ export const recalculateComplete = createAsyncThunk<
   { proposalNo: string; calculationData: CompleteCalculationRequest },
   { rejectValue: string }
 >("quotations/recalculateComplete", async ({ proposalNo, calculationData }, { rejectWithValue }) => {
-  try {
+      try {
+const AUTH_TOKEN = getAuthToken();
+
     const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}/calculate/fire/complete`, {
       method: "PUT",
       headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
@@ -176,7 +198,9 @@ export const recalculateComplete = createAsyncThunk<
 export const getCalculationBreakdown = createAsyncThunk<CalculationBreakdown, string, { rejectValue: string }>(
   "quotations/getCalculationBreakdown",
   async (proposalNo, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}/calculation/fire/breakdown`, {
         method: "GET",
         headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}` },
@@ -194,7 +218,9 @@ export const getCalculationBreakdown = createAsyncThunk<CalculationBreakdown, st
 export const getCurrentCalculation = createAsyncThunk<any, string, { rejectValue: string }>(
   "quotations/getCurrentCalculation",
   async (proposalNo, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}/calculation/current`, {
         method: "GET",
         headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}` },
@@ -212,7 +238,9 @@ export const getCurrentCalculation = createAsyncThunk<any, string, { rejectValue
 export const getSectionsSummary = createAsyncThunk<any, string, { rejectValue: string }>(
   "quotations/getSectionsSummary",
   async (proposalNo, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}/calculation/sections/summary`, {
         method: "GET",
         headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}` },
@@ -232,7 +260,9 @@ export const calculateRiskItems = createAsyncThunk<
   { subRisk: string; riskItems: (RiskItem | Partial<RiskItem>)[]; proportionRate?: number },
   { rejectValue: string }
 >("quotations/calculateRiskItems", async (payload, { rejectWithValue }) => {
-  try {
+      try {
+const AUTH_TOKEN = getAuthToken();
+
     const response = await fetch(`${API_BASE_URL}/Quotation/calculate/risk-items`, {
       method: "POST",
       headers: {
@@ -260,7 +290,9 @@ export const calculateRiskItems = createAsyncThunk<
 export const calculateSectionAggregate = createAsyncThunk<any, { calculatedItems: CalculatedRiskItem[] }, { rejectValue: string }>(
   "quotations/calculateSectionAggregate",
   async (payload, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Quotation/calculate/section-aggregate`, {
         method: "POST",
         headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
@@ -282,7 +314,9 @@ export const calculateSectionAggregate = createAsyncThunk<any, { calculatedItems
 export const calculateMultiSectionAggregate = createAsyncThunk<any, { sections: any[] }, { rejectValue: string }>(
   "quotations/calculateMultiSectionAggregate",
   async (payload, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Quotation/calculate/multi-section-aggregate`, {
         method: "POST",
         headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
@@ -304,7 +338,9 @@ export const calculateMultiSectionAggregate = createAsyncThunk<any, { sections: 
 export const applyProposalAdjustments = createAsyncThunk<any, any, { rejectValue: string }>(
   "quotations/applyProposalAdjustments",
   async (payload, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Quotation/calculate/proposal-adjustments`, {
         method: "POST",
         headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
@@ -326,7 +362,9 @@ export const applyProposalAdjustments = createAsyncThunk<any, any, { rejectValue
 export const calculateProRata = createAsyncThunk<any, { netPremiumDue: number; coverDays: number }, { rejectValue: string }>(
   "quotations/calculateProRata",
   async (payload, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Quotation/calculate/pro-rata`, {
         method: "POST",
         headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
@@ -348,7 +386,9 @@ export const calculateProRata = createAsyncThunk<any, { netPremiumDue: number; c
 export const previewSection = createAsyncThunk<any, { section: any; proportionRate?: number }, { rejectValue: string }>(
   "quotations/previewSection",
   async (payload, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Quotation/calculate/section-preview`, {
         method: "POST",
         headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
@@ -370,7 +410,9 @@ export const previewSection = createAsyncThunk<any, { section: any; proportionRa
 export const previewCompleteCalculation = createAsyncThunk<any, Partial<CompleteCalculationRequest>, { rejectValue: string }>(
   "quotations/previewCompleteCalculation",
   async (payload, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Quotation/calculate/preview-complete`, {
         method: "POST",
         headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
@@ -392,7 +434,9 @@ export const createSectionForProposal = createAsyncThunk<
   { proposalNo: string; section: QuoteSection; calculatedBy?: string; remarks?: string },
   { state: any; rejectValue: string }
 >("quotations/createSectionForProposal", async ({ proposalNo, section, calculatedBy = "USER", remarks = "" }, { getState, rejectWithValue }) => {
-  try {
+      try {
+const AUTH_TOKEN = getAuthToken();
+
     const state: any = getState()
     const currentProposal: Proposal | null = state.quotations.currentProposal
     const existingSections: QuoteSection[] = state.quotations.sections || []
@@ -441,7 +485,9 @@ export const updateSectionForProposal = createAsyncThunk<
   { proposalNo: string; sectionID: string; section: QuoteSection; calculatedBy?: string; remarks?: string },
   { state: any; rejectValue: string }
 >("quotations/updateSectionForProposal", async ({ proposalNo, sectionID, section, calculatedBy = "USER", remarks = "" }, { getState, rejectWithValue }) => {
-  try {
+      try {
+const AUTH_TOKEN = getAuthToken();
+
     const state: any = getState()
     const currentProposal: Proposal | null = state.quotations.currentProposal
     const existingSections: QuoteSection[] = state.quotations.sections || []
@@ -488,7 +534,9 @@ export const deleteSectionForProposal = createAsyncThunk<
   { proposalNo: string; sectionID: string; calculatedBy?: string; remarks?: string },
   { state: any; rejectValue: string }
 >("quotations/deleteSectionForProposal", async ({ proposalNo, sectionID, calculatedBy = "USER", remarks = "" }, { getState, rejectWithValue }) => {
-  try {
+      try {
+const AUTH_TOKEN = getAuthToken();
+
     const state: any = getState()
     const currentProposal: Proposal | null = state.quotations.currentProposal
     const existingSections: QuoteSection[] = state.quotations.sections || []

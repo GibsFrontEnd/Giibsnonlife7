@@ -4,18 +4,28 @@ import type { RootState } from "../../store"
 import type { Agent, AgentState, CreateAgentRequest, AgentPaginationResponse } from "../../../types/agent"
 import { decryptData } from "../../../utils/encrypt-utils";
 
-const encryptedToken = localStorage.getItem("token");
 
 const API_BASE_URL = "https://core-api.newgibsonline.com/api";
 
 // You'll need to get this token from your auth system
-  const AUTH_TOKEN = decryptData(encryptedToken);
+const getAuthToken = () => {
+  try {
+    const encryptedToken = localStorage.getItem("token");
+    if (!encryptedToken) return null;
+    return decryptData(encryptedToken);
+  } catch (err) {
+    console.warn("Failed to get token", err);
+    return null;
+  }
+};
 
 // Async thunks
 export const getAllAgents = createAsyncThunk(
   "agents/getAllAgents",
   async ({ pageNumber = 1, pageSize = 10 }: { pageNumber?: number; pageSize?: number }, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/agents?pageNumber=${pageNumber}&pageSize=${pageSize}`, {
         method: "GET",
         headers: {
@@ -37,7 +47,9 @@ export const getAllAgents = createAsyncThunk(
 )
 
 export const getAgent = createAsyncThunk("agents/getAgent", async (agentID: string, { rejectWithValue }) => {
-  try {
+      try {
+const AUTH_TOKEN = getAuthToken();
+
     const response = await fetch(`${API_BASE_URL}/agents/${agentID}`, {
       method: "GET",
       headers: {
@@ -60,7 +72,9 @@ export const getAgent = createAsyncThunk("agents/getAgent", async (agentID: stri
 export const createAgent = createAsyncThunk(
   "agents/createAgent",
   async (agentData: CreateAgentRequest, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const queryParams = new URLSearchParams({
         PartyID: agentData.PartyID,
         StateID: agentData.StateID,
@@ -111,7 +125,9 @@ export const createAgent = createAsyncThunk(
 export const updateAgent = createAsyncThunk(
   "agents/updateAgent",
   async ({ agentID, agentData }: { agentID: string; agentData: Partial<Agent> }, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/agents/${agentID}`, {
         method: "PUT",
         headers: {
@@ -134,7 +150,9 @@ export const updateAgent = createAsyncThunk(
 )
 
 export const deleteAgent = createAsyncThunk("agents/deleteAgent", async (agentID: string, { rejectWithValue }) => {
-  try {
+      try {
+const AUTH_TOKEN = getAuthToken();
+
     const response = await fetch(`${API_BASE_URL}/agents/${agentID}`, {
       method: "DELETE",
       headers: {

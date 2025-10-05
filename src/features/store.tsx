@@ -17,6 +17,7 @@ import marketingStaffReducer from "./reducers/companyReducers/marketingStaffSlic
 import regionReducer from './reducers/productReducers/regionSlice';
 import quoteReducer from './reducers/quoteReducers/quotationSlice'
 import companySlice from "./reducers/companyReducers/companySlice";
+import marketingChannelsReducer from "./reducers/companyReducers/marketingChannelSlice";
 
 export const store = configureStore({
   reducer: {
@@ -38,6 +39,7 @@ export const store = configureStore({
     marketingStaff: marketingStaffReducer,
     quotations: quoteReducer,
     companies: companySlice,
+    marketingChannels: marketingChannelsReducer,
   },
 });
 

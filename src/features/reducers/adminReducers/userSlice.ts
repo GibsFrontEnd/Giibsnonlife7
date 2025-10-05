@@ -11,26 +11,31 @@ import type {
 import { decryptData } from "../../../utils/encrypt-utils";
 import type { RootState } from "../../store"
 
-const encryptedToken = localStorage.getItem("token");
-
-
 const API_BASE_URL = "https://core-api.newgibsonline.com/api"
 
 // You'll need to get this token from your auth system
 const getAuthToken = () => {
-  return decryptData(encryptedToken);
-}
-
+  try {
+    const encryptedToken = localStorage.getItem("token");
+    if (!encryptedToken) return null;
+    return decryptData(encryptedToken);
+  } catch (err) {
+    console.warn("Failed to get token", err);
+    return null;
+  }
+};
 // Async thunks
 export const getAllUsers = createAsyncThunk(
   "users/getAllUsers",
   async ({ page = 1, pageSize = 50 }: { page?: number; pageSize?: number } = {}, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Users?page=${page}&pageSize=${pageSize}`, {
         method: "GET",
         headers: {
           accept: "*/*",
-          Authorization: `Bearer ${getAuthToken()}`,
+          Authorization: `Bearer ${AUTH_TOKEN}`,
         },
       })
 
@@ -47,12 +52,14 @@ export const getAllUsers = createAsyncThunk(
 )
 
 export const getUserById = createAsyncThunk("users/getUserById", async (userId: number, { rejectWithValue }) => {
-  try {
+      try {
+const AUTH_TOKEN = getAuthToken();
+
     const response = await fetch(`${API_BASE_URL}/Users/${userId}`, {
       method: "GET",
       headers: {
         accept: "*/*",
-        Authorization: `Bearer ${getAuthToken()}`,
+        Authorization: `Bearer ${AUTH_TOKEN}`,
       },
     })
 
@@ -70,12 +77,14 @@ export const getUserById = createAsyncThunk("users/getUserById", async (userId: 
 export const createUser = createAsyncThunk(
   "users/createUser",
   async (userData: CreateUserRequest, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Users`, {
         method: "POST",
         headers: {
           accept: "*/*",
-          Authorization: `Bearer ${getAuthToken()}`,
+          Authorization: `Bearer ${AUTH_TOKEN}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(userData),
@@ -96,12 +105,14 @@ export const createUser = createAsyncThunk(
 export const updateUser = createAsyncThunk(
   "users/updateUser",
   async ({ id, userData }: { id: number; userData: UpdateUserRequest }, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Users/${id}`, {
         method: "PUT",
         headers: {
           accept: "*/*",
-          Authorization: `Bearer ${getAuthToken()}`,
+          Authorization: `Bearer ${AUTH_TOKEN}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(userData),
@@ -120,12 +131,14 @@ export const updateUser = createAsyncThunk(
 )
 
 export const deleteUser = createAsyncThunk("users/deleteUser", async (userId: number, { rejectWithValue }) => {
-  try {
+      try {
+const AUTH_TOKEN = getAuthToken();
+
     const response = await fetch(`${API_BASE_URL}/Users/${userId}`, {
       method: "DELETE",
       headers: {
         accept: "*/*",
-        Authorization: `Bearer ${getAuthToken()}`,
+        Authorization: `Bearer ${AUTH_TOKEN}`,
       },
     })
 
@@ -142,12 +155,14 @@ export const deleteUser = createAsyncThunk("users/deleteUser", async (userId: nu
 export const changePassword = createAsyncThunk(
   "users/changePassword",
   async ({ userId, passwordData }: { userId: number; passwordData: ChangePasswordRequest }, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Users/${userId}/change-password`, {
         method: "PUT",
         headers: {
           accept: "*/*",
-          Authorization: `Bearer ${getAuthToken()}`,
+          Authorization: `Bearer ${AUTH_TOKEN}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(passwordData),
@@ -167,12 +182,14 @@ export const changePassword = createAsyncThunk(
 export const assignRole = createAsyncThunk(
   "users/assignRole",
   async (roleData: AssignRoleRequest, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Users/assign-role`, {
         method: "POST",
         headers: {
           accept: "*/*",
-          Authorization: `Bearer ${getAuthToken()}`,
+          Authorization: `Bearer ${AUTH_TOKEN}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(roleData),
@@ -192,12 +209,14 @@ export const assignRole = createAsyncThunk(
 export const removeRole = createAsyncThunk(
   "users/removeRole",
   async (roleData: AssignRoleRequest, { rejectWithValue }) => {
-    try {
+        try {
+const AUTH_TOKEN = getAuthToken();
+
       const response = await fetch(`${API_BASE_URL}/Users/remove-role`, {
         method: "POST",
         headers: {
           accept: "*/*",
-          Authorization: `Bearer ${getAuthToken()}`,
+          Authorization: `Bearer ${AUTH_TOKEN}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify(roleData),
