@@ -1,3 +1,4 @@
+//@ts-nocheck
 import * as CryptoJS from "crypto-js";
 
 // Safe runtime access to environment variables

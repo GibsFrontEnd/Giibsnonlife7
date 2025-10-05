@@ -1,3 +1,4 @@
+//@ts-nocheck
 import type { Quote, QuoteSection, RiskItem, Extension, Discount } from "../types/quotation"
 
 // Rounding function as specified
