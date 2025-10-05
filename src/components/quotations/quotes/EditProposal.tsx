@@ -312,6 +312,7 @@ const EditProposal = () => {
                 max="100"
                 value={formData.proportionRate}
                 onChange={(e) => handleInputChange("proportionRate", Number(e.target.value))}
+                disabled
               />
             </div>
 
