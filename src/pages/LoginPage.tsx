@@ -21,6 +21,7 @@ import axios from "axios";
 import { store } from "../features/store";
 import { setTokenExpired } from "../features/reducers/authReducers/authSlice";
 import { encryptData } from "../utils/encrypt-utils";
+import dashImage from "../assets/dash_image.png";
 
 const loginSchema = z.object({
   username: z.string().min(2, "Username must be at least 2 characters"),
@@ -296,7 +297,7 @@ const LoginPage = () => {
           </span>
           <div className="border relative overflow-hidden rounded-md mt-6">
             <img
-              src="src\assets\dash_image.png"
+              src={dashImage}
               className="rounded-lg relative z-10 w-full h-auto"
               alt={"alt"}
             />

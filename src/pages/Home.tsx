@@ -1,4 +1,6 @@
 import { Button } from "../components/UI/new-button";
+//@ts-ignore
+import landingImage from "../assets/landing_img.png";
 
 const HomePage = () => {
   return (
@@ -46,8 +48,7 @@ const HomePage = () => {
                 sizes="100vw"
                 loading="lazy"
                 decoding="async"
-                src={"src/assets/landing_img.png"}
-                // src="https://jump.imgix.net/web/pages/products/products-dashboard.png?ixlib=react-custom&amp;auto=format"
+                src={landingImage}
               />
             </figure>
           </div>

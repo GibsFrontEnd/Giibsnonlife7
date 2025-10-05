@@ -6,8 +6,8 @@ const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navItems = [
-    { title: "Home", link: "/dashboard" },
-    { title: "CSU", link: "/csu" },
+    { title: "Home", link: "/quotations" },
+    { title: "CSU", link: "/quotations" },
     { title: "Quotation", link: "/quotations" },
     { title: "Underwriting", link: "/quotations" },
     { title: "Claims", link: "/quotations" },
