@@ -9,13 +9,13 @@ const Header: React.FC = () => {
     { title: "Home", link: "/dashboard" },
     { title: "CSU", link: "/csu" },
     { title: "Quotation", link: "/quotations" },
-    { title: "Underwriting", link: "/underwriting" },
-    { title: "Claims", link: "/claims" },
-    { title: "Reinsurance", link: "/re-insurance" },
-    { title: "Requisition", link: "/requisition" },
-    { title: "Accounting", link: "/accounting" },
-    { title: "Analytics", link: "/analytics" },
-    { title: "Admin", link: "/admin" },
+    { title: "Underwriting", link: "/quotations" },
+    { title: "Claims", link: "/quotations" },
+    { title: "Reinsurance", link: "/quotations" },
+    { title: "Requisition", link: "/quotations" },
+    { title: "Accounting", link: "/quotations" },
+    { title: "Analytics", link: "/quotations" },
+    { title: "Admin", link: "/quotations" },
   ];
 
   return (
