@@ -579,7 +579,7 @@ const handleSave = () => {
 
                           <div>
                             <div className="label">Location</div>
-                            <div className="value"><Input value={item.location} onChange={(e) => handleItemChange(index, "location", e.target.value)} placeholder="Location" /></div>
+                            <div className="value"><Input value={formData.location} onChange={(e) => handleItemChange(index, "location", e.target.value)} placeholder="Location" disabled /></div>
                           </div>
                         </div>
 

@@ -146,7 +146,7 @@ const CreateProposal = () => {
     .filter(c => c.insuredType !== "Corporate")
     .map(c => ({
       value: c.insuredID,
-      label: c.firstName && c.lastName ? `${c.firstName} ${c.lastName}` : c.orgName
+      label: c.fullName ? c.fullName: c.firstName && c.lastName ? `${c.firstName} ${c.lastName}` :c.firstName? c.firstName:c.lastName?c.lastName: c.orgName
     }))
   const companyCustomerOptions = customers
     .filter(c => c.insuredType === "Corporate")
@@ -307,7 +307,22 @@ const CreateProposal = () => {
                 <Select
                   options={companyCustomerOptions}
                   value={companyCustomerOptions.find(c => c.value === formData.insuredID) || null}
-                  onChange={opt => handleInputChange("insuredID", opt?.value ?? "")}
+                  onChange={opt => {
+                    if (!opt) {
+                      handleInputChange("insuredID", "")
+                      handleInputChange("insAddress", "")
+                      handleInputChange("insMobilePhone", "")
+                      handleInputChange("insEmail", "")
+                      return
+                    }
+                    const customer = customers.find(c => c.insuredID === opt.value)
+                    if (customer) {
+                      handleInputChange("insuredID", customer.insuredID)
+                      handleInputChange("insAddress", customer.address ?? "")
+                      handleInputChange("insEmail", customer.email ?? "")
+                      handleInputChange("insMobilePhone", customer.phoneLine1 || customer.phoneLine2 || "")
+                    }
+                  }}
                   placeholder="Select Company"
                   isClearable
                 />
@@ -420,6 +435,7 @@ const CreateProposal = () => {
                 max={100}
                 value={formData.proportionRate}
                 onChange={e => handleInputChange("proportionRate", Number(e.target.value))}
+                disabled
               />
             </div>
 
