@@ -19,7 +19,7 @@ import { getAllProducts } from "../../../features/reducers/productReducers/produ
 import { Button } from "../../UI/new-button"
 import Input from "../../UI/Input"
 import { Label } from "../../UI/label"
-import { AddSectionModal } from "../../modals/AddSectionModal"
+import { AddSectionModal } from "../../Modals/AddSectionModal"
 import type { QuoteSection, CompleteCalculationRequest, ProposalAdjustments } from "../../../types/quotation"
 import "./QuoteCreator.css"
 
