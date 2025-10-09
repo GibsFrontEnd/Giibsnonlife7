@@ -44,42 +44,48 @@ export const AddSectionModal = ({
   const { subRiskSections } = useSelector((state: RootState) => state.subRiskSections)
   const [sectionAgregate, setSectionAggregate] = useState<any>(null)
   const [adjCollapse, setAdjCollapse] = useState<boolean>(false)
-  const [sectionAdjustmentsResult, setSectionAdjustmentsResult] = useState<AdjustmentCalculations>({
-    startingPremium: section?.sectionAdjustments?.startingPremium || 0,
 
-    specialDiscountAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Special Discount")?.amount || 0,
-    specialDiscountNetAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Special Discount")?.premiumAfterAdjustment || 0,
+    const sectionAdjustments = section?.sectionAdjustments
+    const sectionAdjustmentsDiscounts = section?.sectionAdjustments?.discountsApplied
+    const sectionAdjustmentsLoadings = section?.sectionAdjustments?.loadingsApplied
+
+
+  const [sectionAdjustmentsResult, setSectionAdjustmentsResult] = useState<AdjustmentCalculations>({
+    startingPremium: sectionAdjustments?.startingPremium || 0,
+
+    specialDiscountAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Special Discount")?.amount || 0,
+    specialDiscountNetAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Special Discount")?.premiumAfterAdjustment || 0,
   
-    deductibleDiscountAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Deductible Discount")?.amount || 0,
-    deductibleDiscountNetAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Deductible Discount")?.premiumAfterAdjustment || 0,
+    deductibleDiscountAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Deductible Discount")?.amount || 0,
+    deductibleDiscountNetAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Deductible Discount")?.premiumAfterAdjustment || 0,
   
-    spreadDiscountAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Spread Discount")?.amount || 0,
-    spreadDiscountNetAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Spread Discount")?.premiumAfterAdjustment || 0,
+    spreadDiscountAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Spread Discount")?.amount || 0,
+    spreadDiscountNetAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Spread Discount")?.premiumAfterAdjustment || 0,
   
-    ltaDiscountAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "LTA Discount")?.amount || 0,
-    ltaDiscountNetAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "LTA Discount")?.premiumAfterAdjustment || 0,
+    ltaDiscountAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "LTA Discount")?.amount || 0,
+    ltaDiscountNetAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "LTA Discount")?.premiumAfterAdjustment || 0,
   
-    theftLoadingAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Theft Loading")?.amount || 0,
-    theftLoadingNetAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Theft Loading")?.premiumAfterAdjustment || 0,
+    theftLoadingAmount: sectionAdjustmentsLoadings?.find((d) => d.name == "Theft Loading")?.amount || 0,
+    theftLoadingNetAmount: sectionAdjustmentsLoadings?.find((d) => d.name == "Theft Loading")?.premiumAfterAdjustment || 0,
   
-    srccLoadingAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "SRCC Loading")?.amount || 0,
-    srccLoadingNetAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "SRCC Loading")?.premiumAfterAdjustment || 0,
+    srccLoadingAmount: sectionAdjustmentsLoadings?.find((d) => d.name == "SRCC Loading")?.amount || 0,
+    srccLoadingNetAmount: sectionAdjustmentsLoadings?.find((d) => d.name == "SRCC Loading")?.premiumAfterAdjustment || 0,
   
-    otherLoading2Amount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Other Loading 2")?.amount || 0,
-    otherLoading2NetAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Other Loading 2")?.premiumAfterAdjustment || 0,
+    otherLoading2Amount: sectionAdjustmentsLoadings?.find((d) => d.name == "Other Loading 2")?.amount || 0,
+    otherLoading2NetAmount: sectionAdjustmentsLoadings?.find((d) => d.name == "Other Loading 2")?.premiumAfterAdjustment || 0,
   
     netPremiumDue: section?.sectionAdjustments?.finalNetPremium || 0,
     success: false,
     message: "",  })
   const [adjustments, setAdjustments] = useState({
-    specialDiscountRate: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Special Discount")?.rate || 0,
-    deductibleDiscountRate: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Deductible Discount")?.rate || 0,
-    spreadDiscountRate: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Spread Discount")?.rate || 0,
-    ltaDiscountRate: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "LTA Discount")?.rate || 0,
-    otherDiscountsRate: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Special Discount")?.rate || 0,
-    theftLoadingRate: section?.sectionAdjustments?.loadingsApplied?.find((d) => d.name == "Theft Loading")?.rate || 0,
-    srccLoadingRate: section?.sectionAdjustments?.loadingsApplied?.find((d) => d.name == "SRCC Loading")?.rate || 0,
-    otherLoading2Rate: section?.sectionAdjustments?.loadingsApplied?.find((d) => d.name == "Other Loading 2")?.rate || 0,  })
+    specialDiscountRate: sectionAdjustmentsDiscounts?.find((d) => d.name == "Special Discount")?.rate || 0,
+    deductibleDiscountRate: sectionAdjustmentsDiscounts?.find((d) => d.name == "Deductible Discount")?.rate || 0,
+    spreadDiscountRate: sectionAdjustmentsDiscounts?.find((d) => d.name == "Spread Discount")?.rate || 0,
+    ltaDiscountRate: sectionAdjustmentsDiscounts?.find((d) => d.name == "LTA Discount")?.rate || 0,
+    otherDiscountsRate: sectionAdjustmentsDiscounts?.find((d) => d.name == "Special Discount")?.rate || 0,
+    theftLoadingRate: sectionAdjustmentsLoadings?.find((d) => d.name == "Theft Loading")?.rate || 0,
+    srccLoadingRate: sectionAdjustmentsLoadings?.find((d) => d.name == "SRCC Loading")?.rate || 0,
+    otherLoading2Rate: sectionAdjustmentsLoadings?.find((d) => d.name == "Other Loading 2")?.rate || 0,  })
   const { subRiskSMIs } = useSelector((state: RootState) => state.subRiskSMIs)
   const initialForm = (): QuoteSection => ({
     sectionID: section?.sectionID || "",
@@ -1202,7 +1208,7 @@ useEffect(()=>{
                     </Button>
                   </>
                 )}
-                {sectionAdjustmentsResult.success && (
+                {(sectionAdjustmentsResult.success || sectionAdjustmentsLoadings.length>0 || sectionDiscountsLoadings.length>0  )&& (
                   <div className={"proposal-adjustments-card"}>
                     <div className="card-header">
                       <h4>Section Adjustments</h4>

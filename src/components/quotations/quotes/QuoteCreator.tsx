@@ -155,7 +155,7 @@ const [editedSections,setEditedSections] = useState<number[]>([]);
   const [proposalAdjustmentsResult, setProposalAdjustmentsResult] = useState<any | null>(null)
 
   // pro-rata: coverDays (user input) + result storage
-  const [coverDays, setCoverDays] = useState<number>(365)
+  const [coverDays, setCoverDays] = useState<number>(20)
   const [proRataResult, setProRataResult] = useState<any | null>(null)
 
   // fetch token to prevent race conditions
@@ -225,19 +225,23 @@ console.log(sectionInputs);
   }, [calculationBreakdown])
 
   useEffect(() => {
-    if (currentCalculation) {
+    if (calculationBreakdown?.inputs?.proposalAdjustments) {
       setAdjustments({
-        otherDiscountsRate: currentCalculation.otherDiscountsRate || 0,
-        otherLoadingsRate: currentCalculation.otherLoadingsRate || 0,
+        otherDiscountsRate: calculationBreakdown?.inputs?.proposalAdjustments.otherDiscountsRate || 0,
+        otherLoadingsRate: calculationBreakdown?.inputs?.proposalAdjustments.otherLoadingsRate || 0,
       })
-      if (currentCalculation.remarks) setRemarks(currentCalculation.remarks)
+      if (currentCalculation?.remarks) setRemarks(currentCalculation.remarks)
     }
-  }, [currentCalculation])
+    
+  }, [calculationBreakdown?.inputs?.proposalAdjustments])
 
   // initialize coverDays from currentProposal (if present)
   useEffect(() => {
     if (currentProposal && typeof currentProposal.proRataDays === "number") {
-      setCoverDays(currentProposal.proRataDays)
+      const start = new Date(currentProposal.startDate)
+const end = new Date(currentProposal.endDate)
+const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24))
+      setCoverDays(dayRange)
     }
   }, [currentProposal])
 
@@ -551,7 +555,7 @@ console.log(sectionInputs);
 
 
   const handleCalculateProRata = async () => {
-    const netPremium = proposalAdjustmentsResult.netPremiumDue
+    const netPremium = proposalAdjustmentsResult?.netPremiumDue || calculationBreakdown?.calculationSteps?.proRataCalculations.netPremiumBeforeProRata
     if (!netPremium || Number(netPremium) <= 0) {
       toast({
         description: "No net premium available to pro-rate. Run proposal adjustments or a calculation first.",
@@ -566,6 +570,7 @@ console.log(sectionInputs);
       netPremiumDue: Number(netPremium),
       coverDays: Number(coverDays || 0),
     }
+    console.log(payload);
 
     try {
       // @ts-ignore
@@ -614,7 +619,7 @@ console.log(sectionInputs);
     }));
     console.log(editedSections);
     
-    const breakdownSections = (calculationBreakdown?.inputs?.sectionInputs || []).filter((si:any,index)=> !editedSections.includes(index)).map((si: any) => {
+    const breakdownSections = (calculationBreakdown?.inputs?.sectionInputs).filter((si:any,index)=> !editedSections.includes(index)).map((si: any) => {
     
       return {
         sectionID: si.sectionID ?? si.sectionId ?? "",
@@ -931,6 +936,7 @@ console.log("full calculation request");
               value={coverDays}
               onChange={(e) => setCoverDays(Number(e.target.value || 0))}
               style={{ width: 120 }}
+              disabled
             />
             <div style={{ fontSize: 12, color: "#666" }}>Used for pro-rata calculation</div>
           </div>
@@ -972,7 +978,7 @@ console.log("full calculation request");
           </div>
 
           {/* Show proposal-adjustments response (if present) */}
-          {proposalAdjustmentsResult && (
+          {(calculationBreakdown?.calculationSteps?.proposalAdjustments?.discountsApplied.length>0 || calculationBreakdown?.calculationSteps?.proposalAdjustments?.loadingsApplied.length>0 || proposalAdjustmentsResult) && (
             <div className="proposal-adjustments-card">
               <div className="card-header">
                 <h4>Proposal Adjustments</h4>
@@ -983,12 +989,12 @@ console.log("full calculation request");
                 <div className="summary-column">
                   <div className="summary-row">
                     <div className="label">Starting Premium</div>
-                    <div className="value">{formatCurrency(proposalAdjustmentsResult.startingPremium)}</div>
+                    <div className="value">{formatCurrency(proposalAdjustmentsResult?.startingPremium || calculationBreakdown?.calculationSteps?.proposalAdjustments?.startingPremium || 0)}</div>
                   </div>
 
                   <div className="summary-row">
                     <div className="label">Net Premium Due</div>
-                    <div className="value highlight">{formatCurrency(proposalAdjustmentsResult.netPremiumDue)}</div>
+                    <div className="value highlight">{formatCurrency(proposalAdjustmentsResult?.netPremiumDue || calculationBreakdown?.calculationSteps?.proposalAdjustments?.finalNetPremium || 0)}</div>
                   </div>
 
                   <div className="divider" />
@@ -996,8 +1002,8 @@ console.log("full calculation request");
                   <div className="mini-grid">
                     <div className="mini-item">
                       <div className="mini-label">Other Discounts</div>
-                      <div className="mini-value">{formatCurrency(proposalAdjustmentsResult.otherDiscountsAmount)}</div>
-                      <div className="mini-value">Net Amount:{formatCurrency(proposalAdjustmentsResult.otherDiscountsNetAmount)}</div>
+                      <div className="mini-value">{formatCurrency(proposalAdjustmentsResult?.otherDiscountsAmount || calculationBreakdown?.calculationSteps?.proposalAdjustments?.discountsApplied[0]?.amount || 0)}</div>
+                      <div className="mini-value">Net Amount:{formatCurrency(proposalAdjustmentsResult?.otherDiscountsNetAmount || 0)}</div>
                     </div>
                   </div>
                 </div>
@@ -1007,8 +1013,8 @@ console.log("full calculation request");
                   <div className="mini-grid">
                   <div className="mini-item">
                       <div className="mini-label">Other Loadings</div>
-                      <div className="mini-value">{formatCurrency(proposalAdjustmentsResult.otherLoadingsAmount)}</div>
-                      <div className="mini-value">Net Amount:{formatCurrency(proposalAdjustmentsResult.otherLoadingsNetAmount)}</div>
+                      <div className="mini-value">{formatCurrency(proposalAdjustmentsResult?.otherLoadingsAmount || calculationBreakdown?.calculationSteps?.proposalAdjustments?.loadingsApplied[0]?.amount || 0)}</div>
+                      <div className="mini-value">Net Amount:{formatCurrency(proposalAdjustmentsResult?.otherLoadingsNetAmount || 0)}</div>
                     </div>
                   </div>
 
@@ -1016,7 +1022,7 @@ console.log("full calculation request");
 
                   <div className="footer-note">
                     <small className="muted">
-                      {proposalAdjustmentsResult.message ?? "Proposal-level adjustments applied."}
+                      {proposalAdjustmentsResult?.message ?? "Proposal-level adjustments applied."}
                     </small>
                   </div>
                 </div>
@@ -1024,36 +1030,36 @@ console.log("full calculation request");
             </div>
           )}
           {/* Show Pro-Rata result (if present) */}
-          {proRataResult && (
+          {(calculationBreakdown?.calculationSteps?.proRataCalculations || proRataResult) &&  (
             <div className="pro-rata-card">
               <div className="card-header">
                 <h4>Pro-Rata</h4>
-                <span className={`badge ${proRataResult.isProRated ? "info" : "muted"}`}>
-                  {proRataResult.isProRated ? "Pro-Rated" : "Not Pro-Rated"}
+                <span className={`badge ${(proRataResult?.isProRated || calculationBreakdown?.calculationSteps?.proRataCalculations.isProRated) ? "info" : "muted"}`}>
+                  {(proRataResult?.isProRated || calculationBreakdown?.calculationSteps?.proRataCalculations.isProRated) ? "Pro-Rated" : "Not Pro-Rated"}
                 </span>
               </div>
 
               <div className="card-body pro-rata-grid">
                 <div className="pr-row">
                   <div className="pr-label">Base Net Premium</div>
-                  <div className="pr-value">{formatCurrency(proRataResult.netPremiumDue)}</div>
+                  <div className="pr-value">{(formatCurrency(proRataResult?.netPremiumDue || calculationBreakdown?.calculationSteps?.proRataCalculations.netPremiumBeforeProRata||0))}</div>
                 </div>
 
                 <div className="pr-row">
                   <div className="pr-label">Pro-Rata Premium</div>
-                  <div className="pr-value">{formatCurrency(proRataResult.proRataPremium)}</div>
+                  <div className="pr-value">{(formatCurrency(proRataResult?.proRataPremium || calculationBreakdown?.calculationSteps?.proRataCalculations.proRataPremium || 0))}</div>
                 </div>
 
                 <div className="pr-row">
                   <div className="pr-label">Premium Due</div>
                   <div className="pr-value">
-                    {formatCurrency(proRataResult.premiumDue ?? proRataResult.proRataPremium)}
+                    {formatCurrency((proRataResult?.premiumDue || calculationBreakdown?.calculationSteps?.proRataCalculations.finalPremiumDue || 0))}
                   </div>
                 </div>
 
                 <div className="pr-row">
                   <div className="pr-label">Cover Days</div>
-                  <div className="pr-value">{proRataResult.coverDays ?? coverDays ?? "—"}</div>
+                  <div className="pr-value">{proRataResult?.coverDays ?? coverDays ?? "—"}</div>
                 </div>
               </div>
             </div>
