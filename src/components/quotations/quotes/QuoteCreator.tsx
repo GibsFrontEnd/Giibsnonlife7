@@ -1059,6 +1059,12 @@ console.log("full calculation request");
             </div>
           )}
         </div>
+        <Button
+            onClick={handleCalculate}
+            disabled={loading?.calculate || !localSections || localSections.length === 0}
+          >
+            {loading?.calculate ? "Calculating..." : currentCalculation ? "Save to Database and Update Calculation Breakdown" : "Save to Database and Get Calculation Breakdown"}
+          </Button>
 
         {/* Calculation results & breakdown */}
         {currentCalculation && (
