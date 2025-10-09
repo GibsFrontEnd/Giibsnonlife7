@@ -1,7 +1,9 @@
 //@ts-nocheck
+"use client"
 
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import type { AppDispatch } from "../../features/store"
 import type { RootState } from "../../features/store"
 import { getSubRiskSectionsBySubRisk } from "../../features/reducers/productReducers/subRiskSectionSlice"
 import { getSubRiskSMIsBySectionCode } from "../../features/reducers/productReducers/subRiskSMISlice"
@@ -9,33 +11,82 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../UI/dialog"
 import { Button } from "../UI/new-button"
 import Input from "../UI/Input"
 import { Label } from "../UI/label"
-import type { QuoteSection, RiskItem} from "../../types/quotation"
+import type { QuoteSection, RiskItem, CalculatedAggregate, AdjustmentCalculations } from "../../types/quotation"
 import "./AddSectionModal.css"
 
-import { calculateRiskItems } from "../../features/reducers/quoteReducers/quotationSlice"
+import {
+  calculateRiskItems,
+  calculateSectionAggregate,
+  calculateSectionAdjustment,
+} from "../../features/reducers/quoteReducers/quotationSlice"
+import { toast } from "../UI/use-toast"
 
 interface AddSectionModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: (section: QuoteSection) => void
-  section?: QuoteSection
+  section?: QuoteSection | any
   productId: string
 
   // NEW optional prop: modal will call this with the full calculated risk array
   onCalculateFullRiskArray?: (sectionID: string, fullRiskArray: any[]) => void
 }
 
-export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, onCalculateFullRiskArray }: AddSectionModalProps) => {
-  const dispatch = useDispatch()
+export const AddSectionModal = ({
+  isOpen,
+  onClose,
+  onSave,
+  section,
+  productId,
+  onCalculateFullRiskArray,
+}: AddSectionModalProps) => {
+  const dispatch = useDispatch<AppDispatch>()
   const { subRiskSections } = useSelector((state: RootState) => state.subRiskSections)
-  const { subRiskSMIs } = useSelector((state: RootState) => state.subRiskSMIs)
+  const [sectionAgregate, setSectionAggregate] = useState<any>(null)
+  const [adjCollapse, setAdjCollapse] = useState<boolean>(false)
+  const [sectionAdjustmentsResult, setSectionAdjustmentsResult] = useState<AdjustmentCalculations>({
+    startingPremium: section?.sectionAdjustments?.startingPremium || 0,
 
+    specialDiscountAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Special Discount")?.amount || 0,
+    specialDiscountNetAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Special Discount")?.premiumAfterAdjustment || 0,
+  
+    deductibleDiscountAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Deductible Discount")?.amount || 0,
+    deductibleDiscountNetAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Deductible Discount")?.premiumAfterAdjustment || 0,
+  
+    spreadDiscountAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Spread Discount")?.amount || 0,
+    spreadDiscountNetAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Spread Discount")?.premiumAfterAdjustment || 0,
+  
+    ltaDiscountAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "LTA Discount")?.amount || 0,
+    ltaDiscountNetAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "LTA Discount")?.premiumAfterAdjustment || 0,
+  
+    theftLoadingAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Theft Loading")?.amount || 0,
+    theftLoadingNetAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Theft Loading")?.premiumAfterAdjustment || 0,
+  
+    srccLoadingAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "SRCC Loading")?.amount || 0,
+    srccLoadingNetAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "SRCC Loading")?.premiumAfterAdjustment || 0,
+  
+    otherLoading2Amount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Other Loading 2")?.amount || 0,
+    otherLoading2NetAmount: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Other Loading 2")?.premiumAfterAdjustment || 0,
+  
+    netPremiumDue: section?.sectionAdjustments?.finalNetPremium || 0,
+    success: false,
+    message: "",  })
+  const [adjustments, setAdjustments] = useState({
+    specialDiscountRate: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Special Discount")?.rate || 0,
+    deductibleDiscountRate: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Deductible Discount")?.rate || 0,
+    spreadDiscountRate: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Spread Discount")?.rate || 0,
+    ltaDiscountRate: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "LTA Discount")?.rate || 0,
+    otherDiscountsRate: section?.sectionAdjustments?.discountsApplied?.find((d) => d.name == "Special Discount")?.rate || 0,
+    theftLoadingRate: section?.sectionAdjustments?.loadingsApplied?.find((d) => d.name == "Theft Loading")?.rate || 0,
+    srccLoadingRate: section?.sectionAdjustments?.loadingsApplied?.find((d) => d.name == "SRCC Loading")?.rate || 0,
+    otherLoading2Rate: section?.sectionAdjustments?.loadingsApplied?.find((d) => d.name == "Other Loading 2")?.rate || 0,  })
+  const { subRiskSMIs } = useSelector((state: RootState) => state.subRiskSMIs)
   const initialForm = (): QuoteSection => ({
-    sectionID: section?.sectionID || `section_${Date.now()}`,
+    sectionID: section?.sectionID || "",
     sectionName: section?.sectionName || "",
     location: section?.location || "",
     sectionSumInsured: section?.sectionSumInsured || 0,
-    sectionPremium: section?.sectionPremium || 0,
+    sectionPremium: section?.sectionGrossPremium || 0,
     sectionNetPremium: (section as any)?.sectionNetPremium ?? 0,
     lastCalculated: (section as any)?.lastCalculated ?? null,
     proportionRate: /* (section as any)?.proportionRate ?? */ 100,
@@ -48,7 +99,7 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
           actualValue: it.actualValue ?? 0,
           itemRate: it.itemRate ?? 0,
           multiplyRate: it.multiplyRate ?? 1,
-          location: it.location ?? "",
+          location: section?.location ?? "",
           feaDiscountRate: it.feaDiscountRate ?? 0,
 
           // server-calculated fields (display-only)
@@ -72,7 +123,6 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
 
   const [formData, setFormData] = useState<QuoteSection>(initialForm)
   const [selectedSectionCode, setSelectedSectionCode] = useState<string>(section?.sectionID || "")
-
   // track applying state per-item (key: sectionID|index)
   const [applyingMap, setApplyingMap] = useState<Record<string, boolean>>({})
 
@@ -100,12 +150,22 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section])
 
+useEffect(()=>{
+  if(formData.riskItems.length>0)
+  handleCalculateAllItems()
+},[])
+
   const keyFor = (index: number) => `${formData.sectionID || "sec"}|${index}`
 
   const handleSectionNameChange = (sectionCode: string) => {
     setSelectedSectionCode(sectionCode)
     const selected = subRiskSections.find((s) => s.sectionCode === sectionCode)
-    if (selected) setFormData((p) => ({ ...p, sectionName: selected.sectionName, sectionID: sectionCode }))
+    if (selected)
+      setFormData((p) => ({
+        ...p,
+        sectionName: selected.sectionName,
+        sectionID: sectionCode,
+      }))
     else setFormData((p) => ({ ...p, sectionName: "", sectionID: sectionCode }))
   }
 
@@ -120,7 +180,7 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
       actualValue: 0,
       itemRate: 0,
       multiplyRate: 1,
-      location: "",
+      location: formData.location,
       feaDiscountRate: 0,
       actualPremium: 0,
       actualPremiumFormula: "",
@@ -135,7 +195,10 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
       _showStock: false,
       _collapsed: false,
     }
-    setFormData((prev) => ({ ...prev, riskItems: [ ...(prev.riskItems || []), newItem ] }))
+    setFormData((prev) => ({
+      ...prev,
+      riskItems: [...(prev.riskItems || []), newItem],
+    }))
   }
 
   const handleItemChange = (index: number, field: keyof RiskItem | string, value: any) => {
@@ -146,14 +209,29 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
 
     if (field === "smiCode") {
       const s = subRiskSMIs.find((x) => x.smiCode === value)
-      if (s) updated[index].itemRate = (s as any).rate ?? (s as any).itemRate ?? (s as any).defaultRate ?? updated[index].itemRate
+      if (s)
+        updated[index].itemRate =
+          (s as any).rate ?? (s as any).itemRate ?? (s as any).defaultRate ?? updated[index].itemRate
     }
+
+    if (field === "itemRate" && updated[index].stockItem) {
+      updated[index].stockItem = {
+        ...updated[index].stockItem,
+        stockRate: parsed,
+      }
+    }
+    if (field === "location") 
+      updated[index].location = formData.location;
+      
+
 
     setFormData((p) => ({ ...p, riskItems: updated }))
   }
 
   const handleRemoveItem = (index: number) => {
-    const updated = (formData.riskItems as any[]).filter((_, i) => i !== index).map((it, i) => ({ ...it, itemNo: i + 1 }))
+    const updated = (formData.riskItems as any[])
+      .filter((_, i) => i !== index)
+      .map((it, i) => ({ ...it, itemNo: i + 1 }))
     setFormData((p) => ({ ...p, riskItems: updated }))
   }
 
@@ -161,7 +239,13 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
     const updated = [...(formData.riskItems as any[])]
     updated[index]._showStock = !updated[index]._showStock
     if (updated[index]._showStock && !updated[index].stockItem) {
-      updated[index].stockItem = { stockCode: "", stockDescription: "", stockSumInsured: 0, stockRate: 0, stockDiscountRate: 0 }
+      updated[index].stockItem = {
+        stockCode: "",
+        stockDescription: "",
+        stockSumInsured: 0,
+        stockRate: updated[index].itemRate || 0,
+        stockDiscountRate: 0,
+      }
     }
     setFormData((p) => ({ ...p, riskItems: updated }))
   }
@@ -181,9 +265,70 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
     setFormData((p) => ({ ...p, riskItems: updated }))
   }
 
+  const handleSectionAggregate = async (data: any) => {
+    const payload = {
+      calculatedItems: data.calculatedItems,
+    }
+
+    if (payload) {
+      try {
+        const resp: CalculatedAggregate = await dispatch(calculateSectionAggregate(payload)).unwrap()
+        console.log(resp)
+        setSectionAggregate({
+          aggregateSumInsured: resp.aggregateSumInsured,
+          aggregatePremium: resp.aggregatePremium,
+        })
+      } catch (err: any) {
+        // adapt to your error UI (toasts, etc). For now simple alert:
+        toast({
+          description: "Failed to calculate Aggregate",
+          variant: "destructive",
+          duration: 2000,
+        });  
+      }
+    }
+  }
+  const handleApplySectionAdjustments = async () => {
+    if (!adjustments) {
+      toast({
+        description: "Fill in an Adjustment",
+        variant: "warning",
+        duration: 2000,
+      });  
+      return
+    } else if (sectionAgregate?.aggregatePremium == null || sectionAgregate?.aggregatePremium < 0) {
+      toast({
+        description: "Aggregate premium must be calculated and > 0",
+        variant: "warning",
+        duration: 2000,
+      });  
+      return
+    }
+    const payload = {
+      aggregatePremium: sectionAgregate.aggregatePremium,
+      ...adjustments,
+    }
+    console.log(payload)
+
+    if (payload) {
+      try {
+        const resp: AdjustmentCalculations = await dispatch(calculateSectionAdjustment(payload)).unwrap()
+        console.log(resp)
+        setSectionAdjustmentsResult(resp)
+      } catch (err: any) {
+        // adapt to your error UI (toasts, etc). For now simple alert:
+        toast({
+          description: "Failed to apply Adjustments",
+          variant: "destructive",
+          duration: 2000,
+        });    
+      }
+    }
+  }
+
   // ---------- SERVER-CALLED Apply for a single item ----------
   const handleApplyItem = async (index: number) => {
-    const item = (formData.riskItems || [])[index]  
+    const item = (formData.riskItems || [])[index]
     if (!item) return
 
     const mapKey = keyFor(index)
@@ -208,7 +353,7 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
                 stockCode: item.stockItem.stockCode || "",
                 stockDescription: item.stockItem.stockDescription || "",
                 stockSumInsured: Number(item.stockItem.stockSumInsured) || 0,
-                stockRate: Number(item.stockItem.stockRate) || 0,
+                stockRate: Number(item.itemRate) || 0,
                 stockDiscountRate: Number(item.stockItem.stockDiscountRate) || 0,
               }
             : null,
@@ -235,7 +380,7 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
             return (
               it.sectionID === (c.sectionID ?? it.sectionID) &&
               (it.smiCode || "") === (c.smiCode || "") &&
-              (String(it.itemDescription || "").trim() === String(c.itemDescription || "").trim()) &&
+              String(it.itemDescription || "").trim() === String(c.itemDescription || "").trim() &&
               Number(it.actualValue || 0) === Number(c.actualValue || it.actualValue || 0)
             )
           })
@@ -280,7 +425,11 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
       }
     } catch (err: any) {
       // adapt to your error UI (toasts, etc). For now simple alert:
-      alert(err?.message || "Failed to calculate item")
+      toast({
+        description: "Failed to calculate item",
+        variant: "destructive",
+        duration: 2000,
+      });    
     } finally {
       setApplyingMap((m) => {
         const copy = { ...m }
@@ -316,43 +465,45 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
     // capture sectionID early for callback
     try {
       const resp = await (dispatch(calculateRiskItems(payload)) as any).unwrap()
+      handleSectionAggregate(resp)
+
       if (resp && Array.isArray(resp.calculatedItems)) {
-        
         // build merged items array (same logic as before) but do it locally so we can pass it up immediately
         const mergedItems = [...(formData.riskItems || [])]
 
         resp.calculatedItems.forEach((cItem: any) => {
           // find best match (sectionID + smiCode + actualValue + description)
-          const matchIndex = mergedItems.findIndex((it) =>
-            it.sectionID === (cItem.sectionID ?? it.sectionID) &&
-            ((it.smiCode || "") === (cItem.smiCode || "")) &&
-            (String(it.itemDescription || "").trim() === String(cItem.itemDescription || "").trim()) &&
-            (Number(it.actualValue || 0) === Number(cItem.actualValue || it.actualValue || 0))
+          const matchIndex = mergedItems.findIndex(
+            (it) =>
+              it.sectionID === (cItem.sectionID ?? it.sectionID) &&
+              (it.smiCode || "") === (cItem.smiCode || "") &&
+              String(it.itemDescription || "").trim() === String(cItem.itemDescription || "").trim() &&
+              Number(it.actualValue || 0) === Number(cItem.actualValue || it.actualValue || 0),
           )
 
-          // fallback strategy: match by index if no good match found (keeps previous behavior)
+          // fallback strategy: match by  f no good match found (keeps previous behavior)
           const target = matchIndex !== -1 ? matchIndex : mergedItems.findIndex((_, i) => i === 0)
 
           if (target !== -1) {
             mergedItems[target] = {
               ...mergedItems[target],
-              actualValue: cItem.actualValue ?? mergedItems[target].actualValue,
-              itemRate: cItem.itemRate ?? mergedItems[target].itemRate,
-              multiplyRate: cItem.multiplyRate ?? mergedItems[target].multiplyRate,
-              location: cItem.location ?? mergedItems[target].location,
-              itemDescription: cItem.itemDescription ?? mergedItems[target].itemDescription,
-              smiCode: cItem.smiCode ?? mergedItems[target].smiCode,
+              actualValue: cItem.actualValue ?? mergedItems[target]?.actualValue,
+              itemRate: cItem.itemRate ?? mergedItems[target]?.itemRate,
+              multiplyRate: cItem.multiplyRate ?? mergedItems[target]?.multiplyRate,
+              location: cItem.location ?? mergedItems[target]?.location,
+              itemDescription: cItem.itemDescription ?? mergedItems[target]?.itemDescription,
+              smiCode: cItem.smiCode ?? mergedItems[target]?.smiCode,
 
-              actualPremium: cItem.actualPremium ?? mergedItems[target].actualPremium,
-              actualPremiumFormula: cItem.actualPremiumFormula ?? mergedItems[target].actualPremiumFormula,
-              shareValue: cItem.shareValue ?? mergedItems[target].shareValue,
-              shareValueFormula: cItem.shareValueFormula ?? mergedItems[target].shareValueFormula,
-              premiumValue: cItem.premiumValue ?? mergedItems[target].premiumValue,
-              premiumValueFormula: cItem.premiumValueFormula ?? mergedItems[target].premiumValueFormula,
-              stockDiscountAmount: cItem.stockDiscountAmount ?? mergedItems[target].stockDiscountAmount,
-              feaDiscountAmount: cItem.feaDiscountAmount ?? mergedItems[target].feaDiscountAmount,
-              netPremiumAfterDiscounts: cItem.netPremiumAfterDiscounts ?? mergedItems[target].netPremiumAfterDiscounts,
-              stockItem: cItem.stockItem ?? mergedItems[target].stockItem ?? null,
+              actualPremium: cItem.actualPremium ?? mergedItems[target]?.actualPremium,
+              actualPremiumFormula: cItem.actualPremiumFormula ?? mergedItems[target]?.actualPremiumFormula,
+              shareValue: cItem.shareValue ?? mergedItems[target]?.shareValue,
+              shareValueFormula: cItem.shareValueFormula ?? mergedItems[target]?.shareValueFormula,
+              premiumValue: cItem.premiumValue ?? mergedItems[target]?.premiumValue,
+              premiumValueFormula: cItem.premiumValueFormula ?? mergedItems[target]?.premiumValueFormula,
+              stockDiscountAmount: cItem.stockDiscountAmount ?? mergedItems[target]?.stockDiscountAmount,
+              feaDiscountAmount: cItem.feaDiscountAmount ?? mergedItems[target]?.feaDiscountAmount,
+              netPremiumAfterDiscounts: cItem.netPremiumAfterDiscounts ?? mergedItems[target]?.netPremiumAfterDiscounts,
+              stockItem: cItem.stockItem ?? mergedItems[target]?.stockItem ?? null,
             }
           }
         })
@@ -371,11 +522,14 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
           sectionNetPremium: typeof newSectionNet === "number" ? newSectionNet : prev.sectionNetPremium,
           lastCalculated: new Date().toISOString(),
         }))
-        
-
       }
     } catch (err: any) {
-      alert(err?.message || "Failed to calculate all items")
+      toast({
+        description: "Failed to calculate all items",
+        variant: "destructive",
+        duration: 2000,
+      });
+
     } finally {
       setApplyingMap((m) => {
         const c = { ...m }
@@ -385,43 +539,57 @@ export const AddSectionModal = ({ isOpen, onClose, onSave, section, productId, o
     }
   }
 
-const handleSave = () => {
-  if (!formData.sectionName) {
-    alert("Please select a section name")
-    return
+  const handleApplyAndCalculate = async (index: number) => {
+    await handleCalculateAllItems()
+    await handleApplyItem(index)
+    // run your top-level calculate to persist final totals if needed
   }
 
-  // Use location as the basis of the "unique" id, append a short random suffix.
-  // If location is empty, fall back to 'loc' so the id is still valid.
-  const locBase = (formData.location || "").trim() || "loc"
-  const suffix = Math.random().toString(36).slice(2, 8) // 6 chars
-  const generatedId = `${locBase}-${suffix}`
 
-  // Don't mutate formData directly — create an updated copy to pass up
-  const updatedSection: QuoteSection = {
-    ...formData,
-    sectionID: generatedId,
-  }
-
-  // If parent wants the calculated risk array, ensure each item has the sectionID
-  try {
-    if (onCalculateFullRiskArray) {
-      const prepared = (updatedSection.riskItems || []).map((mi) => ({
-        ...mi,
-        sectionID: mi.sectionID ?? updatedSection.sectionID,
-      }))
-      onCalculateFullRiskArray(updatedSection.sectionID, prepared)
+  const handleSave = () => {
+    handleCalculateAllItems()
+    if (!formData.sectionName) {
+      toast({
+        description: "Please select a section name",
+        variant: "warning",
+        duration: 2000,
+      });
+      return
     }
-  } catch (cbErr) {
-    console.warn("onCalculateFullRiskArray callback failed:", cbErr)
-  }
 
-  // Finally call onSave with the updated section
-  onSave(updatedSection)
-  console.log("Saved section:", updatedSection)
-}
+    // Use location as the basis of the "unique" id, append a short random suffix.
+    // If location is empty, fall back to 'loc' so the id is still valid.
+    // Don't mutate formData directly — create an updated copy to pass up
+    const updatedSection: QuoteSection = {
+      ...formData,
+      ...adjustments,
+    }
+
+    // If parent wants the calculated risk array, ensure each item has the sectionID
+    try {
+      if (onCalculateFullRiskArray) {
+        const prepared = (updatedSection.riskItems || []).map((mi) => ({
+          ...mi,
+          sectionID: mi.sectionID ?? updatedSection.sectionID,
+        }))
+        onCalculateFullRiskArray(updatedSection.sectionID, prepared)
+      }
+    } catch (cbErr) {
+      console.warn("onCalculateFullRiskArray callback failed:", cbErr)
+    }
+
+    // Finally call onSave with the updated section
+    onSave(updatedSection)
+    console.log(formData);
+  
+    console.log("Saved section:", updatedSection)
+  }
   const formatCurrency = (amount: number): string =>
-    new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", minimumFractionDigits: 2 }).format(amount)
+    new Intl.NumberFormat("en-NG", {
+      style: "currency",
+      currency: "NGN",
+      minimumFractionDigits: 2,
+    }).format(amount)
 
   const getSmiLabel = (smiCode: string) => {
     const sm = subRiskSMIs.find((s) => s.smiCode === smiCode)
@@ -441,8 +609,13 @@ const handleSave = () => {
             <div className="form-grid">
               <div className="form-field">
                 <Label htmlFor="sectionName">Section Name *</Label>
-                <select id="sectionName" value={selectedSectionCode} onChange={(e) => handleSectionNameChange(e.target.value)} className="form-select">
-                  <option value="">Select Section</option>
+                <select
+                  id="sectionName"
+                  value={selectedSectionCode}
+                  onChange={(e) => handleSectionNameChange(e.target.value)}
+                  className="form-select"
+                >
+                  <option value="">{!formData.sectionName ? "Select Section" : formData.sectionName}</option>
                   {subRiskSections.map((s, index) => (
                     <option key={s.sectionCode + "" + index} value={s.sectionCode}>
                       {s.sectionName}
@@ -453,16 +626,31 @@ const handleSave = () => {
 
               <div className="form-field">
                 <Label htmlFor="location">Location</Label>
-                <Input id="location" value={formData.location} onChange={(e) => setFormData((p) => ({ ...p, location: e.target.value }))} placeholder="Enter location" />
+                <Input
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) => setFormData((p) => ({ ...p, location: e.target.value }))}
+                  placeholder="Enter location"
+                />
               </div>
             </div>
           </div>
 
           <div className="form-section">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 12 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 12,
+                marginBottom: 12,
+              }}
+            >
               <div style={{ fontWeight: 700 }}>Risk Items ({formData.riskItems.length})</div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Button onClick={handleAddItem} size="sm">Add Item</Button>
+                <Button onClick={handleAddItem} size="sm">
+                  Add Item
+                </Button>
                 <Button onClick={handleCalculateAllItems} size="sm" variant="outline" disabled={!!applyingMap["ALL"]}>
                   {applyingMap["ALL"] ? "Calculating..." : "Calculate All"}
                 </Button>
@@ -480,19 +668,31 @@ const handleSave = () => {
                   max="100"
                   step="0.01"
                   value={(formData as any).proportionRate ?? 0}
-                  onChange={(e) => setFormData((p) => ({ ...p, proportionRate: e.target.value === "" ? 0 : Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setFormData((p) => ({
+                      ...p,
+                      proportionRate: e.target.value === "" ? 0 : Number(e.target.value),
+                    }))
+                  }
                   style={{ width: 120 }}
-
-                 disabled
+                  disabled
                 />
               </div>
 
               {(formData.riskItems || []).map((item: any, index: number) => (
-                <article key={`${item.sectionID}-${index}`} className={`item-card ${item._collapsed ? "collapsed" : ""}`} aria-labelledby={`item-${item.itemNo}`}>
+                <article
+                  key={`${item.sectionID}-${index}`}
+                  className={`item-card ${item._collapsed ? "collapsed" : ""}`}
+                  aria-labelledby={`item-${item.itemNo}`}
+                >
                   <div className="card-top-controls">
                     <div className="top-left-meta" />
                     <div className="top-actions">
-                      <button className="link-btn" onClick={() => toggleCollapse(index)} aria-label={item._collapsed ? "Expand item" : "Collapse item"}>
+                      <button
+                        className="link-btn"
+                        onClick={() => toggleCollapse(index)}
+                        aria-label={item._collapsed ? "Expand item" : "Collapse item"}
+                      >
                         {item._collapsed ? "Expand ▾" : "Collapse ▴"}
                       </button>
                     </div>
@@ -516,20 +716,40 @@ const handleSave = () => {
 
                         <div className="collapsed-right-rich">
                           <div className="label small">Net</div>
-                          <div className="value small">{item.netPremiumAfterDiscounts ? formatCurrency(item.netPremiumAfterDiscounts) : "N/A"}</div>
-                          <div className="server-mini">{item.actualPremium ? formatCurrency(item.actualPremium) : ""}</div>
+                          <div className="value small">
+                            {item.netPremiumAfterDiscounts ? formatCurrency(item.netPremiumAfterDiscounts) : "N/A"}
+                          </div>
+                          <div className="server-mini">
+                            {item.actualPremium ? formatCurrency(item.actualPremium) : ""}
+                          </div>
                         </div>
                       </div>
 
                       <footer className="card-footer">
                         <div className="footer-actions centered">
-                          <Button onClick={() => handleApplyItem(index)} size="sm" className="apply-btn" disabled={!!applyingMap[keyFor(index)]}>
+                          <Button
+                            onClick={() => handleApplyAndCalculate(index)}
+                            size="sm"
+                            className="apply-btn"
+                            disabled={!!applyingMap[keyFor(index)]}
+                          >
                             {applyingMap[keyFor(index)] ? "Applying..." : "Apply"}
                           </Button>
-                          <Button onClick={() => handleRemoveItem(index)} size="sm" variant="outline" className="remove-btn">Remove</Button>
-                          <button className="link-btn" onClick={() => toggleCollapse(index)} aria-label={item._collapsed ? "Expand item" : "Collapse item"}>
-                        {item._collapsed ? "Expand ▾" : "Collapse ▴"}
-                      </button>
+                          <Button
+                            onClick={() => handleRemoveItem(index)}
+                            size="sm"
+                            variant="outline"
+                            className="remove-btn"
+                          >
+                            Remove
+                          </Button>
+                          <button
+                            className="link-btn"
+                            onClick={() => toggleCollapse(index)}
+                            aria-label={item._collapsed ? "Expand item" : "Collapse item"}
+                          >
+                            {item._collapsed ? "Expand ▾" : "Collapse ▴"}
+                          </button>
                         </div>
                       </footer>
                     </>
@@ -543,58 +763,111 @@ const handleSave = () => {
 
                         <div className="card-row two-up">
                           <div>
-                          <div className="label">Risk SMI</div>
-                          <div className="value">
-                            <select value={item.smiCode} onChange={(e) => handleItemChange(index, "smiCode", e.target.value)} className="input select">
-                              <option value="">Select SMI</option>
-                              {subRiskSMIs.map((smi, i) => (
-                                <option key={smi.smiCode + "" + i} value={smi.smiCode}>{smi.smiDetails}</option>
-                              ))}
-                            </select>
-                          </div>
+                            <div className="label">Risk SMI</div>
+                            <div className="value">
+                              <select
+                                value={item.smiCode}
+                                onChange={(e) => handleItemChange(index, "smiCode", e.target.value)}
+                                className="input select"
+                              >
+                                <option value="">
+                                  {!item.smiCode
+                                    ? "Select SMI"
+                                    : subRiskSMIs.find((s) => {
+                                        s.smiCode == item.smiCode
+                                      })?.smiDetails}
+                                </option>
+                                {subRiskSMIs.map((smi, i) => (
+                                  <option key={smi.smiCode + "" + i} value={smi.smiCode}>
+                                    {smi.smiDetails}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
                           </div>
                           <div>
-                          <div className="label">Description</div>
-                          <div className="value"><Input value={item.itemDescription} onChange={(e) => handleItemChange(index, "itemDescription", e.target.value)} placeholder="Description" /></div>
-                        </div>
+                            <div className="label">Description</div>
+                            <div className="value">
+                              <Input
+                                value={item.itemDescription}
+                                onChange={(e) => handleItemChange(index, "itemDescription", e.target.value)}
+                                placeholder="Description"
+                              />
+                            </div>
+                          </div>
                         </div>
 
                         <div className="card-row two-up">
                           <div>
                             <div className="label">Actual Value</div>
-                            <div className="value"><Input type="number" min="0" step="0.01" value={item.actualValue} onChange={(e) => handleItemChange(index, "actualValue", e.target.value)} /></div>
+                            <div className="value">
+                              <Input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={item.actualValue}
+                                onChange={(e) => handleItemChange(index, "actualValue", e.target.value)}
+                              />
+                            </div>
                           </div>
 
                           <div>
                             <div className="label">Rate (%)</div>
-                            <div className="value"><Input type="number" min="0" max="100" step="0.01" value={item.itemRate} onChange={(e) => handleItemChange(index, "itemRate", e.target.value)} /></div>
+                            <div className="value">
+                              <Input
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="0.01"
+                                value={item.itemRate}
+                                onChange={(e) => {
+                                  handleItemChange(index, "itemRate", e.target.value)
+                                }}
+                              />
+                            </div>
+                            <div className="discounts-area">
+                            {item.itemRate && item.actualValue ? <div>amount: {formatCurrency((item.itemRate/100)*item.actualValue)}</div> : null}
+                            </div>
                           </div>
                         </div>
 
                         <div className="card-row two-up" style={{ marginTop: 8 }}>
                           <div>
                             <div className="label">Multiplier</div>
-                            <div className="value"><Input type="number" min="0" step="0.01" value={item.multiplyRate} onChange={(e) => handleItemChange(index, "multiplyRate", e.target.value)} /></div>
+                            <div className="value">
+                              <Input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={item.multiplyRate}
+                                onChange={(e) => handleItemChange(index, "multiplyRate", e.target.value)}
+                              />
+                            </div>
                           </div>
 
                           <div>
                             <div className="label">Location</div>
-                            <div className="value"><Input value={formData.location} onChange={(e) => handleItemChange(index, "location", e.target.value)} placeholder="Location" disabled /></div>
+                            <div className="value">
+                              <Input
+                                value={formData.location}
+                                onChange={(e) => handleItemChange(index, "location", e.target.value)}
+                                placeholder="Location"
+                                disabled
+                              />
+                            </div>
                           </div>
                         </div>
 
-                        <div className="card-row" style={{ marginTop: 8 }}>
-                          <div className="label">FEA Discount Rate (%)</div>
-                          <div className="value">
-                            <Input type="number" min="0" step="0.01" value={item.feaDiscountRate ?? 0} onChange={(e) => handleItemChange(index, "feaDiscountRate", e.target.value)} />
-                          </div>
-                        </div>
 
                         <div className="card-row" style={{ marginTop: 8 }}>
                           <div className="label">Stock</div>
                           <div className="value">
                             <label className="stock-toggle">
-                              <input type="checkbox" checked={!!item._showStock} onChange={() => toggleStockUI(index)} />
+                              <input
+                                type="checkbox"
+                                checked={!!item._showStock}
+                                onChange={() => toggleStockUI(index)}
+                              />
                               <span style={{ marginLeft: 8 }}>Add stock</span>
                             </label>
                           </div>
@@ -604,64 +877,154 @@ const handleSave = () => {
                           <div className="stock-block">
                             <div className="stock-row">
                               <div className="label">Stock Code</div>
-                              <div className="value"><Input value={item.stockItem?.stockCode || ""} onChange={(e) => handleStockChange(index, "stockCode", e.target.value)} placeholder="Stock code" /></div>
+                              <div className="value">
+                                <Input
+                                  value={item.stockItem?.stockCode || ""}
+                                  onChange={(e) => handleStockChange(index, "stockCode", e.target.value)}
+                                  placeholder="Stock code"
+                                />
+                              </div>
                             </div>
                             <div className="stock-row">
                               <div className="label">Stock Description</div>
-                              <div className="value"><Input value={item.stockItem?.stockDescription || ""} onChange={(e) => handleStockChange(index, "stockDescription", e.target.value)} placeholder="Stock description" /></div>
+                              <div className="value">
+                                <Input
+                                  value={item.stockItem?.stockDescription || ""}
+                                  onChange={(e) => handleStockChange(index, "stockDescription", e.target.value)}
+                                  placeholder="Stock description"
+                                />
+                              </div>
                             </div>
                             <div className="stock-row two-up">
                               <div>
                                 <div className="label">Stock Sum Insured</div>
-                                <div className="value"><Input type="number" value={item.stockItem?.stockSumInsured ?? 0} onChange={(e) => handleStockChange(index, "stockSumInsured", e.target.value)} /></div>
+                                <div className="value">
+                                  <Input
+                                    type="number"
+                                    value={item.stockItem?.stockSumInsured ?? 0}
+                                    onChange={(e) => handleStockChange(index, "stockSumInsured", e.target.value)}
+                                  />
+                                </div>
                               </div>
                               <div>
                                 <div className="label">Stock Rate (%)</div>
-                                <div className="value"><Input type="number" value={item.itemRate ?? 0} onChange={(e) => handleStockChange(index, "stockRate", e.target.value)} disabled /></div>
+                                <div className="value">
+                                  <Input
+                                    type="number"
+                                    value={item.itemRate}
+                                    onChange={(e) => handleStockChange(index, "stockRate", e.target.value)}
+                                    disabled
+                                  />
+                                </div>
                               </div>
                             </div>
                             <div className="stock-row">
                               <div className="label">Stock Discount Rate (%)</div>
-                              <div className="value"><Input type="number" value={item.stockItem?.stockDiscountRate ?? 0} onChange={(e) => handleStockChange(index, "stockDiscountRate", e.target.value)} /></div>
+                              <div className="value">
+                                <Input
+                                  type="number"
+                                  value={item.stockItem?.stockDiscountRate ?? 0}
+                                  onChange={(e) => handleStockChange(index, "stockDiscountRate", e.target.value)}
+                                />
+                              </div>
                             </div>
                           </div>
                         )}
+                                                    <div className="card-row" style={{ marginTop: 8 }}>
+                          <div className="label">FEA Discount Rate (%)</div>
+                          <div className="value">
+                            <Input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={item.feaDiscountRate ?? 0}
+                              onChange={(e) => handleItemChange(index, "feaDiscountRate", e.target.value)}
+                            />
+                          </div>
+                        </div>
+
 
                         <div className="discounts-area">
-                          {item.stockDiscountAmount ? <div>Stock: {formatCurrency(item.stockDiscountAmount)}</div> : null}
+                          {item.stockDiscountAmount ? (
+                            <div>Stock: {formatCurrency(item.stockDiscountAmount)}</div>
+                          ) : null}
                           {item.feaDiscountAmount ? <div>FEA: {formatCurrency(item.feaDiscountAmount)}</div> : null}
                         </div>
 
-                        <div className="server-summary" role="region" aria-label={`Server premium for item ${item.itemNo}`}>
+                        <div
+                          className="server-summary"
+                          role="region"
+                          aria-label={`Server premium for item ${item.itemNo}`}
+                        >
                           <div className="server-title">Actual Premium</div>
-                          <div className="server-amount">{item.actualPremium ? formatCurrency(item.actualPremium) : "N/A"}</div>
-                          {item.actualPremiumFormula && <div className="server-formula">{item.actualPremiumFormula}</div>}
-
-                          <div style={{ marginTop: 8, display: "flex", gap: 10, flexDirection: "column" }}>
-                            <div className="value" style={{ fontWeight: 700 }}>total Sum Insured: {formatCurrency(item.totalSumInsured ?? 0)}</div>
-
-                            <div className="value" style={{ fontWeight: 700 }}>Shared Premium: {formatCurrency(item.premiumValue ?? 0)}</div>
-                            {item.premiumValueFormula && <div className="server-formula">Premium Formula: {item.premiumValueFormula}</div>}
-
-                            <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
-                              <div className="muted">Stock Discount: {item.stockDiscountAmount ? formatCurrency(item.stockDiscountAmount) : formatCurrency(0)}</div>
-                              <div className="muted">FEA Discount: {item.feaDiscountAmount ? formatCurrency(item.feaDiscountAmount) : formatCurrency(0)}</div>
+                          <div className="server-amount">
+                            {item.actualPremium ? formatCurrency(item.actualPremium) : "N/A"}
+                          </div>
+                          <div
+                            style={{
+                              marginTop: 8,
+                              display: "flex",
+                              gap: 10,
+                              flexDirection: "column",
+                            }}
+                          >
+                            <div className="value" style={{ fontWeight: 700 }}>
+                              total Sum Insured: {formatCurrency(item.totalSumInsured ?? (item.actualValue+item.stockItem.stockSumInsured) ?? 0)}
                             </div>
-
-                            <div className="server-net">Net: {item.netPremiumAfterDiscounts ? formatCurrency(item.netPremiumAfterDiscounts) : formatCurrency(0)}</div>
+                            <div className="value" style={{ fontWeight: 700 }}>
+                              Shared Premium: {formatCurrency(item.premiumValue ?? 0)}
+                            </div>{" "}
+                            <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
+                              <div className="muted">
+                                Stock Discount:{" "}
+                                {item.stockDiscountAmount
+                                  ? formatCurrency(item.stockDiscountAmount)
+                                  : formatCurrency(0)}
+                              </div>
+                              <div className="muted">
+                                FEA Discount:{" "}
+                                {item.feaDiscountAmount ? formatCurrency(item.feaDiscountAmount) : formatCurrency(0)}
+                              </div>
+                            </div>
+                            <div className="server-net">
+                              Net:{" "}
+                              {item.netPremiumAfterDiscounts
+                                ? formatCurrency(item.netPremiumAfterDiscounts)
+                                : formatCurrency(0)}
+                            </div>
                           </div>
                         </div>
                       </div>
 
                       <footer className="card-footer">
                         <div className="footer-actions centered">
-                          <Button onClick={() => handleApplyItem(index)} size="sm" className="apply-btn" disabled={!!applyingMap[keyFor(index)]}>
+                          <Button
+                            onClick={() => {
+                              handleApplyAndCalculate(index)
+                            }}
+                            size="sm"
+                            className="apply-btn"
+                            disabled={!!applyingMap[keyFor(index)]}
+                          >
                             {applyingMap[keyFor(index)] ? "Applying..." : "Apply"}
                           </Button>
-                          <Button onClick={() => handleRemoveItem(index)} size="sm" variant="outline" className="remove-btn">Remove</Button>
-                          <button className="link-btn" onClick={() => toggleCollapse(index)} aria-label={item._collapsed ? "Expand item" : "Collapse item"}>
-                        {item._collapsed ? "Expand ▾" : "Collapse ▴"}
-                      </button>
+                          <Button
+                            onClick={() => {
+                              handleRemoveItem(index)
+                            }}
+                            size="sm"
+                            variant="outline"
+                            className="remove-btn"
+                          >
+                            Remove
+                          </Button>
+                          <button
+                            className="link-btn"
+                            onClick={() => toggleCollapse(index)}
+                            aria-label={item._collapsed ? "Expand item" : "Collapse item"}
+                          >
+                            {item._collapsed ? "Expand ▾" : "Collapse ▴"}
+                          </button>
                         </div>
                       </footer>
                     </>
@@ -669,6 +1032,263 @@ const handleSave = () => {
                 </article>
               ))}
             </div>
+          </div>
+          <div className="form-section">
+            <div className="qc-adjustments-panel">
+              <h3 style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Section Adjustments</span>
+                <button
+                  className="link-btn"
+                  onClick={() => setAdjCollapse(!adjCollapse)}
+                  aria-label={adjCollapse ? "Expand item" : "Collapse item"}
+                >
+                  {adjCollapse ? "Expand ▾" : "Collapse ▴"}
+                </button>
+              </h3>
+              {!adjCollapse && (
+                <>
+                  <div className="qc-adjustments-grid">
+                    <div className="qc-adjustment-section">
+                      <h4>Discounts</h4>
+                      <div className="qc-adjustment-field">
+                        <Label htmlFor="specialDiscountRate">Special Discount (%)</Label>
+                        <Input
+                          id="specialDiscountRate"
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          value={adjustments.specialDiscountRate}
+                          onChange={(e) =>
+                            setAdjustments((prev) => ({
+                              ...prev,
+                              specialDiscountRate: Number(e.target.value),
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="qc-adjustment-field">
+                        <Label htmlFor="deductibleDiscountRate">Deductible Discount (%)</Label>
+                        <Input
+                          id="deductibleDiscountRate"
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          value={adjustments.deductibleDiscountRate}
+                          onChange={(e) =>
+                            setAdjustments((prev) => ({
+                              ...prev,
+                              deductibleDiscountRate: Number(e.target.value),
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="qc-adjustment-field">
+                        <Label htmlFor="spreadDiscountRate">Spread Discount (%)</Label>
+                        <Input
+                          id="spreadDiscountRate"
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          value={adjustments.spreadDiscountRate}
+                          onChange={(e) =>
+                            setAdjustments((prev) => ({
+                              ...prev,
+                              spreadDiscountRate: Number(e.target.value),
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="qc-adjustment-field">
+                        <Label htmlFor="ltaDiscountRate">LTA Discount (%)</Label>
+                        <Input
+                          id="ltaDiscountRate"
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          value={adjustments.ltaDiscountRate}
+                          onChange={(e) =>
+                            setAdjustments((prev) => ({
+                              ...prev,
+                              ltaDiscountRate: Number(e.target.value),
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="qc-adjustment-field">
+                        <Label htmlFor="otherDiscountsRate">Other Discounts (%)</Label>
+                        <Input
+                          id="otherDiscountsRate"
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          value={adjustments.otherDiscountsRate}
+                          onChange={(e) =>
+                            setAdjustments((prev) => ({
+                              ...prev,
+                              otherDiscountsRate: Number(e.target.value),
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div className="qc-adjustment-section">
+                      <h4>Loadings</h4>
+                      <div className="qc-adjustment-field">
+                        <Label htmlFor="theftLoadingRate">Theft Loading (%)</Label>
+                        <Input
+                          id="theftLoadingRate"
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          value={adjustments.theftLoadingRate}
+                          onChange={(e) =>
+                            setAdjustments((prev) => ({
+                              ...prev,
+                              theftLoadingRate: Number(e.target.value),
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="qc-adjustment-field">
+                        <Label htmlFor="srccLoadingRate">SRCC Loading (%)</Label>
+                        <Input
+                          id="srccLoadingRate"
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          value={adjustments.srccLoadingRate}
+                          onChange={(e) =>
+                            setAdjustments((prev) => ({
+                              ...prev,
+                              srccLoadingRate: Number(e.target.value),
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="qc-adjustment-field">
+                        <Label htmlFor="otherLoading2Rate">Other Loading 2 (%)</Label>
+                        <Input
+                          id="otherLoading2Rate"
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.01"
+                          value={adjustments.otherLoading2Rate}
+                          onChange={(e) =>
+                            setAdjustments((prev) => ({
+                              ...prev,
+                              otherLoading2Rate: Number(e.target.value),
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+              <div style={{ marginTop: 12, display: "flex", gap: 8, flexDirection: "column" }}>
+                {!adjCollapse && (
+                  <>
+                    <Button onClick={handleApplySectionAdjustments} size="sm" variant="outline">
+                      Apply Section Adjustments
+                    </Button>
+                  </>
+                )}
+                {sectionAdjustmentsResult.success && (
+                  <div className={"proposal-adjustments-card"}>
+                    <div className="card-header">
+                      <h4>Section Adjustments</h4>
+                      <span className="badge success">Applied</span>
+                    </div>
+
+                    <div className="card-body two-column">
+                      <div className="summary-column">
+                        <div className="summary-row">
+                          <div className="label">Starting Premium</div>
+                          <div className="value">{formatCurrency(sectionAdjustmentsResult.startingPremium)}</div>
+                        </div>
+
+                        <div className="summary-row">
+                          <div className="label">Net Premium Due</div>
+                          <div className="value highlight">
+                            {formatCurrency(sectionAdjustmentsResult.netPremiumDue)}
+                          </div>
+                        </div>
+
+                        <div className="divider" />
+
+                        <div className="mini-grid">
+                          <div className="mini-item">
+                            <div className="mini-label">Special Discount</div>
+                            <div className="mini-value">
+                              {formatCurrency(sectionAdjustmentsResult.specialDiscountAmount)}
+                            </div>
+                          </div>
+                          <div className="mini-item">
+                            <div className="mini-label">Deductible Discount</div>
+                            <div className="mini-value">
+                              {formatCurrency(sectionAdjustmentsResult.deductibleDiscountAmount)}
+                            </div>
+                          </div>
+                          <div className="mini-item">
+                            <div className="mini-label">Spread Discount</div>
+                            <div className="mini-value">
+                              {formatCurrency(sectionAdjustmentsResult.spreadDiscountAmount)}
+                            </div>
+                          </div>
+                          <div className="mini-item">
+                            <div className="mini-label">LTA Discount</div>
+                            <div className="mini-value">
+                              {formatCurrency(sectionAdjustmentsResult.ltaDiscountAmount)}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="summary-column">
+                        <div className="section-title">Loadings</div>
+                        <div className="mini-grid">
+                          <div className="mini-item">
+                            <div className="mini-label">Theft Loading</div>
+                            <div className="mini-value">
+                              {formatCurrency(sectionAdjustmentsResult.theftLoadingAmount)}
+                            </div>
+                          </div>
+                          <div className="mini-item">
+                            <div className="mini-label">SRCC Loading</div>
+                            <div className="mini-value">
+                              {formatCurrency(sectionAdjustmentsResult.srccLoadingAmount)}
+                            </div>
+                          </div>
+                          <div className="mini-item">
+                            <div className="mini-label">Other Loading 2</div>
+                            <div className="mini-value">
+                              {formatCurrency(sectionAdjustmentsResult.otherLoading2Amount)}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="divider" />
+
+                        <div className="footer-note">
+                          <small className="muted">
+                            {sectionAdjustmentsResult.message ?? "Section-level adjustments applied."}
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>{" "}
           </div>
 
           <div className="summary-section">
@@ -680,11 +1300,24 @@ const handleSave = () => {
               <Label>Total Premium</Label>
               <div className="summary-value">{formatCurrency(formData.sectionPremium || 0)}</div>
             </div>
+
             {formData.sectionNetPremium !== undefined && (
               <div className="summary-item">
                 <Label>Net Premium</Label>
                 <div className="summary-value">{formatCurrency((formData as any).sectionNetPremium || 0)}</div>
               </div>
+            )}
+            {sectionAgregate !== null && (
+              <>
+                <div className="summary-item">
+                  <Label>Aggregate Sum Insured</Label>
+                  <div className="summary-value">{formatCurrency(sectionAgregate.aggregateSumInsured || 0)}</div>
+                </div>
+                <div className="summary-item">
+                  <Label>Aggregate Premium</Label>
+                  <div className="summary-value">{formatCurrency(sectionAgregate.aggregatePremium || 0)}</div>
+                </div>
+              </>
             )}
             {formData.lastCalculated && (
               <div className="summary-item">
@@ -695,11 +1328,14 @@ const handleSave = () => {
           </div>
 
           <div className="modal-actions">
-          <Button onClick={handleCalculateAllItems} size="default" variant="outline" disabled={!!applyingMap["ALL"]}>
+            {/*           <Button onClick={handleCalculateAllItems} size="default" variant="outline" disabled={!!applyingMap["ALL"]}>
                   {applyingMap["ALL"] ? "Calculating..." : "Calculate All"}
                 </Button>
-            <Button onClick={handleSave}>Save Section</Button>
-            <Button onClick={onClose} variant="outline">Cancel</Button>
+ */}{" "}
+            <Button onClick={handleSave}>Save & Update</Button>
+            <Button onClick={onClose} variant="outline">
+              Cancel
+            </Button>
           </div>
         </div>
       </DialogContent>

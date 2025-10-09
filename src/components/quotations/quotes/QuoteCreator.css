@@ -539,7 +539,9 @@
   padding: 14px;
   margin: 20px 0;
 }
-
+.proposal-adjustments-card-collapsed{
+  height: 20px;
+}
 .card-header {
   display: flex;
   gap: 12px;

@@ -23,6 +23,7 @@ interface GetCustomersParams {
   pageNumber?: number;
   pageSize?: number;
   searchTerm?: string;
+  insuredType?:string;
 }
 
 export const getAllCustomers = createAsyncThunk<
@@ -31,17 +32,19 @@ export const getAllCustomers = createAsyncThunk<
   { rejectValue: string }
 >(
   "customers/getAllCustomers",
-  async (params = {}, { rejectWithValue }) => {
+  async (params = {} as GetCustomersParams, { rejectWithValue }) => {
         try {
 const AUTH_TOKEN = getAuthToken();
 
-      const { pageNumber = 1, pageSize = 50, searchTerm = "" } = params;
+      const { pageNumber=1, pageSize=20, searchTerm="" ,insuredType=""} = params;
 
       const query = new URLSearchParams({
         pageNumber: pageNumber.toString(),
         pageSize: pageSize.toString(),
         searchTerm,
+        insuredType,
       }).toString();
+console.log(`${API_BASE_URL}/customers?${query}`);
 
       const response = await fetch(`${API_BASE_URL}/customers?${query}`, {
         method: "GET",

@@ -1,6 +1,9 @@
 //@ts-nocheck
-import { useEffect, useRef, useState } from "react"
+"use client"
+
+import {useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
+import type { AppDispatch } from "../../../features/store"
 import { useNavigate, useParams } from "react-router-dom"
 import type { RootState } from "../../../features/store"
 import {
@@ -20,8 +23,14 @@ import { Button } from "../../UI/new-button"
 import Input from "../../UI/Input"
 import { Label } from "../../UI/label"
 import { AddSectionModal } from "../../Modals/AddSectionModal"
-import type { QuoteSection, CompleteCalculationRequest, ProposalAdjustments } from "../../../types/quotation"
+import type {
+  QuoteSection,
+  CompleteCalculationRequest,
+  ProposalAdjustments,
+  aggregateTotals,
+} from "../../../types/quotation"
 import "./QuoteCreator.css"
+import { toast } from "@/components/UI/use-toast"
 
 // helpers (unchanged)
 const getLatestSectionSummaries = (rawSections: any[] | undefined) => {
@@ -35,6 +44,7 @@ const getLatestSectionSummaries = (rawSections: any[] | undefined) => {
     const existingTs = existing && existing.lastCalculated ? Date.parse(existing.lastCalculated) : 0
     if (!existing || ts >= existingTs) map.set(id, s)
   })
+
   return Array.from(map.values())
 }
 
@@ -71,7 +81,8 @@ const normalizeCalculationBreakdown = (raw: any) => {
         items,
         totals: {
           totalActualValue: s.sectionSumInsured ?? items.reduce((a: number, it: any) => a + (it.actualValue || 0), 0),
-          totalSharePremium: s.sectionGrossPremium ?? items.reduce((a: number, it: any) => a + (it.actualPremium || 0), 0),
+          totalSharePremium:
+            s.sectionGrossPremium ?? items.reduce((a: number, it: any) => a + (it.actualPremium || 0), 0),
           totalNetPremiumAfterDiscounts: s.sectionNetPremium ?? 0,
         },
       },
@@ -104,12 +115,11 @@ const normalizeCalculationBreakdown = (raw: any) => {
 
 const QuoteCreator = () => {
   const { proposalNo } = useParams<{ proposalNo: string }>()
-  const dispatch = useDispatch()
   const navigate = useNavigate()
+  const dispatch = useDispatch<AppDispatch>()
 
   const {
     currentProposal,
-    sections,
     currentCalculation,
     calculationBreakdown,
     sectionsSummary: storeSectionsSummary,
@@ -123,31 +133,24 @@ const QuoteCreator = () => {
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null)
   const [showDetailedBreakdown, setShowDetailedBreakdown] = useState(false)
 
-  const [adjustments, setAdjustments] = useState<ProposalAdjustments>({
-    specialDiscountRate: 0,
-    deductibleDiscountRate: 0,
-    spreadDiscountRate: 0,
-    ltaDiscountRate: 0,
+  const [adjustments, setAdjustments] = useState<any>({
     otherDiscountsRate: 0,
-    theftLoadingRate: 0,
-    srccLoadingRate: 0,
-    otherLoading2Rate: 0,
     otherLoadingsRate: 0,
   })
 
   const [remarks, setRemarks] = useState("")
   const [normalizedBreakdown, setNormalizedBreakdown] = useState<any | null>(null)
-
+  const [aggregateTotals, setAggregateTotals] = useState<aggregateTotals | null>(null)
   // local (component) state to avoid showing stale summaries
   const [sectionsLoading, setSectionsLoading] = useState(false)
   const [localSectionsSummary, setLocalSectionsSummary] = useState<any | null>(null)
-
+  const [payloadSection, setPayloadSection] = useState<any[] | null>([])
   // local-only sections array (used while server endpoints are disabled)
   const [localSections, setLocalSections] = useState<QuoteSection[] | null>(null)
 
   // stores the FULL calculated risk arrays produced by AddSectionModal's "Calculate All" button
   const [calculatedRiskMap, setCalculatedRiskMap] = useState<Record<string, any[]>>({})
-
+const [editedSections,setEditedSections] = useState<number[]>([]);
   // store the result of applyProposalAdjustments call (startingPremium, discount amounts, netPremiumDue, etc.)
   const [proposalAdjustmentsResult, setProposalAdjustmentsResult] = useState<any | null>(null)
 
@@ -157,6 +160,17 @@ const QuoteCreator = () => {
 
   // fetch token to prevent race conditions
   const sectionsFetchIdRef = useRef(0)
+
+  useEffect(() => {
+    setLocalSections(null)
+    setLocalSectionsSummary(null)
+    setCalculatedRiskMap({})
+    setProposalAdjustmentsResult(null)
+    setProRataResult(null)
+    setNormalizedBreakdown(null)
+    setAggregateTotals(null)
+    setShowDetailedBreakdown(false)
+  }, [proposalNo])
 
   // load proposal, current calculation, breakdown and sectionsSummary (with local clearing)
   useEffect(() => {
@@ -172,23 +186,10 @@ const QuoteCreator = () => {
 
     Promise.resolve(dispatch(getSectionsSummary(proposalNo) as any))
       .then((res: any) => {
-        console.log(res);
-        
-        const payload = res?.payload ?? res
+        const payload = res?.payload
         if (!payload) return
         if (sectionsFetchIdRef.current === fetchId) {
           setLocalSectionsSummary(payload)
-          if (!localSections) {
-            const initialSections = (payload.sections || []).map((s: any) => ({
-              sectionID: s.sectionID,
-              sectionName: s.sectionName,
-              location: s.location,
-              sectionSumInsured: s.sectionSumInsured ?? 0,
-              sectionPremium: s.sectionPremium ?? s.sectionGrossPremium ?? 0,
-              riskItems: s.riskItems ?? [],
-            })) as QuoteSection[]
-            setLocalSections(initialSections)
-          }
         }
       })
       .catch((err) => {
@@ -197,64 +198,41 @@ const QuoteCreator = () => {
       .finally(() => {
         if (sectionsFetchIdRef.current === fetchId) setSectionsLoading(false)
       })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, proposalNo])
 
   useEffect(() => {
-    if (!storeSectionsSummary) return
-    if (!sectionsLoading) {
-      setLocalSectionsSummary(storeSectionsSummary)
-      if (!localSections && Array.isArray(sections) && sections.length > 0) {
-        setLocalSections(sections as QuoteSection[])
-      }
+    const sectionInputs = calculationBreakdown?.inputs?.sectionInputs
+console.log(sectionInputs);
+
+    // If no section inputs, clear the sections
+    if (!sectionInputs || sectionInputs.length === 0) {
+      console.log("No section calculations found for proposal")
+      setLocalSections([])
+      return
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storeSectionsSummary, sectionsLoading])
+
+    const freshSections = sectionInputs.map((s: any) => ({
+      sectionID: s.sectionID,
+      sectionName: s.sectionName,
+      location: s.location ?? "",
+      sectionSumInsured: s.sectionSumInsured ?? 0,
+      sectionPremium: s.sectionGrossPremium ?? 0,
+      sectionNetPremium: s.sectionNetPremium ?? 0,
+      riskItems: s.riskItems ?? [],
+    }))
+
+    setLocalSections(freshSections)
+  }, [calculationBreakdown])
 
   useEffect(() => {
     if (currentCalculation) {
       setAdjustments({
-        specialDiscountRate: currentCalculation.specialDiscountRate || 0,
-        deductibleDiscountRate: currentCalculation.deductibleDiscountRate || 0,
-        spreadDiscountRate: currentCalculation.spreadDiscountRate || 0,
-        ltaDiscountRate: currentCalculation.ltaDiscountRate || 0,
         otherDiscountsRate: currentCalculation.otherDiscountsRate || 0,
-        theftLoadingRate: currentCalculation.theftLoadingRate || 0,
-        srccLoadingRate: currentCalculation.srccLoadingRate || 0,
-        otherLoading2Rate: currentCalculation.otherLoading2Rate || 0,
         otherLoadingsRate: currentCalculation.otherLoadingsRate || 0,
       })
       if (currentCalculation.remarks) setRemarks(currentCalculation.remarks)
     }
   }, [currentCalculation])
-
-  useEffect(() => {
-    const sectionInputs = calculationBreakdown?.inputs?.sectionInputs
-    if (!sectionInputs?.length) return
-  
-    setLocalSections((prev) => {
-      const safePrev = Array.isArray(prev) ? prev : []
-  
-      const incoming = sectionInputs.map((s: any) => ({
-        sectionID: s.sectionID,
-        sectionName: s.sectionName,
-        location: s.location ?? "",
-        sectionSumInsured: s.sectionSumInsured ?? 0,
-        sectionPremium: s.sectionPremium ?? 0,
-        sectionNetPremium: s.sectionNetPremium ?? 0,
-        riskItems: s.riskItems ?? [],
-      }))
-  
-      const existingIDs = new Set(safePrev.map((p) => p.sectionID))
-      const merged = [
-        ...safePrev,
-        ...incoming.filter((s) => !existingIDs.has(s.sectionID)),
-      ]
-  
-      return merged
-    })
-  }, [calculationBreakdown])
-  
 
   // initialize coverDays from currentProposal (if present)
   useEffect(() => {
@@ -265,7 +243,7 @@ const QuoteCreator = () => {
 
   useEffect(() => {
     if (proposalNo) {
-      const proposalProductId = currentProposal && currentProposal.subRiskID
+      const proposalProductId = currentProposal && currentProposal.riskID
       if (proposalProductId) {
         dispatch(
           getAllProducts({
@@ -310,27 +288,58 @@ const QuoteCreator = () => {
   }
 
   // LOCAL-only save / delete logic
-  const handleSaveSection = async (section: QuoteSection) => {
-    console.log(localSections);
-    
-    setLocalSections((prev) => {
-      const list = prev ? [...prev] : []
-      const idx = list.findIndex((s) => s.location === section.location)
-      if (idx >= 0) {
-        list[idx] = section
+  const handleSaveSection = async (fullsection: any) => {
+    const {
+      specialDiscountRate,
+      deductibleDiscountRate,
+      spreadDiscountRate,
+      ltaDiscountRate,
+      theftLoadingRate,
+      srccLoadingRate,
+      otherLoading2Rate,
+      ...section
+    } = fullsection;
+  
+    // --- PAYLOAD SECTIONS ---
+    setPayloadSection((prev) => {
+      const list = prev ? [...prev] : [];
+      if (editingSectionId == null) {                  // <-- check null/undefined directly
+        list.push(fullsection);
       } else {
-        list.push(section)
-        console.log(section);
-        
+        setEditedSections(prev => 
+          prev.includes(Number(editingSectionId)) ? prev : [...prev, Number(editingSectionId)]
+        )
+          const idx = Number(editingSectionId);
+        if (!Number.isNaN(idx) && idx >= 0 && idx < list.length) {
+          list[idx] = fullsection;
+        } else {
+          list.push(fullsection); // fallback
+        }
       }
-      console.log(JSON.stringify(list));
-      
-      return list
-    })
-
+      return list;
+    });
+  
+    // --- LOCAL SECTIONS ---
+    setLocalSections((prev) => {
+      const list = prev ? [...prev] : [];
+      if (editingSectionId == null) {
+        list.push(section);
+      } else {
+        const idx = Number(editingSectionId);
+        if (!Number.isNaN(idx) && idx >= 0 && idx < list.length) {
+          list[idx] = section;
+        } else {
+          list.push(section);
+        }
+      }
+      return list;
+    });
+  
+    // --- LOCAL SECTIONS SUMMARY ---
     setLocalSectionsSummary((prev: any) => {
-      const copy = prev ? { ...prev } : { sections: [] }
-      const existingIdx = (copy.sections || []).findIndex((s: any) => s.sectionID === section.sectionID)
+      const copy = prev ? { ...prev } : { sections: [] };
+      const sections = copy.sections ? [...copy.sections] : [];
+  
       const summarySection = {
         sectionID: section.sectionID,
         sectionName: section.sectionName,
@@ -339,26 +348,36 @@ const QuoteCreator = () => {
         sectionPremium: section.sectionPremium,
         riskItems: section.riskItems,
         lastCalculated: new Date().toISOString(),
-      }
-      if (existingIdx >= 0) {
-        copy.sections[existingIdx] = summarySection
+      };
+  
+      if (editingSectionId == null) {
+        sections.push(summarySection);
       } else {
-        copy.sections = [...(copy.sections || []), summarySection]
+        const idx = Number(editingSectionId);
+        if (!Number.isNaN(idx) && idx >= 0 && idx < sections.length) {
+          sections[idx] = summarySection;
+        } else {
+          sections.push(summarySection);
+        }
       }
-      return copy
-    })
-
-    setShowAddSectionModal(false)
-    setEditingSectionId(null)
-  }
-
-  const handleDeleteSection = async (sectionId: string) => {
+  
+      copy.sections = sections;
+      return copy;
+    });
+  
+    setShowAddSectionModal(false);
+    setEditingSectionId(null);
+    calculateMultiSectionAggregateLocal();
+  };
+    
+  const handleDeleteSection = async (sectionId: number) => {
     if (!window.confirm("Are you sure you want to delete this section?")) return
+    setPayloadSection((prev) => (prev ? prev.filter((s,index:any) => index !== sectionId) : null))
 
-    setLocalSections((prev) => (prev ? prev.filter((s) => s.location !== sectionId) : null))
+    setLocalSections((prev) => (prev ? prev.filter((s,index) => index !== sectionId) : null))
     setLocalSectionsSummary((prev: any) => {
       if (!prev) return prev
-      return { ...prev, sections: (prev.sections || []).filter((s: any) => s.sectionID !== sectionId) }
+      return { ...prev, sections: (prev.sections || []).filter((s: any,index) => index !== sectionId) }
     })
     setCalculatedRiskMap((m) => {
       const copy = { ...m }
@@ -372,12 +391,18 @@ const QuoteCreator = () => {
     setCalculatedRiskMap((prev) => ({ ...prev, [sectionID]: fullRiskArray }))
 
     const existsInLocalSections = !!(localSections && localSections.find((s) => s.sectionID === sectionID))
-    const existsInSummary = !!(localSectionsSummary && Array.isArray(localSectionsSummary.sections) && localSectionsSummary.sections.find((s: any) => s.sectionID === sectionID))
+    const existsInSummary = !!(
+      localSectionsSummary &&
+      Array.isArray(localSectionsSummary.sections) &&
+      localSectionsSummary.sections.find((s: any) => s.sectionID === sectionID)
+    )
 
     if (existsInLocalSections) {
       setLocalSections((prev) => {
         if (!prev) return prev
-        return prev.map((s) => (s.sectionID === sectionID ? { ...s, riskItems: fullRiskArray, lastCalculated: new Date().toISOString() } : s))
+        return prev.map((s) =>
+          s.sectionID === sectionID ? { ...s, riskItems: fullRiskArray, lastCalculated: new Date().toISOString() } : s,
+        )
       })
     }
 
@@ -407,234 +432,72 @@ const QuoteCreator = () => {
     const authoritativeSections: any[] = localSections
       ? localSections
       : localSectionsSummary?.sections && localSectionsSummary.sections.length > 0
-      ? localSectionsSummary.sections
-      : sections || []
-  
-    const getSectionId = (s: any) => s.sectionID ?? s.sectionId ?? s.id ?? s.sectionName ?? `section-${Math.random().toString(36).slice(2, 8)}`
-  
-    const sectionsForPayload = authoritativeSections
-      .map((s: any) => {
-        const sid = getSectionId(s)
-  
-        // Prefer server-calculated array stored in calculatedRiskMap
-        const calc = calculatedRiskMap[sid] ?? calculatedRiskMap[s.sectionID ?? s.sectionId ?? s.id ?? s.sectionName] ?? null
-  
-        // If we have a calculated array, normalize it into calculatedItems
-        if (Array.isArray(calc) && calc.length > 0) {
-          const calculatedItems = calc.map((ri: any, i: number) => ({
-            itemNo: ri.itemNo ?? i + 1,
-            sectionID: sid,
-            smiCode: ri.smiCode ?? "",
-            itemDescription: ri.itemDescription ?? ri.description ?? "",
-            actualValue: Number(ri.actualValue ?? ri.value ?? 0),
-            itemRate: Number(ri.itemRate ?? ri.rate ?? 0),
-            multiplyRate: Number(ri.multiplyRate ?? ri.multiple ?? 1),
-            location: ri.location ?? s.location ?? "",
-            stockItem:
-              ri.stockItem && typeof ri.stockItem === "object"
-                ? {
-                    stockCode: ri.stockItem.stockCode ?? "",
-                    stockDescription: ri.stockItem.stockDescription ?? "",
-                    stockSumInsured: Number(ri.stockItem.stockSumInsured ?? ri.stockItem.stockSum ?? 0),
-                    stockRate: Number(ri.stockItem.stockRate ?? ri.stockItem.rate ?? 0),
-                    stockDiscountRate: Number(ri.stockItem.stockDiscountRate ?? 0),
-                  }
-                : null,
-            feaDiscountRate: Number(ri.feaDiscountRate ?? 0),
-            // server-calculated fields (keep/normalize)
-            actualPremium: Number(ri.actualPremium ?? 0),
-            shareValue: Number(ri.shareValue ?? 0),
-            premiumValue: Number(ri.premiumValue ?? 0),
-            stockSumInsured: Number(ri.stockSumInsured ?? 0),
-            stockGrossPremium: Number(ri.stockGrossPremium ?? 0),
-            stockDiscountAmount: Number(ri.stockDiscountAmount ?? 0),
-            stockNetPremium: Number(ri.stockNetPremium ?? 0),
-            totalSumInsured: Number(ri.totalSumInsured ?? 0),
-            totalGrossPremium: Number(ri.totalGrossPremium ?? 0),
-            feaDiscountAmount: Number(ri.feaDiscountAmount ?? 0),
-            netPremiumAfterDiscounts: Number(ri.netPremiumAfterDiscounts ?? 0),
-          }))
-  
-          return {
-            sectionID: sid,
-            sectionName: s.sectionName ?? s.sectionDisplayName ?? `Section ${sid}`,
-            calculatedItems,
-          }
-        }
-  
-        // fallback: map UI riskItems to calculatedItems shape (server will compute numbers)
-        const rawRiskItems = Array.isArray(s.riskItems) ? s.riskItems : []
-        const calculatedItems = rawRiskItems.map((ri: any, i: number) => ({
-          itemNo: ri.itemNo ?? i + 1,
-          sectionID: sid,
-          smiCode: ri.smiCode ?? "",
-          itemDescription: ri.itemDescription ?? ri.description ?? "",
-          actualValue: Number(ri.actualValue ?? ri.value ?? 0),
-          itemRate: Number(ri.itemRate ?? ri.rate ?? 0),
-          multiplyRate: Number(ri.multiplyRate ?? ri.multiple ?? 1),
-          location: ri.location ?? s.location ?? "",
-          stockItem:
-            ri.stockItem && typeof ri.stockItem === "object"
-              ? {
-                  stockCode: ri.stockItem.stockCode ?? "",
-                  stockDescription: ri.stockItem.stockDescription ?? "",
-                  stockSumInsured: Number(ri.stockItem.stockSumInsured ?? ri.stockItem.stockSum ?? 0),
-                  stockRate: Number(ri.stockItem.stockRate ?? ri.stockItem.rate ?? 0),
-                  stockDiscountRate: Number(ri.stockItem.stockDiscountRate ?? 0),
-                }
-              : null,
-          feaDiscountRate: Number(ri.feaDiscountRate ?? 0),
-          actualPremium: Number(ri.actualPremium ?? 0),
-          shareValue: Number(ri.shareValue ?? 0),
-          premiumValue: Number(ri.premiumValue ?? 0),
-          stockSumInsured: Number(ri.stockSumInsured ?? 0),
-          stockGrossPremium: Number(ri.stockGrossPremium ?? 0),
-          stockDiscountAmount: Number(ri.stockDiscountAmount ?? 0),
-          stockNetPremium: Number(ri.stockNetPremium ?? 0),
-          totalSumInsured: Number(ri.totalSumInsured ?? ri.actualValue ?? 0),
-          totalGrossPremium: Number(ri.totalGrossPremium ?? 0),
-          feaDiscountAmount: Number(ri.feaDiscountAmount ?? 0),
-          netPremiumAfterDiscounts: Number(ri.netPremiumAfterDiscounts ?? 0),
-        }))
-  
-        return {
-          sectionID: sid,
-          sectionName: s.sectionName ?? s.sectionDisplayName ?? `Section ${sid}`,
-          calculatedItems,
-        }
-      })
-      .filter(Boolean)
-  console.log(JSON.stringify(sectionsForPayload));
-  
-    // thunk accepts { sections: [...] }
-    return { sections: sectionsForPayload }
+        ? localSectionsSummary.sections
+        : [] // Changed from sections || [] to just []
+
+    const sectionsForPayload = {
+      adjustedSections: authoritativeSections.map((s) => ({
+        sectionID: s.sectionID,
+        sectionName: s.sectionName,
+        sectionSumInsured: s.sectionSumInsured,
+        sectionNetPremium: s.sectionNetPremium,
+        riskItemCount: s.riskItems.length,
+        location: s.location,
+      })),
+    }
+
+    return { ...sectionsForPayload }
   }
+
   // POST to calculate multi-section aggregate and apply result locally (expects your sectionAggregates response)
   const calculateMultiSectionAggregateLocal = async () => {
-    const authoritativeSections: any[] =
-      localSections?.length
-        ? localSections
-        : localSectionsSummary?.sections?.length
+    const authoritativeSections: any[] = localSections?.length
+      ? localSections
+      : localSectionsSummary?.sections?.length
         ? localSectionsSummary.sections
-        : sections || []
-  
+        : [] // Changed from sections || [] to just []
+
     if (!authoritativeSections || authoritativeSections.length === 0) {
-      alert("No sections available to aggregate.")
+      toast({
+        description: "No sections available to aggregate.",
+        variant: "info",
+        duration: 2000,
+      });
+
       return
     }
-  
+
     const payload = buildMultiSectionPayload()
-  
+
     try {
       // Dispatch your thunk instead of doing fetch here
       const resultAction = await dispatch(calculateMultiSectionAggregate(payload))
-  
+
       if (calculateMultiSectionAggregate.rejected.match(resultAction)) {
         throw new Error(resultAction.payload || "Aggregate calculation failed")
       }
-  
-      const raw = resultAction.payload
-      const aggregates: any[] = Array.isArray(raw?.sectionAggregates)
-        ? raw.sectionAggregates
-        : Array.isArray(raw?.sections)
-        ? raw.sections
-        : []
-  
-      if (!aggregates.length) {
-        alert("Aggregate returned no section results.")
-        return
-      }
-  
-      const normalized = aggregates.map((agg: any) => ({
-        sectionID: agg.sectionID ?? agg.sectionId ?? agg.id,
-        sectionName: agg.sectionName ?? agg.sectionDisplayName,
-        sectionSumInsured: typeof agg.sectionSumInsured === "number" ? agg.sectionSumInsured : undefined,
-        sectionPremium:
-          typeof agg.sectionAggregatePremium === "number"
-            ? agg.sectionAggregatePremium
-            : typeof agg.sectionPremium === "number"
-            ? agg.sectionPremium
-            : undefined,
-        riskItemCount: typeof agg.riskItemCount === "number" ? agg.riskItemCount : undefined,
-        raw: agg,
-      }))
-  
-      setLocalSectionsSummary((prev: any) => {
-        const copy = prev ? { ...prev } : { sections: [] }
-        const sectionsArr = Array.isArray(copy.sections) ? [...copy.sections] : []
-  
-        normalized.forEach((n) => {
-          if (!n.sectionID) return
-          const idx = sectionsArr.findIndex((s: any) => s.sectionID === n.sectionID)
-          const existing = sectionsArr[idx] || {}
-          const updated = {
-            ...existing,
-            sectionID: n.sectionID,
-            sectionName: n.sectionName ?? existing.sectionName ?? "",
-            sectionSumInsured: typeof n.sectionSumInsured === "number" ? n.sectionSumInsured : existing.sectionSumInsured ?? 0,
-            sectionPremium: typeof n.sectionPremium === "number" ? n.sectionPremium : existing.sectionPremium ?? 0,
-            netPremium: typeof n.sectionNetPremium === "number" ? n.sectionNetPremium : existing.netPremium ?? existing.sectionNetPremium ?? 0,
-            riskItemCount: typeof n.riskItemCount === "number" ? n.riskItemCount : existing.riskItemCount ?? (existing.riskItems ? existing.riskItems.length : 0),
-            lastCalculated: new Date().toISOString(),
-          }
-          if (idx >= 0) sectionsArr[idx] = updated
-          else sectionsArr.push(updated)
-        })
-  
-        return { ...copy, sections: sectionsArr }
-      })
-  
-      setLocalSections((prev) => {
-        const list = prev ? [...prev] : []
-        normalized.forEach((n) => {
-          if (!n.sectionID) return
-          const idx = list.findIndex((s) => s.sectionID === n.sectionID)
-          const existing = idx >= 0 ? list[idx] : undefined
-          const updatedSection: QuoteSection = {
-            sectionID: n.sectionID,
-            sectionName: n.sectionName ?? existing?.sectionName ?? "",
-            location: existing?.location ?? "",
-            sectionSumInsured: typeof n.sectionSumInsured === "number" ? n.sectionSumInsured : existing?.sectionSumInsured ?? 0,
-            sectionPremium: typeof n.sectionPremium === "number" ? n.sectionPremium : existing?.sectionPremium ?? 0,
-            riskItems: existing?.riskItems ?? (calculatedRiskMap[n.sectionID] ?? []),
-          }
-          if (idx >= 0) list[idx] = updatedSection
-          else list.push(updatedSection)
-        })
-        return list
-      })
-  
-      alert("Multi-section aggregate calculated and applied locally.")
+      setAggregateTotals(resultAction.payload)
+      toast({
+        description: "Multi-section aggregate totals calculated.",
+        variant: "success",
+        duration: 1000,
+      });
+
     } catch (err: any) {
+      toast({
+        description: `Failed to calculate aggregate: ${err?.message ?? err}`,
+        variant:"destructive",
+        duration: 2000,
+      });
       console.error("Aggregate calculation failed:", err)
-      alert(`Failed to calculate aggregate: ${err?.message ?? err}`)
     }
   }
-    // Build payload for applyProposalAdjustments (matches your curl)
-  const buildProposalAdjustmentsPayload = () => {
-    const authoritativeSections: any[] = localSections
-      ? localSections
-      : localSectionsSummary?.sections && localSectionsSummary.sections.length > 0
-      ? localSectionsSummary.sections
-      : sections || []
 
-    // compute a starting totalAggregatePremium value from section premiums if totalAggregatePremium not provided explicitly
-    const totalFromSections = authoritativeSections.reduce((acc: number, s: any) => acc + (s.sectionPremium ?? s.sectionGrossPremium ?? 0), 0)
+  useEffect(()=>{
+    if(localSections?.length!=undefined && localSections?.length>0)
+    calculateMultiSectionAggregateLocal();
+  },[localSections?.length])
 
-    return {
-      // your curl didn't include proposalNo in request body; adjust if your API requires it
-      totalAggregatePremium: Math.max(0, totalFromSections),
-      specialDiscountRate: adjustments.specialDiscountRate,
-      deductibleDiscountRate: adjustments.deductibleDiscountRate,
-      spreadDiscountRate: adjustments.spreadDiscountRate,
-      ltaDiscountRate: adjustments.ltaDiscountRate,
-      otherDiscountsRate: adjustments.otherDiscountsRate,
-      theftLoadingRate: adjustments.theftLoadingRate,
-      srccLoadingRate: adjustments.srccLoadingRate,
-      otherLoading2Rate: adjustments.otherLoading2Rate,
-      otherLoadingsRate: adjustments.otherLoadingsRate,
-    }
-  }
 
   // Handler that dispatches applyProposalAdjustments and stores returned amounts locally
   const handleApplyProposalAdjustments = async () => {
@@ -644,14 +507,16 @@ const QuoteCreator = () => {
       console.warn("Applying proposal adjustments locally (no proposalNo).")
     }
 
-    const payload = buildProposalAdjustmentsPayload()
-    console.log(payload);
-    
+    const payload = {
+      totalAggregatePremium:aggregateTotals?.totalAggregatePremium,
+      otherDiscountsRate:adjustments.otherDiscountsRate,
+      otherLoadingsRate:adjustments.otherLoadingsRate
+    }
 
     try {
       // @ts-ignore
-      const res = await (dispatch(applyProposalAdjustments(payload)) as any).unwrap?.() ?? (await dispatch(applyProposalAdjustments(payload) as any))
-
+      const res =
+        (await (dispatch(applyProposalAdjustments(payload)) as any).unwrap?.())
       // res expected shape from your curl:
       // {
       //  startingPremium,
@@ -668,34 +533,32 @@ const QuoteCreator = () => {
       if (proposalNo) {
         await dispatch(getCalculationBreakdown(proposalNo) as any)
       }
-
-      alert(res?.message ?? "Proposal adjustments applied.")
+      toast({
+        description: "Proposal adjustments applied.",
+        variant: "success",
+        duration: 2000,
+      });
     } catch (err: any) {
       console.error("applyProposalAdjustments failed:", err)
-      alert(err?.message || "Failed to apply proposal adjustments")
+      toast({
+        description: "Failed to apply proposal adjustments",
+        variant: "destructive",
+        duration: 2000,
+      });
     }
   }
 
-  const handleApplyAndCalculate = async () => {
-    await handleApplyProposalAdjustments()
-    // run your top-level calculate to persist final totals if needed
-    await handleCalculate()
-  }
 
-  // ---------- Step 5: Pro-Rata ----------
-  // Picks best available netPremium: prefer proposalAdjustmentsResult, fall back to calculation/breakdown
-  const getAuthoritativeNetPremium = () => {
-    if (proposalAdjustmentsResult && typeof proposalAdjustmentsResult.netPremiumDue === "number") return proposalAdjustmentsResult.netPremiumDue
-    if (currentCalculation && typeof currentCalculation.netPremium === "number") return currentCalculation.netPremium
-    if (normalizedBreakdown?.finalResults && typeof normalizedBreakdown.finalResults.netPremium === "number") return normalizedBreakdown.finalResults.netPremium
-    if (calculationBreakdown?.finalResults && typeof calculationBreakdown.finalResults.netPremium === "number") return calculationBreakdown.finalResults.netPremium
-    return 0
-  }
 
   const handleCalculateProRata = async () => {
-    const netPremium = getAuthoritativeNetPremium()
+    const netPremium = proposalAdjustmentsResult.netPremiumDue
     if (!netPremium || Number(netPremium) <= 0) {
-      alert("No net premium available to pro-rate. Run proposal adjustments or a calculation first.")
+      toast({
+        description: "No net premium available to pro-rate. Run proposal adjustments or a calculation first.",
+        variant: "warning",
+        duration: 2000,
+      });
+
       return
     }
 
@@ -706,47 +569,148 @@ const QuoteCreator = () => {
 
     try {
       // @ts-ignore
-      const res = await (dispatch(calculateProRata(payload)) as any).unwrap?.() ?? (await dispatch(calculateProRata(payload) as any))
+      const res =(await (dispatch(calculateProRata(payload)) as any).unwrap?.()) 
       setProRataResult(res || null)
 
       // optionally refresh breakdown if server persisted something
       if (proposalNo) {
         await dispatch(getCalculationBreakdown(proposalNo) as any)
       }
+      toast({
+        description: "Pro-rata calculation complete.",
+        variant: "success",
+        duration: 2000,
+      });
 
-      alert(res?.message ?? "Pro-rata calculation complete.")
     } catch (err: any) {
       console.error("calculateProRata failed:", err)
-      alert(err?.message || "Failed to calculate pro-rata")
+      toast({
+        description: "Failed to calculate pro-rata.",
+        variant: "destructive",
+        duration: 2000,
+      });
     }
   }
 
-  // convenience: run pro-rata then top-level calculate to persist final totals
-  const handleProRataAndCalculate = async () => {
-    await handleCalculate()
-  }
 
   const handleCalculate = async () => {
     if (!proposalNo || !currentProposal) return
+    const sectionsToCalculate = payloadSection?.map(({ lastCalculated, proportionRate, ...rest }) => ({
+      ...rest,
+      riskItems: (rest.riskItems || []).map(({
+        actualPremium,
+        actualPremiumFormula,
+        shareValue,
+        shareValueFormula,
+        premiumValue,
+        premiumValueFormula,
+        stockDiscountAmount,
+        feaDiscountAmount,
+        netPremiumAfterDiscounts,
+        _showStock,
+        _collapsed,
+        ...riskRest
+      }) => riskRest)
+    }));
+    console.log(editedSections);
+    
+    const breakdownSections = (calculationBreakdown?.inputs?.sectionInputs || []).filter((si:any,index)=> !editedSections.includes(index)).map((si: any) => {
+    
+      return {
+        sectionID: si.sectionID ?? si.sectionId ?? "",
+        sectionName: si.sectionName ?? "",
+        location: si.location ?? "",
+        sectionSumInsured: si.sectionSumInsured ?? 0,
+        // match payload shape: sectionPremium is gross/premium from breakdown
+        sectionPremium: si.sectionGrossPremium ?? si.sectionPremium ?? 0,
+        sectionNetPremium: si.sectionNetPremium ?? 0,
+        // preserve existing timestamp if available otherwise set now
+        lastCalculated: new Date().toISOString(),
+        // preserve existing proportionRate if available otherwise fallback to currentProposal or 0
+        proportionRate: currentProposal?.proportionRate ?? 0,
+    
+        // riskItems mapped to exact payload item shape (including UI flags & totals)
+        riskItems: (si.riskItems || []).map((it: any) => ({
+          itemNo: it.itemNo ?? 0,
+          sectionID: it.sectionID ?? it.sectionId ?? si.sectionID ?? "",
+          smiCode: it.smiCode ?? "",
+          itemDescription: it.itemDescription ?? "",
+          actualValue: it.actualValue ?? 0,
+          itemRate: it.itemRate ?? 0,
+          multiplyRate: it.multiplyRate ?? 1,
+          location: it.location ?? si.location ?? "",
+          feaDiscountRate: it.feaDiscountRate ?? 0,
+    
+          // premium-related fields (keep formulas if present)
+          actualPremium: it.actualPremium ?? 0,
+          actualPremiumFormula: it.actualPremiumFormula ?? "",
+          shareValue: it.shareValue ?? 0,
+          shareValueFormula: it.shareValueFormula ?? "",
+          premiumValue: it.premiumValue ?? 0,
+          premiumValueFormula: it.premiumValueFormula ?? "",
+    
+          // stock/discount amounts and net premium
+          stockDiscountAmount: it.stockDiscountAmount ?? 0,
+          feaDiscountAmount: it.feaDiscountAmount ?? 0,
+          netPremiumAfterDiscounts: it.netPremiumAfterDiscounts ?? it.stockNetPremium ?? 0,
+    
+          stockItem: it.stockItem ?? null,
+    
+          // UI flags exactly like your payload uses
+          _showStock: !!it.stockItem,
+          _collapsed: false,
+    
+          // try to preserve totalSumInsured if present or compute a reasonable fallback
+          totalSumInsured: it.totalSumInsured ?? it.stockSumInsured ?? (it.actualValue ? it.actualValue * (it.multiplyRate ?? 1) : 0)
+        })),
+    
+        // section-level rates: look into sectionAdjustments for rates first, else fallback to 0 or si fields
+        specialDiscountRate: si.sectionAdjustments?.discountsApplied?.find((d: any) => d.name === "Special Discount")?.rate ?? si.specialDiscountRate ?? 0,
+        deductibleDiscountRate: si.sectionAdjustments?.discountsApplied?.find((d: any) => d.name === "Deductible Discount")?.rate ?? si.deductibleDiscountRate ?? 0,
+        spreadDiscountRate: si.sectionAdjustments?.discountsApplied?.find((d: any) => d.name === "Spread Discount")?.rate ?? si.spreadDiscountRate ?? 0,
+        ltaDiscountRate: si.sectionAdjustments?.discountsApplied?.find((d: any) => d.name === "LTA Discount")?.rate ?? si.ltaDiscountRate ?? 0,
+        otherDiscountsRate: si.otherDiscountsRate ?? 0,
+        theftLoadingRate: si.sectionAdjustments?.loadingsApplied?.find((d: any) => d.name === "Theft Loading")?.rate ?? si.theftLoadingRate ?? 0,
+        srccLoadingRate: si.sectionAdjustments?.loadingsApplied?.find((d: any) => d.name === "SRCC Loading")?.rate ?? si.srccLoadingRate ?? 0,
+        otherLoading2Rate: si.sectionAdjustments?.loadingsApplied?.find((d: any) => d.name === "Other Loading 2")?.rate ?? si.otherLoading2Rate ?? 0,
+      };
+    });
+    
+    const finalSectionsToCalculate = [
+      ...(breakdownSections || []),
+      ...(sectionsToCalculate || [])
+    ];
+    
+console.log(breakdownSections);
+console.log(sectionsToCalculate);
 
-    const calculationRequest: CompleteCalculationRequest = {
+    console.log(finalSectionsToCalculate);
+    
+        const calculationRequest: CompleteCalculationRequest = {
       proposalNo,
-      sections,
+      sections: finalSectionsToCalculate, // Use local sections
       proportionRate: currentProposal.proportionRate,
       exchangeRate: currentProposal.exRate,
       currency: currentProposal.exCurrency,
-      coverDays: currentProposal.proRataDays || 365,
+      coverDays: coverDays || 365,
       ...adjustments,
       calculatedBy: "SYSTEM",
       remarks,
     }
+console.log("full calculation request");
+
+    console.log(calculationRequest);
+    
 
     try {
       if (currentCalculation) {
+        console.log("recalc");
+        
         // @ts-ignore
         await (dispatch(recalculateComplete({ proposalNo, calculationData: calculationRequest }) as any).unwrap?.() ??
           dispatch(recalculateComplete({ proposalNo, calculationData: calculationRequest }) as any))
       } else {
+        console.log("calc");
         // @ts-ignore
         await (dispatch(calculateComplete({ proposalNo, calculationData: calculationRequest }) as any).unwrap?.() ??
           dispatch(calculateComplete({ proposalNo, calculationData: calculationRequest }) as any))
@@ -768,7 +732,11 @@ const QuoteCreator = () => {
         })
     } catch (err) {
       console.error("Calculation failed:", err)
-      alert("Calculation failed. See console for details.")
+      toast({
+        description: "Calculation failed. See console for details.",
+        variant: "destructive",
+        duration: 2000,
+      });
     }
   }
 
@@ -803,7 +771,10 @@ const QuoteCreator = () => {
           <Button onClick={handleCancel} variant="outline">
             Back to Proposal
           </Button>
-          <Button onClick={handleCalculate} disabled={loading?.calculate || sections.length === 0}>
+          <Button
+            onClick={handleCalculate}
+            disabled={loading?.calculate || !localSections || localSections.length === 0}
+          >
             {loading?.calculate ? "Calculating..." : currentCalculation ? "Recalculate" : "Calculate"}
           </Button>
         </div>
@@ -818,20 +789,24 @@ const QuoteCreator = () => {
           <div className="qc-sections-header">
             <h3>
               Sections (
-              {localSectionsSummary?.sections && localSectionsSummary.sections.length > 0
-                ? getLatestSectionSummaries(localSectionsSummary.sections).length
-                : (localSections && localSections.length) || sections.length}
-              )
+              {localSectionsSummary?.sections && localSectionsSummary.length > 0
+                ? getLatestSectionSummaries(localSectionsSummary).length
+                : (localSections && localSections.length) || 0}
+              {/* Removed sections.length fallback */})
             </h3>
             <Button onClick={handleAddSection} size="sm">
               Add Section
             </Button>
           </div>
-
           {(() => {
-            const summaryList = localSectionsSummary?.sections ? getLatestSectionSummaries(localSectionsSummary.sections) : null
-            const listToRender = localSections && localSections.length > 0 ? localSections : summaryList && summaryList.length > 0 ? summaryList : sections
-            
+            const summaryList = localSectionsSummary?.sections ? getLatestSectionSummaries(localSectionsSummary) : null
+            const listToRender =
+              localSections && localSections.length > 0
+                ? localSections
+                : summaryList && summaryList.length > 0
+                  ? summaryList
+                  : [] // Changed from sections to []
+         
 
             if (sectionsLoading) {
               return (
@@ -851,13 +826,14 @@ const QuoteCreator = () => {
 
             return (
               <div className="qc-sections-list">
-                {listToRender.map((section: any) => {              
-                  const id = (section.sectionID)
+                {listToRender.map((section: any,index) => {
+                  const id = index
                   const name = section.sectionName ?? "Unnamed Section"
                   const location = section.location ?? ""
-/*                   const itemCount = (calculatedRiskMap[id] ?? section.riskItemCount ?? section.riskItems?.length ?? 0) || 0
- */                  const sumInsured = section.sectionSumInsured ?? section.sectionSumInsured ?? 0
+                  /*                   const itemCount = (calculatedRiskMap[id] ?? section.riskItemCount ?? section.riskItems?.length ?? 0) || 0
+                   */ const sumInsured = section.sectionSumInsured ?? section.sectionSumInsured ?? 0
                   const premium = section.sectionGrossPremium ?? section.sectionPremium ?? 0
+
                   const lastCalc = section.lastCalculated ?? null
 
                   return (
@@ -865,18 +841,27 @@ const QuoteCreator = () => {
                       <div className="qc-section-info">
                         <h4>{name}</h4>
                         <p>Location: {location || "N/A"}</p>
-{/*                         <p>Items: {itemCount}</p>
- */}                        <div className="qc-section-amounts">
+                        {/*                         <p>Items: {itemCount}</p>
+                         */} <div className="qc-section-amounts">
                           <span>Sum Insured: {formatCurrency(sumInsured)}</span>
                           <span>Premium: {formatCurrency(premium)}</span>
                         </div>
-                        {lastCalc && <div className="qc-section-lastcalc">Last calculated: {new Date(lastCalc).toLocaleString()}</div>}
+                        {lastCalc && (
+                          <div className="qc-section-lastcalc">
+                            Last calculated: {new Date(lastCalc).toLocaleString()}
+                          </div>
+                        )}
                       </div>
                       <div className="qc-section-actions">
-                        <Button onClick={() => handleEditSection(location)} size="sm" variant="outline">
+                        <Button onClick={() => handleEditSection(String(index))} size="sm" variant="outline">
                           Edit
                         </Button>
-                        <Button onClick={() => handleDeleteSection(location)} size="sm" variant="outline" className="qc-delete-btn">
+                        <Button
+                          onClick={() => handleDeleteSection(id)}
+                          size="sm"
+                          variant="outline"
+                          className="qc-delete-btn"
+                        >
                           Delete
                         </Button>
                       </div>
@@ -886,70 +871,44 @@ const QuoteCreator = () => {
               </div>
             )
           })()}
-
           {/* Calculate Aggregate Button */}
-          <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
+          {/*           <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
             <Button onClick={calculateMultiSectionAggregateLocal} size="sm" variant="solid">
               Calculate Aggregate (all sections)
             </Button>
           </div>
+ */}{" "}
+
+{aggregateTotals && (<>                  <br /> <div className="qc-sections-summary">
+                      <h3>Sections Totals</h3>
+          
+
+                <div className="qc-results-grid">
+                  <div className="qc-result-item">
+                    <Label>Total Sum Insured</Label>
+                    <div className="qc-result-value">{formatCurrency(aggregateTotals.totalSumInsured)}</div>
+                  </div>
+                  <div className="qc-result-item">
+                    <Label>Total Aggregate Premium</Label>
+                    <div className="qc-result-value">{formatCurrency(aggregateTotals?.totalAggregatePremium)}</div>
+                  </div>
+                  <div className="qc-result-item">
+                    <Label>Section Count</Label>
+                    <div className="qc-result-value">{aggregateTotals?.sectionCount}</div>
+                  </div>
+                </div>
+                </div>
+                </>)}
+        
         </div>
 
         {/* Adjustments panel */}
         <div className="qc-adjustments-panel">
-          <h3>Premium Adjustments</h3>
+          <h3>Proposal Adjustments</h3>
 
           <div className="qc-adjustments-grid">
             <div className="qc-adjustment-section">
               <h4>Discounts</h4>
-              <div className="qc-adjustment-field">
-                <Label htmlFor="specialDiscountRate">Special Discount (%)</Label>
-                <Input
-                  id="specialDiscountRate"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value={adjustments.specialDiscountRate}
-                  onChange={(e) => setAdjustments((prev) => ({ ...prev, specialDiscountRate: Number(e.target.value) }))}
-                />
-              </div>
-              <div className="qc-adjustment-field">
-                <Label htmlFor="deductibleDiscountRate">Deductible Discount (%)</Label>
-                <Input
-                  id="deductibleDiscountRate"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value={adjustments.deductibleDiscountRate}
-                  onChange={(e) => setAdjustments((prev) => ({ ...prev, deductibleDiscountRate: Number(e.target.value) }))}
-                />
-              </div>
-              <div className="qc-adjustment-field">
-                <Label htmlFor="spreadDiscountRate">Spread Discount (%)</Label>
-                <Input
-                  id="spreadDiscountRate"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value={adjustments.spreadDiscountRate}
-                  onChange={(e) => setAdjustments((prev) => ({ ...prev, spreadDiscountRate: Number(e.target.value) }))}
-                />
-              </div>
-              <div className="qc-adjustment-field">
-                <Label htmlFor="ltaDiscountRate">LTA Discount (%)</Label>
-                <Input
-                  id="ltaDiscountRate"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value={adjustments.ltaDiscountRate}
-                  onChange={(e) => setAdjustments((prev) => ({ ...prev, ltaDiscountRate: Number(e.target.value) }))}
-                />
-              </div>
               <div className="qc-adjustment-field">
                 <Label htmlFor="otherDiscountsRate">Other Discounts (%)</Label>
                 <Input
@@ -962,77 +921,7 @@ const QuoteCreator = () => {
                   onChange={(e) => setAdjustments((prev) => ({ ...prev, otherDiscountsRate: Number(e.target.value) }))}
                 />
               </div>
-            </div>
-
-            <div className="qc-adjustment-section">
-              <h4>Loadings</h4>
-              <div className="qc-adjustment-field">
-                <Label htmlFor="theftLoadingRate">Theft Loading (%)</Label>
-                <Input
-                  id="theftLoadingRate"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value={adjustments.theftLoadingRate}
-                  onChange={(e) => setAdjustments((prev) => ({ ...prev, theftLoadingRate: Number(e.target.value) }))}
-                />
-              </div>
-              <div className="qc-adjustment-field">
-                <Label htmlFor="srccLoadingRate">SRCC Loading (%)</Label>
-                <Input
-                  id="srccLoadingRate"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value={adjustments.srccLoadingRate}
-                  onChange={(e) => setAdjustments((prev) => ({ ...prev, srccLoadingRate: Number(e.target.value) }))}
-                />
-              </div>
-              <div className="qc-adjustment-field">
-                <Label htmlFor="otherLoading2Rate">Other Loading 2 (%)</Label>
-                <Input
-                  id="otherLoading2Rate"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value={adjustments.otherLoading2Rate}
-                  onChange={(e) =>
-                    setAdjustments((prev) => ({ ...prev, otherLoading2Rate: Number(e.target.value) }))
-                  }
-                />
-              </div>
-              <div className="qc-adjustment-field">
-                <Label htmlFor="otherLoadingsRate">Other Loadings (%)</Label>
-                <Input
-                  id="otherLoadingsRate"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value={adjustments.otherLoadingsRate}
-                  onChange={(e) => setAdjustments((prev) => ({ ...prev, otherLoadingsRate: Number(e.target.value) }))}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="qc-remarks-field">
-            <Label htmlFor="remarks">Remarks</Label>
-            <textarea
-              id="remarks"
-              value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
-              placeholder="Enter any remarks..."
-              className="qc-remarks-textarea"
-              rows={4}
-            />
-          </div>
-
-          {/* coverDays input for pro-rata */}
-          <div style={{ marginTop: 30,marginBottom:30, display: "flex", alignItems: "center", gap: 8,width:"40%" }}>
+              <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8}}>
             <Label htmlFor="coverDaysSmall">Cover Days</Label>
             <Input
               id="coverDaysSmall"
@@ -1046,132 +935,130 @@ const QuoteCreator = () => {
             <div style={{ fontSize: 12, color: "#666" }}>Used for pro-rata calculation</div>
           </div>
 
-          {/* Proposal adjustments action buttons */}
-          <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
+            </div>
+
+            <div className="qc-adjustment-section">
+              <h4>Loadings</h4>
+              <div className="qc-adjustment-field">
+                <Label htmlFor="otherLoadingsRate">Other Loadings (%)</Label>
+                <Input
+                  id="otherLoadingsRate"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  value={adjustments.otherLoadingsRate}
+                  onChange={(e) => setAdjustments((prev) => ({ ...prev, otherLoadingsRate: Number(e.target.value) }))}
+                />
+              </div>
+              <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
             <Button onClick={handleApplyProposalAdjustments} size="sm" variant="outline">
               Apply Proposal Adjustments
             </Button>
-{/*             <Button onClick={handleApplyAndCalculate} size="sm">
+            {/*             <Button onClick={handleApplyAndCalculate} size="sm">
               Apply & Calculate Proposal
             </Button>
- */}            <Button onClick={handleCalculateProRata} size="sm" variant="outline">
+ */}{" "}
+            <Button onClick={handleCalculateProRata} size="sm" variant="outline">
               Calculate Pro-Rata
             </Button>
-{/*             <Button onClick={handleProRataAndCalculate} size="sm">
+            {/*             <Button onClick={handleProRataAndCalculate} size="sm">
               Pro-Rata & Calculate Proposal
             </Button>
- */}          </div>
+ */}{" "}
+          </div>
+
+            </div>
+          </div>
 
           {/* Show proposal-adjustments response (if present) */}
           {proposalAdjustmentsResult && (
-  <div className="proposal-adjustments-card">
-    <div className="card-header">
-      <h4>Proposal Adjustments</h4>
-      <span className="badge success">Applied</span>
-    </div>
+            <div className="proposal-adjustments-card">
+              <div className="card-header">
+                <h4>Proposal Adjustments</h4>
+                <span className="badge success">Applied</span>
+              </div>
 
-    <div className="card-body two-column">
-      <div className="summary-column">
-        <div className="summary-row">
-          <div className="label">Starting Premium</div>
-          <div className="value">{formatCurrency(proposalAdjustmentsResult.startingPremium)}</div>
-        </div>
+              <div className="card-body two-column">
+                <div className="summary-column">
+                  <div className="summary-row">
+                    <div className="label">Starting Premium</div>
+                    <div className="value">{formatCurrency(proposalAdjustmentsResult.startingPremium)}</div>
+                  </div>
 
-        <div className="summary-row">
-          <div className="label">Net Premium Due</div>
-          <div className="value highlight">{formatCurrency(proposalAdjustmentsResult.netPremiumDue)}</div>
-        </div>
+                  <div className="summary-row">
+                    <div className="label">Net Premium Due</div>
+                    <div className="value highlight">{formatCurrency(proposalAdjustmentsResult.netPremiumDue)}</div>
+                  </div>
 
-        <div className="divider" />
+                  <div className="divider" />
 
-        <div className="mini-grid">
-          <div className="mini-item">
-            <div className="mini-label">Special Discount</div>
-            <div className="mini-value">{formatCurrency(proposalAdjustmentsResult.specialDiscountAmount)}</div>
-          </div>
-          <div className="mini-item">
-            <div className="mini-label">Deductible Discount</div>
-            <div className="mini-value">{formatCurrency(proposalAdjustmentsResult.deductibleDiscountAmount)}</div>
-          </div>
-          <div className="mini-item">
-            <div className="mini-label">Spread Discount</div>
-            <div className="mini-value">{formatCurrency(proposalAdjustmentsResult.spreadDiscountAmount)}</div>
-          </div>
-          <div className="mini-item">
-            <div className="mini-label">LTA Discount</div>
-            <div className="mini-value">{formatCurrency(proposalAdjustmentsResult.ltaDiscountAmount)}</div>
-          </div>
-        </div>
-      </div>
+                  <div className="mini-grid">
+                    <div className="mini-item">
+                      <div className="mini-label">Other Discounts</div>
+                      <div className="mini-value">{formatCurrency(proposalAdjustmentsResult.otherDiscountsAmount)}</div>
+                      <div className="mini-value">Net Amount:{formatCurrency(proposalAdjustmentsResult.otherDiscountsNetAmount)}</div>
+                    </div>
+                  </div>
+                </div>
 
-      <div className="summary-column">
-        <div className="section-title">Loadings</div>
-        <div className="mini-grid">
-          <div className="mini-item">
-            <div className="mini-label">Theft Loading</div>
-            <div className="mini-value">{formatCurrency(proposalAdjustmentsResult.theftLoadingAmount)}</div>
-          </div>
-          <div className="mini-item">
-            <div className="mini-label">SRCC Loading</div>
-            <div className="mini-value">{formatCurrency(proposalAdjustmentsResult.srccLoadingAmount)}</div>
-          </div>
-          <div className="mini-item">
-            <div className="mini-label">Other Loading 2</div>
-            <div className="mini-value">{formatCurrency(proposalAdjustmentsResult.otherLoading2Amount)}</div>
-          </div>
-          <div className="mini-item">
-            <div className="mini-label">Other Loadings</div>
-            <div className="mini-value">{formatCurrency(proposalAdjustmentsResult.otherLoadingsAmount)}</div>
-          </div>
-        </div>
+                <div className="summary-column">
+                  <div className="section-title">Loadings</div>
+                  <div className="mini-grid">
+                  <div className="mini-item">
+                      <div className="mini-label">Other Loadings</div>
+                      <div className="mini-value">{formatCurrency(proposalAdjustmentsResult.otherLoadingsAmount)}</div>
+                      <div className="mini-value">Net Amount:{formatCurrency(proposalAdjustmentsResult.otherLoadingsNetAmount)}</div>
+                    </div>
+                  </div>
 
-        <div className="divider" />
+                  <div className="divider" />
 
-        <div className="footer-note">
-          <small className="muted">{proposalAdjustmentsResult.message ?? "Proposal-level adjustments applied."}</small>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+                  <div className="footer-note">
+                    <small className="muted">
+                      {proposalAdjustmentsResult.message ?? "Proposal-level adjustments applied."}
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
           {/* Show Pro-Rata result (if present) */}
           {proRataResult && (
-  <div className="pro-rata-card">
-    <div className="card-header">
-      <h4>Pro-Rata</h4>
-      <span className={`badge ${proRataResult.isProRated ? "info" : "muted"}`}>{proRataResult.isProRated ? "Pro-Rated" : "Not Pro-Rated"}</span>
-    </div>
+            <div className="pro-rata-card">
+              <div className="card-header">
+                <h4>Pro-Rata</h4>
+                <span className={`badge ${proRataResult.isProRated ? "info" : "muted"}`}>
+                  {proRataResult.isProRated ? "Pro-Rated" : "Not Pro-Rated"}
+                </span>
+              </div>
 
-    <div className="card-body pro-rata-grid">
-      <div className="pr-row">
-        <div className="pr-label">Base Net Premium</div>
-        <div className="pr-value">{formatCurrency(proRataResult.netPremiumDue)}</div>
-      </div>
+              <div className="card-body pro-rata-grid">
+                <div className="pr-row">
+                  <div className="pr-label">Base Net Premium</div>
+                  <div className="pr-value">{formatCurrency(proRataResult.netPremiumDue)}</div>
+                </div>
 
-      <div className="pr-row">
-        <div className="pr-label">Pro-Rata Premium</div>
-        <div className="pr-value">{formatCurrency(proRataResult.proRataPremium)}</div>
-      </div>
+                <div className="pr-row">
+                  <div className="pr-label">Pro-Rata Premium</div>
+                  <div className="pr-value">{formatCurrency(proRataResult.proRataPremium)}</div>
+                </div>
 
-      <div className="pr-row">
-        <div className="pr-label">Premium Due</div>
-        <div className="pr-value">{formatCurrency(proRataResult.premiumDue ?? proRataResult.proRataPremium)}</div>
-      </div>
+                <div className="pr-row">
+                  <div className="pr-label">Premium Due</div>
+                  <div className="pr-value">
+                    {formatCurrency(proRataResult.premiumDue ?? proRataResult.proRataPremium)}
+                  </div>
+                </div>
 
-      <div className="pr-row">
-        <div className="pr-label">Cover Days</div>
-        <div className="pr-value">{proRataResult.coverDays ?? coverDays ?? "—"}</div>
-      </div>
-    </div>
-  </div>
-)}     
-          <div style={{ marginTop: 12, display: "flex", gap: 8, justifyContent:"flex-end", }}>
-            <Button onClick={handleProRataAndCalculate} size="sm">
-              Calculate Final Quotation
-            </Button>
-          </div>
-
-</div>
+                <div className="pr-row">
+                  <div className="pr-label">Cover Days</div>
+                  <div className="pr-value">{proRataResult.coverDays ?? coverDays ?? "—"}</div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* Calculation results & breakdown */}
         {currentCalculation && (
@@ -1214,38 +1101,42 @@ const QuoteCreator = () => {
                   </div>
                 </div>
 
-                {localSectionsSummary && localSectionsSummary.sections && localSectionsSummary.sections.length > 0 && (
-  <div className="qc-sections-summary">
-    <h4>Sections Summary</h4>
-    <div className="qc-sections-summary-table card-table">
-      <table>
-        <thead>
-          <tr>
-            <th>Section</th>
-            <th className="right">Sum Insured</th>
-            <th className="right">Premium</th>
-            <th className="right">Net Premium</th>
-            <th className="center">Last Calculated</th>
-          </tr>
-        </thead>
-        <tbody>
-          {localSectionsSummary.sections.map((section: any) => (
-            <tr key={section.sectionID}>
-              <td>
-                <div className="section-name">{section.sectionName}</div>
-                <div className="muted small">{section.location || "—"}</div>
-              </td>
-              <td className="right">{formatCurrency(section.sectionSumInsured)}</td>
-              <td className="right">{formatCurrency(section.sectionPremium)}</td>
-              <td className="right highlight">{formatCurrency(section.netPremium ?? section.sectionNetPremium ?? 0)}</td>
-              <td className="center">{section.lastCalculated ? new Date(section.lastCalculated).toLocaleString() : "N/A"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-)}
+                {localSectionsSummary == [] && localSectionsSummary.length > 0 && (
+                  <div className="qc-sections-summary">
+                    <h4>Sections Summary</h4>
+                    <div className="qc-sections-summary-table card-table">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Section</th>
+                            <th className="right">Sum Insured</th>
+                            <th className="right">Gross Premium</th>
+                            <th className="right">Net Premium</th>
+                            <th className="center">Last Calculated</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {localSectionsSummary.map((section: any) => (
+                            <tr key={section.sectionID}>
+                              <td>
+                                <div className="section-name">{section.sectionName}</div>
+                                <div className="muted small">{section.location || "—"}</div>
+                              </td>
+                              <td className="right">{formatCurrency(section.sectionSumInsured)}</td>
+                              <td className="right">{formatCurrency(section.sectionGrossPremium)}</td>
+                              <td className="right highlight">
+                                {formatCurrency(section.netPremium ?? section.sectionNetPremium ?? 0)}
+                              </td>
+                              <td className="center">
+                                {section.lastCalculated ? new Date(section.lastCalculated).toLocaleString() : "N/A"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
                 {currentCalculation.validationErrors && currentCalculation.validationErrors.length > 0 && (
                   <div className="qc-validation-errors">
                     <h4>Validation Issues:</h4>
@@ -1260,255 +1151,289 @@ const QuoteCreator = () => {
             ) : (
               breakdown && (
                 <div className="qc-detailed-breakdown">
-                {/* Calculation Metadata */}
-                <div className="qc-breakdown-section">
-                  <h4>Calculation Information</h4>
-                  <div className="qc-info-grid">
-                    <div className="qc-info-item">
-                      <Label>Calculated On</Label>
-                      <div className="qc-info-value">{breakdown.calculatedOn ? new Date(breakdown.calculatedOn).toLocaleString() : "N/A"}</div>
-                    </div>
-                    <div className="qc-info-item">
-                      <Label>Calculated By</Label>
-                      <div className="qc-info-value">{breakdown.calculatedBy || "N/A"}</div>
-                    </div>
-                    <div className="qc-info-item">
-                      <Label>Type</Label>
-                      <div className="qc-info-value">{breakdown.calculationType || "N/A"}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Show inputs if present */}
-                {breakdown.inputs && (
+                  {/* Calculation Metadata */}
                   <div className="qc-breakdown-section">
-                    <h4>Calculation Inputs</h4>
+                    <h4>Calculation Information</h4>
                     <div className="qc-info-grid">
                       <div className="qc-info-item">
-                        <Label>Proportion Rate</Label>
-                        <div className="qc-info-value">{breakdown.inputs.proportionRate ?? "N/A"}%</div>
+                        <Label>Calculated On</Label>
+                        <div className="qc-info-value">
+                          {breakdown.calculatedOn ? new Date(breakdown.calculatedOn).toLocaleString() : "N/A"}
+                        </div>
                       </div>
                       <div className="qc-info-item">
-                        <Label>Exchange Rate</Label>
-                        <div className="qc-info-value">{breakdown.inputs.exchangeRate ?? "N/A"}</div>
+                        <Label>Calculated By</Label>
+                        <div className="qc-info-value">{breakdown.calculatedBy || "N/A"}</div>
                       </div>
                       <div className="qc-info-item">
-                        <Label>Currency</Label>
-                        <div className="qc-info-value">{breakdown.inputs.currency ?? "N/A"}</div>
-                      </div>
-                      <div className="qc-info-item">
-                        <Label>Cover Days</Label>
-                        <div className="qc-info-value">{breakdown.inputs.coverDays ?? "N/A"}</div>
-                      </div>
-                      <div className="qc-info-item">
-                        <Label>Start</Label>
-                        <div className="qc-info-value">{breakdown.inputs.startDate ? new Date(breakdown.inputs.startDate).toLocaleString() : "N/A"}</div>
-                      </div>
-                      <div className="qc-info-item">
-                        <Label>End</Label>
-                        <div className="qc-info-value">{breakdown.inputs.endDate ? new Date(breakdown.inputs.endDate).toLocaleString() : "N/A"}</div>
+                        <Label>Type</Label>
+                        <div className="qc-info-value">{breakdown.calculationType || "N/A"}</div>
                       </div>
                     </div>
                   </div>
-                )}
 
-                {/* Section Calculations */}
-                {breakdown.calculationSteps?.sectionCalculations?.map((sectionCalc: any) => (
-                  <div key={sectionCalc.sectionID} className="qc-breakdown-section">
-                    <h4>Section: {sectionCalc.sectionName}</h4>
-
-                    {/* Risk Items */}
-                    <div className="qc-items-breakdown">
-                      <h5>Risk Items Calculation</h5>
-                      <div className="qc-items-table">
-                        <table>
-                          <thead>
-                            <tr>
-                              <th>Item</th>
-                              <th>Description</th>
-                              <th>Actual Value</th>
-                              <th>Rate</th>
-                              <th>Formula</th>
-                              <th>Premium</th>
-                              <th>Discounts</th>
-                              <th>Net Premium</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {sectionCalc.riskItemCalculations?.items?.map((item: any) => (
-                              <tr key={`${item.smiCode || ''}-${item.itemNo}`}>
-                                <td>{item.itemNo}</td>
-                                <td>{item.itemDescription}</td>
-                                <td>{formatCurrency(item.actualValue)}</td>
-                                <td>{item.itemRate !== undefined ? `${item.itemRate}%` : "N/A"}</td>
-                                <td className="qc-formula-cell">{item.actualPremiumFormula}</td>
-                                <td>{formatCurrency(item.actualPremium)}</td>
-                                <td>
-                                  {item.stockDiscountAmount > 0 && (
-                                    <div>Stock: {formatCurrency(item.stockDiscountAmount)}</div>
-                                  )}
-                                  {item.feaDiscountAmount > 0 && (
-                                    <div>FEA: {formatCurrency(item.feaDiscountAmount)}</div>
-                                  )}
-                                </td>
-                                <td className="qc-highlight">{formatCurrency(item.netPremiumAfterDiscounts)}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                          <tfoot>
-                            <tr className="qc-totals-row">
-                              <td colSpan={2}>
-                                <strong>Section Totals</strong>
-                              </td>
-                              <td>
-                                <strong>
-                                  {formatCurrency(sectionCalc.riskItemCalculations?.totals?.totalActualValue || 0)}
-                                </strong>
-                              </td>
-                              <td></td>
-                              <td></td>
-                              <td>
-                                <strong>
-                                  {formatCurrency(sectionCalc.riskItemCalculations?.totals?.totalSharePremium || 0)}
-                                </strong>
-                              </td>
-                              <td></td>
-                              <td className="qc-highlight">
-                                <strong>
-                                  {formatCurrency(
-                                    sectionCalc.riskItemCalculations?.totals?.totalNetPremiumAfterDiscounts || 0,
-                                  )}
-                                </strong>
-                              </td>
-                            </tr>
-                          </tfoot>
-                        </table>
-                      </div>
-                    </div>
-
-                    {/* Section Adjustments */}
-                    {sectionCalc.sectionAdjustments && (
-                      <div className="qc-section-adjustments">
-                        <h5>Section Adjustments</h5>
-                        <div className="qc-adjustments-flow">
-                          <div className="qc-adjustment-step">
-                            <Label>Starting Premium</Label>
-                            <div className="qc-value">{formatCurrency(sectionCalc.sectionAdjustments.startingPremium)}</div>
+                  {/* Show inputs if present */}
+                  {breakdown.inputs && (
+                    <div className="qc-breakdown-section">
+                      <h4>Calculation Inputs</h4>
+                      <div className="qc-info-grid">
+                        <div className="qc-info-item">
+                          <Label>Proportion Rate</Label>
+                          <div className="qc-info-value">{breakdown.inputs.proportionRate ?? "N/A"}%</div>
+                        </div>
+                        <div className="qc-info-item">
+                          <Label>Exchange Rate</Label>
+                          <div className="qc-info-value">{breakdown.inputs.exchangeRate ?? "N/A"}</div>
+                        </div>
+                        <div className="qc-info-item">
+                          <Label>Currency</Label>
+                          <div className="qc-info-value">{breakdown.inputs.currency ?? "N/A"}</div>
+                        </div>
+                        <div className="qc-info-item">
+                          <Label>Cover Days</Label>
+                          <div className="qc-info-value">{breakdown.inputs.coverDays ?? "N/A"}</div>
+                        </div>
+                        <div className="qc-info-item">
+                          <Label>Start</Label>
+                          <div className="qc-info-value">
+                            {breakdown.inputs.startDate ? new Date(breakdown.inputs.startDate).toLocaleString() : "N/A"}
                           </div>
-                          {sectionCalc.sectionAdjustments.discountsApplied?.map((discount: any, idx: number) => (
-                            <div key={idx} className="qc-adjustment-step qc-discount">
-                              <Label>{discount.name}</Label>
-                              <div className="qc-value">-{formatCurrency(discount.amount)}</div>
-                            </div>
-                          ))}
-                          {sectionCalc.sectionAdjustments.loadingsApplied?.map((loading: any, idx: number) => (
-                            <div key={idx} className="qc-adjustment-step qc-loading">
-                              <Label>{loading.name}</Label>
-                              <div className="qc-value">+{formatCurrency(loading.amount)}</div>
-                            </div>
-                          ))}
-                          <div className="qc-adjustment-step qc-final">
-                            <Label>Final Net Premium</Label>
-                            <div className="qc-value qc-highlight">
-                              {formatCurrency(sectionCalc.sectionAdjustments.finalNetPremium)}
-                            </div>
+                        </div>
+                        <div className="qc-info-item">
+                          <Label>End</Label>
+                          <div className="qc-info-value">
+                            {breakdown.inputs.endDate ? new Date(breakdown.inputs.endDate).toLocaleString() : "N/A"}
                           </div>
                         </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+                    </div>
+                  )}
 
-                {/* Pro-Rata Calculation */}
-                {breakdown.calculationSteps?.proRataCalculations && (
-                  <div className="qc-breakdown-section">
-                    <h4>Pro-Rata Calculation</h4>
-                    <div className="qc-prorata-detail">
-                      <div className="qc-prorata-row">
-                        <Label>Net Premium Before Pro-Rata</Label>
-                        <div className="qc-value">{formatCurrency(breakdown.calculationSteps.proRataCalculations.netPremiumBeforeProRata)}</div>
+                  {/* Section Calculations */}
+                  {breakdown.calculationSteps?.sectionCalculations?.map((sectionCalc: any) => (
+                    <div key={sectionCalc.sectionID} className="qc-breakdown-section">
+                      <h4>Section: {sectionCalc.sectionName}</h4>
+
+                      {/* Risk Items */}
+                      <div className="qc-items-breakdown">
+                        <h5>Risk Items Calculation</h5>
+                        <div className="qc-items-table">
+                          <table>
+                            <thead>
+                              <tr>
+                                <th>Item</th>
+                                <th>Description</th>
+                                <th>Actual Value</th>
+                                <th>Rate</th>
+                                <th>Formula</th>
+                                <th>Premium</th>
+                                <th>Discounts</th>
+                                <th>Net Premium</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {sectionCalc.riskItemCalculations?.items?.map((item: any) => (
+                                <tr key={`${item.smiCode || ""}-${item.itemNo}`}>
+                                  <td>{item.itemNo}</td>
+                                  <td>{item.itemDescription}</td>
+                                  <td>{formatCurrency(item.actualValue)}</td>
+                                  <td>{item.itemRate !== undefined ? `${item.itemRate}%` : "N/A"}</td>
+                                  <td className="qc-formula-cell">{item.actualPremiumFormula}</td>
+                                  <td>{formatCurrency(item.actualPremium)}</td>
+                                  <td>
+                                    {item.stockDiscountAmount > 0 && (
+                                      <div>Stock: {formatCurrency(item.stockDiscountAmount)}</div>
+                                    )}
+                                    {item.feaDiscountAmount > 0 && (
+                                      <div>FEA: {formatCurrency(item.feaDiscountAmount)}</div>
+                                    )}
+                                  </td>
+                                  <td className="qc-highlight">{formatCurrency(item.netPremiumAfterDiscounts)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                            <tfoot>
+                              <tr className="qc-totals-row">
+                                <td colSpan={2}>
+                                  <strong>Section Totals</strong>
+                                </td>
+                                <td>
+                                  <strong>
+                                    {formatCurrency(sectionCalc.riskItemCalculations?.totals?.totalActualValue || 0)}
+                                  </strong>
+                                </td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                  <strong>
+                                    {formatCurrency(sectionCalc.riskItemCalculations?.totals?.totalSharePremium || 0)}
+                                  </strong>
+                                </td>
+                                <td></td>
+                                <td className="qc-highlight">
+                                  <strong>
+                                    {formatCurrency(
+                                      sectionCalc.riskItemCalculations?.totals?.totalNetPremiumAfterDiscounts || 0,
+                                    )}
+                                  </strong>
+                                </td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
                       </div>
-                      <div className="qc-prorata-row">
-                        <Label>Cover Days</Label>
-                        <div className="qc-value">{breakdown.calculationSteps.proRataCalculations.coverDays} days</div>
-                      </div>
-                      <div className="qc-prorata-row">
-                        <Label>Standard Days</Label>
-                        <div className="qc-value">{breakdown.calculationSteps.proRataCalculations.standardDays} days</div>
-                      </div>
-                      <div className="qc-prorata-row">
-                        <Label>Pro-Rata Factor</Label>
-                        <div className="qc-value">{breakdown.calculationSteps.proRataCalculations.proRataFactor}</div>
-                      </div>
-                      <div className="qc-prorata-row qc-formula">
-                        <Label>Formula</Label>
-                        <div className="qc-value">{breakdown.calculationSteps.proRataCalculations.proRataFormula}</div>
-                      </div>
-                      <div className="qc-prorata-row qc-final">
-                        <Label>Final Premium Due</Label>
-                        <div className="qc-value qc-highlight">{formatCurrency(breakdown.calculationSteps.proRataCalculations.finalPremiumDue)}</div>
+
+                      {/* Section Adjustments */}
+                      {sectionCalc.sectionAdjustments && (
+                        <div className="qc-section-adjustments">
+                          <h5>Section Adjustments</h5>
+                          <div className="qc-adjustments-flow">
+                            <div className="qc-adjustment-step">
+                              <Label>Starting Premium</Label>
+                              <div className="qc-value">
+                                {formatCurrency(sectionCalc.sectionAdjustments.startingPremium)}
+                              </div>
+                            </div>
+                            {sectionCalc.sectionAdjustments.discountsApplied?.map((discount: any, idx: number) => (
+                              <div key={idx} className="qc-adjustment-step qc-discount">
+                                <Label>{discount.name}</Label>
+                                <div className="qc-value">-{formatCurrency(discount.amount)}</div>
+                              </div>
+                            ))}
+                            {sectionCalc.sectionAdjustments.loadingsApplied?.map((loading: any, idx: number) => (
+                              <div key={idx} className="qc-adjustment-step qc-loading">
+                                <Label>{loading.name}</Label>
+                                <div className="qc-value">+{formatCurrency(loading.amount)}</div>
+                              </div>
+                            ))}
+                            <div className="qc-adjustment-step qc-final">
+                              <Label>Final Net Premium</Label>
+                              <div className="qc-value qc-highlight">
+                                {formatCurrency(sectionCalc.sectionAdjustments.finalNetPremium)}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Pro-Rata Calculation */}
+                  {breakdown.calculationSteps?.proRataCalculations && (
+                    <div className="qc-breakdown-section">
+                      <h4>Pro-Rata Calculation</h4>
+                      <div className="qc-prorata-detail">
+                        <div className="qc-prorata-row">
+                          <Label>Net Premium Before Pro-Rata</Label>
+                          <div className="qc-value">
+                            {formatCurrency(breakdown.calculationSteps.proRataCalculations.netPremiumBeforeProRata)}
+                          </div>
+                        </div>
+                        <div className="qc-prorata-row">
+                          <Label>Cover Days</Label>
+                          <div className="qc-value">
+                            {breakdown.calculationSteps.proRataCalculations.coverDays} days
+                          </div>
+                        </div>
+                        <div className="qc-prorata-row">
+                          <Label>Standard Days</Label>
+                          <div className="qc-value">
+                            {breakdown.calculationSteps.proRataCalculations.standardDays} days
+                          </div>
+                        </div>
+                        <div className="qc-prorata-row">
+                          <Label>Pro-Rata Factor</Label>
+                          <div className="qc-value">{breakdown.calculationSteps.proRataCalculations.proRataFactor}</div>
+                        </div>
+                        <div className="qc-prorata-row qc-formula">
+                          <Label>Formula</Label>
+                          <div className="qc-value">
+                            {breakdown.calculationSteps.proRataCalculations.proRataFormula}
+                          </div>
+                        </div>
+                        <div className="qc-prorata-row qc-final">
+                          <Label>Final Premium Due</Label>
+                          <div className="qc-value qc-highlight">
+                            {formatCurrency(breakdown.calculationSteps.proRataCalculations.finalPremiumDue)}
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Final Results Summary */}
-                {breakdown.finalResults && (
-                  <div className="qc-breakdown-section qc-final-results">
-                    <h4>Final Results Summary</h4>
-                    <div className="qc-results-grid">
-                      <div className="qc-result-item">
-                        <Label>Total Sum Insured</Label>
-                        <div className="qc-result-value">{formatCurrency(breakdown.finalResults.totalSumInsured)}</div>
-                      </div>
-                      <div className="qc-result-item">
-                        <Label>Total Premium</Label>
-                        <div className="qc-result-value">{formatCurrency(breakdown.finalResults.totalPremium)}</div>
-                      </div>
-                      <div className="qc-result-item">
-                        <Label>Net Premium</Label>
-                        <div className="qc-result-value">{formatCurrency(breakdown.finalResults.netPremium)}</div>
-                      </div>
-                      <div className="qc-result-item">
-                        <Label>Pro-Rata Premium</Label>
-                        <div className="qc-result-value">{formatCurrency(breakdown.finalResults.proRataPremium)}</div>
-                      </div>
-                      <div className="qc-result-item">
-                        <Label>Share Sum Insured</Label>
-                        <div className="qc-result-value">{formatCurrency(breakdown.finalResults.shareSumInsured)}</div>
-                      </div>
-                      <div className="qc-result-item">
-                        <Label>Share Premium</Label>
-                        <div className="qc-result-value">{formatCurrency(breakdown.finalResults.sharePremium)}</div>
-                      </div>
-                      <div className="qc-result-item">
-                        <Label>Foreign Sum Insured</Label>
-                        <div className="qc-result-value">{formatCurrency(breakdown.finalResults.foreignSumInsured)} {breakdown.finalResults.foreignCurrency}</div>
-                      </div>
-                      <div className="qc-result-item">
-                        <Label>Foreign Premium</Label>
-                        <div className="qc-result-value">{formatCurrency(breakdown.finalResults.foreignPremium)} {breakdown.finalResults.foreignCurrency}</div>
-                      </div>
-                      <div className="qc-result-item">
-                        <Label>Overall Premium Rate</Label>
-                        <div className="qc-result-value">{breakdown.finalResults.overallPremiumRate?.toFixed(4)}%</div>
-                      </div>
-                      <div className="qc-result-item">
-                        <Label>Effective Discount Rate</Label>
-                        <div className="qc-result-value">{breakdown.finalResults.effectiveDiscountRate?.toFixed(2)}%</div>
-                      </div>
-                      <div className="qc-result-item">
-                        <Label>Effective Loading Rate</Label>
-                        <div className="qc-result-value">{breakdown.finalResults.effectiveLoadingRate?.toFixed(2)}%</div>
-                      </div>
-                      <div className="qc-result-item">
-                        <Label>Proportion Share</Label>
-                        <div className="qc-result-value">{breakdown.finalResults.proportionShare}%</div>
+                  {/* Final Results Summary */}
+                  {breakdown.finalResults && (
+                    <div className="qc-breakdown-section qc-final-results">
+                      <h4>Final Results Summary</h4>
+                      <div className="qc-results-grid">
+                        <div className="qc-result-item">
+                          <Label>Total Sum Insured</Label>
+                          <div className="qc-result-value">
+                            {formatCurrency(breakdown.finalResults.totalSumInsured)}
+                          </div>
+                        </div>
+                        <div className="qc-result-item">
+                          <Label>Total Premium</Label>
+                          <div className="qc-result-value">{formatCurrency(breakdown.finalResults.totalPremium)}</div>
+                        </div>
+                        <div className="qc-result-item">
+                          <Label>Net Premium</Label>
+                          <div className="qc-result-value">{formatCurrency(breakdown.finalResults.netPremium)}</div>
+                        </div>
+                        <div className="qc-result-item">
+                          <Label>Pro-Rata Premium</Label>
+                          <div className="qc-result-value">{formatCurrency(breakdown.finalResults.proRataPremium)}</div>
+                        </div>
+                        <div className="qc-result-item">
+                          <Label>Share Sum Insured</Label>
+                          <div className="qc-result-value">
+                            {formatCurrency(breakdown.finalResults.shareSumInsured)}
+                          </div>
+                        </div>
+                        <div className="qc-result-item">
+                          <Label>Share Premium</Label>
+                          <div className="qc-result-value">{formatCurrency(breakdown.finalResults.sharePremium)}</div>
+                        </div>
+                        <div className="qc-result-item">
+                          <Label>Foreign Sum Insured</Label>
+                          <div className="qc-result-value">
+                            {formatCurrency(breakdown.finalResults.foreignSumInsured)}{" "}
+                            {breakdown.finalResults.foreignCurrency}
+                          </div>
+                        </div>
+                        <div className="qc-result-item">
+                          <Label>Foreign Premium</Label>
+                          <div className="qc-result-value">
+                            {formatCurrency(breakdown.finalResults.foreignPremium)}{" "}
+                            {breakdown.finalResults.foreignCurrency}
+                          </div>
+                        </div>
+                        <div className="qc-result-item">
+                          <Label>Overall Premium Rate</Label>
+                          <div className="qc-result-value">
+                            {breakdown.finalResults.overallPremiumRate?.toFixed(4)}%
+                          </div>
+                        </div>
+                        <div className="qc-result-item">
+                          <Label>Effective Discount Rate</Label>
+                          <div className="qc-result-value">
+                            {breakdown.finalResults.effectiveDiscountRate?.toFixed(2)}%
+                          </div>
+                        </div>
+                        <div className="qc-result-item">
+                          <Label>Effective Loading Rate</Label>
+                          <div className="qc-result-value">
+                            {breakdown.finalResults.effectiveLoadingRate?.toFixed(2)}%
+                          </div>
+                        </div>
+                        <div className="qc-result-item">
+                          <Label>Proportion Share</Label>
+                          <div className="qc-result-value">{breakdown.finalResults.proportionShare}%</div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>              
+                  )}
+                </div>
               )
             )}
           </div>
@@ -1523,7 +1448,14 @@ const QuoteCreator = () => {
             setEditingSectionId(null)
           }}
           onSave={handleSaveSection}
-          section={editingSectionId ? (calculationBreakdown?.inputs.sectionInputs || localSections || sections).find((s) => s.location === editingSectionId) : undefined}
+          section={
+            editingSectionId != null
+              ? (calculationBreakdown?.inputs.sectionInputs).find(
+                  (s,index:number) => {console.log(index,editingSectionId);
+                   return(String(index) == editingSectionId)},
+                )
+              : undefined
+          }
           productId={proposalProductId || ""}
           onCalculateFullRiskArray={handleReceiveFullRiskArray}
         />

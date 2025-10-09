@@ -1,23 +1,32 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import { Button } from "../UI/new-button"
 
 const Header: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navItems = [
-    { title: "Home", link: "/quotations" },
-    { title: "CSU", link: "/quotations" },
+    { title: "Home", link: "/dashboard" },
+    { title: "CSU", link: "/csu" },
     { title: "Quotation", link: "/quotations" },
-    { title: "Underwriting", link: "/quotations" },
-    { title: "Claims", link: "/quotations" },
-    { title: "Reinsurance", link: "/quotations" },
-    { title: "Requisition", link: "/quotations" },
-    { title: "Accounting", link: "/quotations" },
-    { title: "Analytics", link: "/quotations" },
-    { title: "Admin", link: "/quotations" },
-  ];
+    { title: "Underwriting", link: "/underwriting" },
+     { title: "Claims", link: "/claims" },
+    { title: "Reinsurance", link: "/re-insurance" },
+    { title: "Requisition", link: "/requisition" },
+    { title: "Accounting", link: "/accounting" },
+    { title: "Analytics", link: "/analytics" },
+    { title: "Admin", link: "/admin" },
+ ];
 
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.replace("/login");  
+    window.location.replace("/login");  
+    };
+    
+  
   return (
     <header  className="bg-white border-b border-gray-200 px-5 flex items-center justify-between h-16 shadow ml-auto" style={{ backgroundColor: "rgb(255, 206, 187)" }}>
       <div className="font-bold text-lg"></div>
@@ -36,8 +45,8 @@ const Header: React.FC = () => {
             {item.title}
           </NavLink>
         ))}
+        <Button onClick={()=>{handleLogout();}} variant="destructive">Logout</Button>
       </nav>
-
       <button
         className="block xl:hidden w-fit p-2 text-black hover:text-gray-800"
         onClick={() => setMenuOpen(!menuOpen)}

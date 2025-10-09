@@ -34,6 +34,13 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const redirectTo = localStorage.getItem("redirectAfterLogin") || "/dashboard";
   const { toast } = useToast();
+  useEffect(() => {
+    window.history.pushState(null, "", window.location.href);
+    window.onpopstate = function () {
+      window.history.go(1);
+    };
+  }, []);
+    
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -42,6 +49,7 @@ const LoginPage = () => {
     }
  */
   }, [navigate]);
+
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),

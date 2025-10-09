@@ -108,6 +108,18 @@ export interface RiskItem {
   feaDiscountRate: number
 }
 
+export interface CalculatedAggregate{
+    aggregateSumInsured: number,
+    aggregatePremium: number,
+    success: boolean,
+    message: string
+  
+}
+
+export interface sectionAdjustments extends Omit<ProposalAdjustments, 'otherLoadingsRate'>{
+  aggregatePremium: number,
+}
+
 export interface CalculatedRiskItem extends RiskItem {
   actualPremium: number
   shareValue: number
@@ -162,6 +174,23 @@ export interface QuoteSection {
   riskItems: RiskItemUI[]
 }
 
+export interface aggregateTotals{
+  sectionSummaries: [
+    {
+      sectionID: string,
+      sectionName: string,
+      sectionSumInsured: number,
+      sectionAggregatePremium: number,
+      riskItemCount: number
+    }
+  ],
+  totalSumInsured: number,
+  totalAggregatePremium: number,
+  sectionCount: number,
+  success: boolean,
+  message: string
+}
+
 export interface CalculatedSection {
   sectionID: string
   sectionName: string
@@ -204,14 +233,12 @@ export interface AdjustmentCalculations {
   spreadDiscountNetAmount: number
   ltaDiscountAmount: number
   ltaDiscountNetAmount: number
-  otherDiscountsAmount: number
   theftLoadingAmount: number
   theftLoadingNetAmount: number
   srccLoadingAmount: number
   srccLoadingNetAmount: number
   otherLoading2Amount: number
   otherLoading2NetAmount: number
-  otherLoadingsAmount: number
   netPremiumDue: number
   success: boolean
   message: string | null

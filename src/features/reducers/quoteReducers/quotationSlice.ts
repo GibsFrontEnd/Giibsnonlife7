@@ -6,10 +6,14 @@ import type {
   CreateProposalRequest,
   UpdateProposalRequest,
   CompleteCalculationRequest,
+  sectionAdjustments,
   CompleteCalculationResponse,
   CalculationBreakdown,
   ProposalPaginationResponse,
   QuoteSection,
+  CalculatedAggregate,
+  AdjustmentCalculations,
+  aggregateTotals,
   CalculateRiskItemsResponse,
   RiskItem,
   CalculatedRiskItem,
@@ -275,6 +279,8 @@ const AUTH_TOKEN = getAuthToken();
 
     if (!response.ok) await handleFetchError(response)
     const data = await response.json()
+    console.log(payload);
+    
     return data as CalculateRiskItemsResponse
   } catch (error) {
     return rejectWithValue(error instanceof Error ? error.message : "Failed to calculate risk items")
@@ -287,7 +293,7 @@ const AUTH_TOKEN = getAuthToken();
  * Step 2 - section aggregate (aggregates calculated items for a single section)
  * Request body: { calculatedItems: CalculatedRiskItem[] }
  */
-export const calculateSectionAggregate = createAsyncThunk<any, { calculatedItems: CalculatedRiskItem[] }, { rejectValue: string }>(
+export const calculateSectionAggregate = createAsyncThunk<CalculatedAggregate, { calculatedItems: CalculatedRiskItem[] }, { rejectValue: string }>(
   "quotations/calculateSectionAggregate",
   async (payload, { rejectWithValue }) => {
         try {
@@ -295,11 +301,11 @@ const AUTH_TOKEN = getAuthToken();
 
       const response = await fetch(`${API_BASE_URL}/Quotation/calculate/section-aggregate`, {
         method: "POST",
-        headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
+        headers: { accept: "text/json", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
       if (!response.ok) await handleFetchError(response)
-      const data = await response.json()
+      const data:CalculatedAggregate = await response.json()
       return data
     } catch (err) {
       return rejectWithValue(err instanceof Error ? err.message : "Failed to calculate section aggregate")
@@ -307,23 +313,46 @@ const AUTH_TOKEN = getAuthToken();
   },
 )
 
+export const calculateSectionAdjustment = createAsyncThunk<AdjustmentCalculations,sectionAdjustments, { rejectValue: string }>(
+  "quotations/calculateSectionAdjustment",
+  async (payload, { rejectWithValue }) => {
+        try {
+const AUTH_TOKEN = getAuthToken();
+console.log(payload);
+
+      const response = await fetch(`${API_BASE_URL}/Quotation/calculate/section-adjustments`, {
+        method: "POST",
+        headers: { accept: "text/json", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      if (!response.ok) await handleFetchError(response)
+      const data:AdjustmentCalculations = await response.json()
+      return data
+    } catch (err) {
+      return rejectWithValue(err instanceof Error ? err.message : "Failed to calculate section aggregate")
+    }
+  },
+)
+
+
 /**
  * Step 3 - multi-section aggregate
  * Request body: { sections: { sectionID, sectionName, calculatedItems }[] }
  */
-export const calculateMultiSectionAggregate = createAsyncThunk<any, { sections: any[] }, { rejectValue: string }>(
+export const calculateMultiSectionAggregate = createAsyncThunk<aggregateTotals, { adjustedSections: any[] }, { rejectValue: string }>(
   "quotations/calculateMultiSectionAggregate",
   async (payload, { rejectWithValue }) => {
         try {
 const AUTH_TOKEN = getAuthToken();
 
-      const response = await fetch(`${API_BASE_URL}/Quotation/calculate/multi-section-aggregate`, {
+      const response = await fetch(`${API_BASE_URL}/Quotation/calculate/aggregate-adjusted-sections`, {
         method: "POST",
-        headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
+        headers: { accept: "text/json", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
       if (!response.ok) await handleFetchError(response)
       const data = await response.json()
+      
       return data
     } catch (err) {
       return rejectWithValue(err instanceof Error ? err.message : "Failed to calculate multi-section aggregate")
@@ -343,7 +372,7 @@ const AUTH_TOKEN = getAuthToken();
 
       const response = await fetch(`${API_BASE_URL}/Quotation/calculate/proposal-adjustments`, {
         method: "POST",
-        headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
+        headers: { accept: "text/json", Authorization: `Bearer ${AUTH_TOKEN}`, "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
       if (!response.ok) await handleFetchError(response)

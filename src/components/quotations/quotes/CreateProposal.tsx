@@ -1,4 +1,4 @@
-//@ts-nocheck
+// @ts-nocheck
 
 import { useEffect, useRef, useState } from "react"
 import { useDispatch } from "react-redux"
@@ -34,14 +34,18 @@ const CreateProposal = () => {
   const { branches } = useSelector((state: RootState) => state.branches)
   const { customers } = useSelector((state: RootState) => state.customers)
   const { agents } = useSelector((state: RootState) => state.parties)
-  const { mktStaffs} = useAppSelector(selectMarketingStaff)
+  const { mktStaffs } = useAppSelector(selectMarketingStaff)
 
-  const [insuredType, setInsuredType] = useState<"individual" | "organization">("individual")
+  // customer search state + debounce ref
+  const [customerSearch, setCustomerSearch] = useState<string>("")
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const [insuredType, setInsuredType] = useState<"individual" | "corporate">("individual")
   const [riskClass, setRiskClass] = useState("")
   const [formData, setFormData] = useState<CreateProposalRequest>({
-    subriskID:"",
+    subriskID: "",
     branchID: "",
-    insuredID:"",
+    insuredID: "",
     partyID: "",
     mktStaffID: "",
     startDate: "",
@@ -67,8 +71,44 @@ const CreateProposal = () => {
     dispatch(getAllBranches() as any)
     dispatch(getAllAgents({ pageNumber: 1, pageSize: 100 }) as any)
     dispatch(fetchMktStaffs() as any)
-    dispatch(getAllCustomers() as any)
+    dispatch(getAllCustomers({ pageNumber: 1, pageSize: 50, insuredType: insuredType }) as any)
   }, [dispatch])
+
+  // re-fetch customers when insuredType changes
+  useEffect(() => {
+    dispatch(getAllCustomers({ pageNumber: 1, pageSize: 50, insuredType: insuredType }) as any)
+  }, [insuredType, dispatch])
+
+  // debounced search: dispatch when user stops typing for 2s
+  useEffect(() => {
+    // clear existing timer
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current)
+    }
+
+    const trimmed = (customerSearch ?? "").trim()
+
+    // only dispatch if user typed something; remove this check if you want empty search to return all
+    if (trimmed.length === 0) return
+
+    searchDebounceRef.current = setTimeout(() => {
+      dispatch(
+        getAllCustomers({
+          pageNumber: 1,
+          pageSize: 50,
+          insuredType,
+          searchTerm: trimmed,
+        }) as any
+      )
+    }, 2000)
+
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current)
+        searchDebounceRef.current = null
+      }
+    }
+  }, [customerSearch, insuredType, dispatch])
 
   // Fetch products when riskClass changes
   useEffect(() => {
@@ -86,7 +126,6 @@ const CreateProposal = () => {
   }, [success.createProposal, navigate, dispatch])
 
   const handleInputChange = (field: keyof CreateProposalRequest, value: any) => {
-    
     setFormData(prev => ({ ...prev, [field]: value }))
     if (validationErrors.length > 0) setValidationErrors([])
   }
@@ -143,16 +182,14 @@ const CreateProposal = () => {
   const agentOptions = agents.map(a => ({ value: a.partyID, label: a.party }))
   const mktStaffOptions = mktStaffs.map(s => ({ value: s.mktStaffID, label: s.staffName }))
   const individualCustomerOptions = customers
-    .filter(c => c.insuredType !== "Corporate")
+    .filter(c => (c.insuredType ?? "").toString().toLowerCase() !== "corporate")
     .map(c => ({
       value: c.insuredID,
-      label: c.fullName ? c.fullName: c.firstName && c.lastName ? `${c.firstName} ${c.lastName}` :c.firstName? c.firstName:c.lastName?c.lastName: c.orgName
+      label: c.fullName ? c.fullName : c.firstName && c.lastName ? `${c.firstName} ${c.lastName}` : c.firstName ? c.firstName : c.lastName ? c.lastName : c.orgName
     }))
   const companyCustomerOptions = customers
-    .filter(c => c.insuredType === "Corporate")
-    .map(c => ({ value: c.insuredID, label: c.fullName }))
-
-    
+    .filter(c => (c.insuredType ?? "").toString().toLowerCase() === "corporate")
+    .map(c => ({ value: c.insuredID, label: c.fullName ?? c.orgName ?? c.insuredID }))
 
   return (
     <div className="create-proposal-container">
@@ -240,16 +277,16 @@ const CreateProposal = () => {
               <button
                 type="button"
                 className={`toggle-btn ${insuredType === "individual" ? "active" : ""}`}
-                onClick={() => setInsuredType("individual")}
+                onClick={() => { setInsuredType("individual"); setFormData(prev => ({ ...prev, isOrg: false })); }}
               >
                 Individual
               </button>
               <button
                 type="button"
-                className={`toggle-btn ${insuredType === "organization" ? "active" : ""}`}
-                onClick={() => setInsuredType("organization")}
+                className={`toggle-btn ${insuredType === "corporate" ? "active" : ""}`}
+                onClick={() => { setInsuredType("corporate"); setFormData(prev => ({ ...prev, isOrg: true })); }}
               >
-                Organization
+                Corporate
               </button>
             </div>
           </div>
@@ -261,12 +298,20 @@ const CreateProposal = () => {
                   <Label htmlFor="customerName">Customer Name *</Label>
                   <Select
                     options={individualCustomerOptions}
+                    inputValue={customerSearch}
+                    onInputChange={(value, { action }) => {
+                      // only set local search when user types or blurs; react-select calls this for other actions too
+                      if (action === 'input-change' || action === 'input-blur' || action === 'menu-close') {
+                        setCustomerSearch(value)
+                      }
+                    }}
                     value={individualCustomerOptions.find(c => c.value === formData.insuredID) || null}
                     onChange={opt => {
                       if (!opt) {
                         handleInputChange("insuredID", "")
                         handleInputChange("surname", "")
                         handleInputChange("firstName", "")
+                        setCustomerSearch("")
                         return
                       }
                       const customer = customers.find(c => c.insuredID === opt.value)
@@ -274,9 +319,12 @@ const CreateProposal = () => {
                         handleInputChange("insuredID", customer.insuredID)
                         handleInputChange("surname", customer.lastName ?? "")
                         handleInputChange("firstName", customer.firstName ?? "")
+                        // you can also set other fields from customer here if needed
                       }
+                      // clear the typed input after selection
+                      setCustomerSearch("")
                     }}
-                    placeholder="Select Customer"
+                    placeholder="Type to search customers..."
                     isClearable
                   />
                 </div>
