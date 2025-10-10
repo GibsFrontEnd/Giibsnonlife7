@@ -157,7 +157,7 @@ export const AddSectionModal = ({
   }, [section])
 
 useEffect(()=>{
-  if(formData.riskItems.length>0)
+  if(formData.riskItems?.length>0)
   handleCalculateAllItems()
 },[])
 
@@ -372,7 +372,7 @@ useEffect(()=>{
       const resp = await (dispatch(calculateRiskItems(payload)) as any).unwrap()
 
       // merge server result: server returns calculatedItems array and global totals
-      if (resp && Array.isArray(resp.calculatedItems) && resp.calculatedItems.length > 0) {
+      if (resp && Array.isArray(resp.calculatedItems) && resp.calculatedItems?.length > 0) {
         const c = resp.calculatedItems[0] // calculated item
         setFormData((prev) => {
           const items = [...(prev.riskItems || [])]
@@ -447,7 +447,7 @@ useEffect(()=>{
 
   // ---------- SERVER-CALLED Calculate ALL items ----------
   const handleCalculateAllItems = async () => {
-    if (!formData.riskItems || formData.riskItems.length === 0) return
+    if (!formData.riskItems || formData.riskItems?.length === 0) return
 
     const mapAllKey = "ALL"
     setApplyingMap((m) => ({ ...m, [mapAllKey]: true }))
@@ -652,7 +652,7 @@ useEffect(()=>{
                 marginBottom: 12,
               }}
             >
-              <div style={{ fontWeight: 700 }}>Risk Items ({formData.riskItems.length})</div>
+              <div style={{ fontWeight: 700 }}>Risk Items ({formData.riskItems?.length})</div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <Button onClick={handleAddItem} size="sm">
                   Add Item
@@ -1208,7 +1208,7 @@ useEffect(()=>{
                     </Button>
                   </>
                 )}
-                {(sectionAdjustmentsResult.success || sectionAdjustmentsLoadings.length>0 || sectionDiscountsLoadings.length>0  )&& (
+                {(sectionAdjustmentsResult.success || sectionAdjustmentsLoadings?.length>0 || sectionAdjustmentsDiscounts?.length>0  )&& (
                   <div className={"proposal-adjustments-card"}>
                     <div className="card-header">
                       <h4>Section Adjustments</h4>

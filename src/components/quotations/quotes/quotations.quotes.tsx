@@ -80,11 +80,11 @@ const Quotations = () => {
   const filteredProposals = proposals.filter((proposal) => {
     const safeLower = (val?: string) => val?.toLowerCase() ?? ""
     const matchesSearch =
-      safeLower((proposal.proposalNo || "")).includes(searchTerm.toLowerCase()) ||
-      safeLower((proposal.insSurname) || "").includes(searchTerm.toLowerCase())
+      safeLower(proposal.proposalNo || "").includes(searchTerm.toLowerCase()) ||
+      safeLower(proposal.insSurname || "").includes(searchTerm.toLowerCase())
 
-      if(selectedRiskFilter != null){  
-        switch (activeTab) {
+    if (selectedRiskFilter != null) {
+      switch (activeTab) {
         case "drafts":
           return matchesSearch && selectedRiskFilter == proposal.riskID && proposal.transSTATUS === "PENDING"
         case "calculated":
@@ -92,21 +92,20 @@ const Quotations = () => {
         case "converted":
           return matchesSearch && selectedRiskFilter == proposal.riskID && proposal.transSTATUS === "CONVERTED"
         default:
-          return matchesSearch && selectedRiskFilter == proposal.riskID 
+          return matchesSearch && selectedRiskFilter == proposal.riskID
+      }
+    } else {
+      switch (activeTab) {
+        case "drafts":
+          return matchesSearch && proposal.transSTATUS === "PENDING"
+        case "calculated":
+          return matchesSearch && proposal.transSTATUS === "CALCULATED"
+        case "converted":
+          return matchesSearch && proposal.transSTATUS === "CONVERTED"
+        default:
+          return matchesSearch
       }
     }
-      else{
-    switch (activeTab) {
-      case "drafts":
-        return matchesSearch && proposal.transSTATUS === "PENDING"
-      case "calculated":
-        return matchesSearch && proposal.transSTATUS === "CALCULATED"
-      case "converted":
-        return matchesSearch && proposal.transSTATUS === "CONVERTED"
-      default:
-        return matchesSearch
-    }
-  }
   })
 
   const formatDate = (dateString: string) => {
@@ -153,57 +152,77 @@ const Quotations = () => {
         </div>
 
         <div className="qtns-tabs-container">
-            <button
-              className={`qtns-tab qtns-dropdown-trigger ${selectedRiskFilter ? "active" : ""}`}
-              onClick={() => setShowRiskDropdown(!showRiskDropdown)}
-            >
-              {selectedRiskFilter
-                ? risks.find((r) => r.riskName === selectedRiskFilter)?.riskName || "Business Filter"
-                : "Business Filter"}{" "}
-              ▼
-            </button>
-            {showRiskDropdown && (
-              <div className="qtns-dropdown-menu">
-                <button className="qtns-dropdown-item" onClick={() => handleRiskFilter(null)}>
-                  All Businesses
+          <button
+            className={`qtns-tab qtns-dropdown-trigger ${selectedRiskFilter ? "active" : ""}`}
+            onClick={() => setShowRiskDropdown(!showRiskDropdown)}
+          >
+            {selectedRiskFilter
+              ? risks.find((r) => r.riskName === selectedRiskFilter)?.riskName || "Business Filter"
+              : "Business Filter"}{" "}
+            ▼
+          </button>
+          {showRiskDropdown && (
+            <div className="qtns-dropdown-menu">
+              <button className="qtns-dropdown-item" onClick={() => handleRiskFilter(null)}>
+                All Businesses
+              </button>
+              {risks.map((risk) => (
+                <button key={risk.riskID} className="qtns-dropdown-item" onClick={() => handleRiskFilter(risk.riskID)}>
+                  {risk.riskName}
                 </button>
-                {risks.map((risk) => (
-                  <button
-                    key={risk.riskID}
-                    className="qtns-dropdown-item"
-                    onClick={() => handleRiskFilter(risk.riskID)}
-                  >
-                    {risk.riskName}
-                  </button>
-                ))}
-              </div>
-            )}
+              ))}
+            </div>
+          )}
 
           <button
             className={`qtns-tab ${activeTab === "overview" ? "active" : ""}`}
             onClick={() => handleTabChange("overview")}
           >
-            Overview ({proposals.filter((p) => selectedRiskFilter != null ? selectedRiskFilter == p.riskID :p).length})
+            Overview (
+            {proposals.filter((p) => (selectedRiskFilter != null ? selectedRiskFilter == p.riskID : p)).length})
           </button>
           <button
             className={`qtns-tab ${activeTab === "drafts" ? "active" : ""}`}
             onClick={() => handleTabChange("drafts")}
           >
-            Drafts ({proposals.filter((p) => selectedRiskFilter != null ? p.transSTATUS === "PENDING" && selectedRiskFilter == p.riskID :p.transSTATUS === "PENDING").length})
+            Drafts (
+            {
+              proposals.filter((p) =>
+                selectedRiskFilter != null
+                  ? p.transSTATUS === "PENDING" && selectedRiskFilter == p.riskID
+                  : p.transSTATUS === "PENDING",
+              ).length
+            }
+            )
           </button>
           <button
             className={`qtns-tab ${activeTab === "calculated" ? "active" : ""}`}
             onClick={() => handleTabChange("calculated")}
           >
-            Calculated ({proposals.filter((p) => selectedRiskFilter != null ? p.transSTATUS === "CALCULATED" && selectedRiskFilter == p.riskID :p.transSTATUS === "CALCULATED").length})
+            Calculated (
+            {
+              proposals.filter((p) =>
+                selectedRiskFilter != null
+                  ? p.transSTATUS === "CALCULATED" && selectedRiskFilter == p.riskID
+                  : p.transSTATUS === "CALCULATED",
+              ).length
+            }
+            )
           </button>
           <button
             className={`qtns-tab ${activeTab === "converted" ? "active" : ""}`}
             onClick={() => handleTabChange("converted")}
           >
-            Converted ({proposals.filter((p) => selectedRiskFilter != null ? p.transSTATUS === "CONVERTED" && selectedRiskFilter == p.riskID :p.transSTATUS === "CONVERTED").length})
+            Converted (
+            {
+              proposals.filter((p) =>
+                selectedRiskFilter != null
+                  ? p.transSTATUS === "CONVERTED" && selectedRiskFilter == p.riskID
+                  : p.transSTATUS === "CONVERTED",
+              ).length
+            }
+            )
           </button>
-
         </div>
       </div>
 
@@ -243,7 +262,9 @@ const Quotations = () => {
                 <div className="qtns-detail-row">
                   <div className="qtns-detail-item">
                     <span className="qtns-detail-label">Business</span>
-                    <span className="qtns-detail-value">{risks.find((r)=> r.riskID == proposal.riskID)?.riskName}</span>
+                    <span className="qtns-detail-value">
+                      {risks.find((r) => r.riskID == proposal.riskID)?.riskName}
+                    </span>
                   </div>
                   <div className="qtns-detail-item">
                     <span className="qtns-detail-label">Subclass</span>
@@ -286,7 +307,6 @@ const Quotations = () => {
         )}
       </div>
 
-      {/* Pagination */}
       <div className="qtns-pagination">
         <Button onClick={() => handlePageChange(pagination.page - 1)} disabled={!pagination.hasPrevious} size="sm">
           Previous
