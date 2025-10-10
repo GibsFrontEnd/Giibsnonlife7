@@ -1,5 +1,3 @@
-"use client"
-
 //@ts-nocheck
 
 import { useEffect, useState } from "react"
