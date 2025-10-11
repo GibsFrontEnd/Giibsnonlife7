@@ -104,7 +104,7 @@ export const AddSectionModal = ({
           itemDescription: it.itemDescription ?? "",
           actualValue: it.actualValue ?? 0,
           itemRate: it.itemRate ?? 0,
-          multiplyRate: it.multiplyRate ?? 1,
+          multiplyRate: it.multiplyRate ?? 0,
           location: section?.location ?? "",
           feaDiscountRate: it.feaDiscountRate ?? 0,
 
@@ -185,7 +185,7 @@ useEffect(()=>{
       itemDescription: "",
       actualValue: 0,
       itemRate: 0,
-      multiplyRate: 1,
+      multiplyRate: 0,
       location: formData.location,
       feaDiscountRate: 0,
       actualPremium: 0,
@@ -351,7 +351,7 @@ useEffect(()=>{
           itemDescription: item.itemDescription,
           actualValue: Number(item.actualValue) || 0,
           itemRate: Number(item.itemRate) || 0,
-          multiplyRate: Number(item.multiplyRate) || 1,
+          multiplyRate: Number(item.multiplyRate) || 0,
           location: item.location || "",
           feaDiscountRate: Number(item.feaDiscountRate) || 0,
           stockItem: item.stockItem
@@ -460,7 +460,7 @@ useEffect(()=>{
         itemDescription: it.itemDescription,
         actualValue: Number(it.actualValue) || 0,
         itemRate: Number(it.itemRate) || 0,
-        multiplyRate: Number(it.multiplyRate) || 1,
+        multiplyRate: Number(it.multiplyRate) || 0,
         location: it.location || "",
         feaDiscountRate: Number(it.feaDiscountRate) || 0,
         stockItem: it.stockItem ?? null,
@@ -922,6 +922,9 @@ useEffect(()=>{
                                     disabled
                                   />
                                 </div>
+                                <div className="discounts-area">
+                            {item.itemRate && item.stockItem.stockSumInsured ? <div>amount: {formatCurrency((item.itemRate/100)*item.stockItem.stockSumInsured)}</div> : null}
+                            </div>
                               </div>
                             </div>
                             <div className="stock-row">
@@ -933,6 +936,9 @@ useEffect(()=>{
                                   onChange={(e) => handleStockChange(index, "stockDiscountRate", e.target.value)}
                                 />
                               </div>
+                              <div className="discounts-area">
+                            {item.stockItem?.stockDiscountRate && item.stockItem.stockSumInsured ? <div>amount: {formatCurrency((item.stockItem?.stockDiscountRate/100)*item.stockItem.stockSumInsured)}</div> : null}
+                            </div>
                             </div>
                           </div>
                         )}
@@ -1042,7 +1048,7 @@ useEffect(()=>{
           <div className="form-section">
             <div className="qc-adjustments-panel">
               <h3 style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Section Adjustments</span>
+                <span>Premium Adjustments</span>
                 <button
                   className="link-btn"
                   onClick={() => setAdjCollapse(!adjCollapse)}
@@ -1204,14 +1210,14 @@ useEffect(()=>{
                 {!adjCollapse && (
                   <>
                     <Button onClick={handleApplySectionAdjustments} size="sm" variant="outline">
-                      Apply Section Adjustments
+                      Apply Premium Adjustments
                     </Button>
                   </>
                 )}
                 {(sectionAdjustmentsResult.success || sectionAdjustmentsLoadings?.length>0 || sectionAdjustmentsDiscounts?.length>0  )&& (
                   <div className={"proposal-adjustments-card"}>
                     <div className="card-header">
-                      <h4>Section Adjustments</h4>
+                      <h4>Premium Adjustments</h4>
                       <span className="badge success">Applied</span>
                     </div>
 

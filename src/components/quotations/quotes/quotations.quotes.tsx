@@ -1,6 +1,5 @@
 //@ts-nocheck
-
-import { useEffect, useState } from "react"
+import { use, useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import type { RootState } from "../../../features/store"
@@ -16,7 +15,11 @@ import { Button } from "../../UI/new-button"
 import Input from "../../UI/Input"
 import "./Quotations.css"
 
-const Quotations = () => {
+type QuotationsProps = {
+  businessId: string | null
+}
+
+const Quotations = ({ businessId }: QuotationsProps) => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { proposals, loading, error, searchTerm, activeTab, selectedRiskFilter, pagination } = useSelector(
@@ -47,6 +50,10 @@ const Quotations = () => {
   const handleTabChange = (tab: "overview" | "drafts" | "calculated" | "converted") => {
     dispatch(setActiveTab(tab))
   }
+
+useEffect(()=>{
+  dispatch(setSelectedRiskFilter(businessId))
+},[])
 
   const handleRiskFilter = (riskID: string | null) => {
     dispatch(setSelectedRiskFilter(riskID))
@@ -152,7 +159,7 @@ const Quotations = () => {
         </div>
 
         <div className="qtns-tabs-container">
-          <button
+{/*           <button
             className={`qtns-tab qtns-dropdown-trigger ${selectedRiskFilter ? "active" : ""}`}
             onClick={() => setShowRiskDropdown(!showRiskDropdown)}
           >
@@ -173,7 +180,7 @@ const Quotations = () => {
               ))}
             </div>
           )}
-
+ */}
           <button
             className={`qtns-tab ${activeTab === "overview" ? "active" : ""}`}
             onClick={() => handleTabChange("overview")}

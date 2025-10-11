@@ -1079,7 +1079,7 @@ console.log("full calculation request");
             onClick={handleCalculate}
             disabled={loading?.calculate || !localSections || localSections.length === 0}
           >
-            {loading?.calculate ? "Calculating..." : currentCalculation ? "Save to Database and Update Calculation Breakdown" : "Save to Database and Get Calculation Breakdown"}
+            {loading?.calculate ? "Calculating..." : currentCalculation ? "Update Details" : "Save Details"}
           </Button>
 
         {/* Calculation results & breakdown */}
@@ -1316,18 +1316,19 @@ console.log("full calculation request");
                                 {formatCurrency(sectionCalc.sectionAdjustments.startingPremium)}
                               </div>
                             </div>
-                            {sectionCalc.sectionAdjustments.discountsApplied?.map((discount: any, idx: number) => (
-                              <div key={idx} className="qc-adjustment-step qc-discount">
-                                <Label>{discount.name}</Label>
-                                <div className="qc-value">-{formatCurrency(discount.amount)}</div>
-                              </div>
-                            ))}
                             {sectionCalc.sectionAdjustments.loadingsApplied?.map((loading: any, idx: number) => (
                               <div key={idx} className="qc-adjustment-step qc-loading">
                                 <Label>{loading.name}</Label>
                                 <div className="qc-value">+{formatCurrency(loading.amount)}</div>
                               </div>
                             ))}
+                                                        {sectionCalc.sectionAdjustments.discountsApplied?.map((discount: any, idx: number) => (
+                              <div key={idx} className="qc-adjustment-step qc-discount">
+                                <Label>{discount.name}</Label>
+                                <div className="qc-value">-{formatCurrency(discount.amount)}</div>
+                              </div>
+                            ))}
+
                             <div className="qc-adjustment-step qc-final">
                               <Label>Final Net Premium</Label>
                               <div className="qc-value qc-highlight">
@@ -1472,10 +1473,14 @@ console.log("full calculation request");
           onSave={handleSaveSection}
           section={
             editingSectionId != null
-              ? (calculationBreakdown?.inputs.sectionInputs).find(
-                  (s,index:number) => {console.log(index,editingSectionId);
-                   return(String(index) == editingSectionId)},
+            ? (
+                calculationBreakdown?.inputs.sectionInputs?.find(
+                  (s, index: number) => String(index) === editingSectionId
+                ) ??
+                localSections?.find(
+                  (s, index: number) => String(index) === editingSectionId
                 )
+              )
               : undefined
           }
           productId={proposalProductId || ""}
