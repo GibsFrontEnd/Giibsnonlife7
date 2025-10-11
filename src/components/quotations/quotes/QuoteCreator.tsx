@@ -131,6 +131,7 @@ const QuoteCreator = () => {
 
   const [showAddSectionModal, setShowAddSectionModal] = useState(false)
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null)
+  const [adjCollapse, setAdjCollapse] = useState(true)
   const [showDetailedBreakdown, setShowDetailedBreakdown] = useState(false)
 
   const [adjustments, setAdjustments] = useState<any>({
@@ -909,8 +910,17 @@ console.log("full calculation request");
 
         {/* Adjustments panel */}
         <div className="qc-adjustments-panel">
-          <h3>Proposal Adjustments</h3>
-
+        <h3 style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Section Adjustments</span>
+                <button
+                  className="link-btn"
+                  onClick={() => setAdjCollapse(!adjCollapse)}
+                  aria-label={adjCollapse ? "Expand item" : "Collapse item"}
+                >
+                  {adjCollapse ? "Expand ▾" : "Collapse ▴"}
+                </button>
+              </h3>
+{!adjCollapse && 
           <div className="qc-adjustments-grid">
             <div className="qc-adjustment-section">
               <h4>Discounts</h4>
@@ -976,7 +986,7 @@ console.log("full calculation request");
 
             </div>
           </div>
-
+        }
           {/* Show proposal-adjustments response (if present) */}
           {(calculationBreakdown?.calculationSteps?.proposalAdjustments?.discountsApplied.length>0 || calculationBreakdown?.calculationSteps?.proposalAdjustments?.loadingsApplied.length>0 || proposalAdjustmentsResult) && (
             <div className="proposal-adjustments-card">

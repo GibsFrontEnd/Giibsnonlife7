@@ -43,7 +43,7 @@ export const AddSectionModal = ({
   const dispatch = useDispatch<AppDispatch>()
   const { subRiskSections } = useSelector((state: RootState) => state.subRiskSections)
   const [sectionAgregate, setSectionAggregate] = useState<any>(null)
-  const [adjCollapse, setAdjCollapse] = useState<boolean>(false)
+  const [adjCollapse, setAdjCollapse] = useState<boolean>(true)
 
     const sectionAdjustments = section?.sectionAdjustments
     const sectionAdjustmentsDiscounts = section?.sectionAdjustments?.discountsApplied
