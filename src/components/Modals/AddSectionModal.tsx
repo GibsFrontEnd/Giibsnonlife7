@@ -975,7 +975,7 @@ useEffect(()=>{
                             }}
                           >
                             <div className="value" style={{ fontWeight: 700 }}>
-                              total Sum Insured: {formatCurrency(item.totalSumInsured ?? (item.actualValue+item.stockItem.stockSumInsured) ?? 0)}
+                              total Sum Insured: {formatCurrency(item?.totalSumInsured || (item?.actualValue+item?.stockItem?.stockSumInsured) || 0)}
                             </div>
                             <div className="value" style={{ fontWeight: 700 }}>
                               Shared Premium: {formatCurrency(item.premiumValue ?? 0)}
