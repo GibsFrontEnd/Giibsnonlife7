@@ -911,7 +911,7 @@ console.log("full calculation request");
         {/* Adjustments panel */}
         <div className="qc-adjustments-panel">
         <h3 style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Section Adjustments</span>
+                <span>Proposal Adjustments</span>
                 <button
                   className="link-btn"
                   onClick={() => setAdjCollapse(!adjCollapse)}
