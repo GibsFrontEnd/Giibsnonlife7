@@ -36,12 +36,12 @@ const QuoteSidebar: React.FC = () => {
   return (
     <aside
       className="
-        fixed left-0 top-0 bottom-0 z-50
-        bg-primary text-white
-        flex flex-col
-        overflow-y-auto
-        md:w-52 max-md:w-15
-      "
+      fixed left-0 top-0 bottom-0 z-100
+      bg-primary text-white
+      flex flex-col
+      overflow-y-auto
+      md:w-52 max-md:w-15
+    "
       aria-label="Main sidebar"
     >
       <div className="font-bold text-lg pt-5 pl-3 pb-4">GIBS ENTERPRISE 7</div>
