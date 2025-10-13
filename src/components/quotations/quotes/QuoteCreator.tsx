@@ -792,122 +792,124 @@ console.log("full calculation request");
       <div className="qc-content">
         {/* Sections Panel */}
         <div className="qc-sections-panel">
-          <div className="qc-sections-header">
-            <h3>
-              Sections (
-              {localSectionsSummary?.sections && localSectionsSummary.length > 0
-                ? getLatestSectionSummaries(localSectionsSummary).length
-                : (localSections && localSections.length) || 0}
-              {/* Removed sections.length fallback */})
-            </h3>
-            <Button onClick={handleAddSection} size="sm">
-              Add Section
-            </Button>
-          </div>
-          {(() => {
-            const summaryList = localSectionsSummary?.sections ? getLatestSectionSummaries(localSectionsSummary) : null
-            const listToRender =
-              localSections && localSections.length > 0
-                ? localSections
-                : summaryList && summaryList.length > 0
-                  ? summaryList
-                  : [] // Changed from sections to []
-         
+  <div className="qc-sections-header">
+    <h3>
+      Sections (
+      {localSectionsSummary?.sections && localSectionsSummary.length > 0
+        ? getLatestSectionSummaries(localSectionsSummary).length
+        : (localSections && localSections.length) || 0}
+      {/* Removed sections.length fallback */})
+    </h3>
+    <Button onClick={handleAddSection} size="sm">
+      Add Section
+    </Button>
+  </div>
 
-            if (sectionsLoading) {
-              return (
-                <div className="qc-no-sections qc-loading-sections">
-                  <p>Loading sections…</p>
-                </div>
-              )
-            }
+  {(() => {
+    const summaryList = localSectionsSummary?.sections ? getLatestSectionSummaries(localSectionsSummary) : null
+    const listToRender =
+      localSections && localSections.length > 0
+        ? localSections
+        : summaryList && summaryList.length > 0
+        ? summaryList
+        : [] // Changed from sections to []
 
-            if (!listToRender || listToRender.length === 0) {
-              return (
-                <div className="qc-no-sections">
-                  <p>No sections added yet. Click "Add Section" to begin.</p>
-                </div>
-              )
-            }
-
-            return (
-              <div className="qc-sections-list">
-                {listToRender.map((section: any,index) => {
-                  const id = index
-                  const name = section.sectionName ?? "Unnamed Section"
-                  const location = section.location ?? ""
-                  /*                   const itemCount = (calculatedRiskMap[id] ?? section.riskItemCount ?? section.riskItems?.length ?? 0) || 0
-                   */ const sumInsured = section.sectionSumInsured ?? section.sectionSumInsured ?? 0
-                  const premium = section.sectionGrossPremium ?? section.sectionPremium ?? 0
-
-                  const lastCalc = section.lastCalculated ?? null
-
-                  return (
-                    <div key={id} className="qc-section-card">
-                      <div className="qc-section-info">
-                        <h4>{name}</h4>
-                        <p>Location: {location || "N/A"}</p>
-                        {/*                         <p>Items: {itemCount}</p>
-                         */} <div className="qc-section-amounts">
-                          <span>Sum Insured: {formatCurrency(sumInsured)}</span>
-                          <span>Premium: {formatCurrency(premium)}</span>
-                        </div>
-                        {lastCalc && (
-                          <div className="qc-section-lastcalc">
-                            Last calculated: {new Date(lastCalc).toLocaleString()}
-                          </div>
-                        )}
-                      </div>
-                      <div className="qc-section-actions">
-                        <Button onClick={() => handleEditSection(String(index))} size="sm" variant="outline">
-                          Edit
-                        </Button>
-                        <Button
-                          onClick={() => handleDeleteSection(id)}
-                          size="sm"
-                          variant="outline"
-                          className="qc-delete-btn"
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )
-          })()}
-          {/* Calculate Aggregate Button */}
-          {/*           <div style={{ marginTop: 12, display: "flex", justifyContent: "flex-end" }}>
-            <Button onClick={calculateMultiSectionAggregateLocal} size="sm" variant="solid">
-              Calculate Aggregate (all sections)
-            </Button>
-          </div>
- */}{" "}
-
-{aggregateTotals && (<>                  <br /> <div className="qc-sections-summary">
-                      <h3>Sections Totals</h3>
-          
-
-                <div className="qc-results-grid">
-                  <div className="qc-result-item">
-                    <Label>Total Sum Insured</Label>
-                    <div className="qc-result-value">{formatCurrency(aggregateTotals.totalSumInsured)}</div>
-                  </div>
-                  <div className="qc-result-item">
-                    <Label>Total Aggregate Premium</Label>
-                    <div className="qc-result-value">{formatCurrency(aggregateTotals?.totalAggregatePremium)}</div>
-                  </div>
-                  <div className="qc-result-item">
-                    <Label>Section Count</Label>
-                    <div className="qc-result-value">{aggregateTotals?.sectionCount}</div>
-                  </div>
-                </div>
-                </div>
-                </>)}
-        
+    if (sectionsLoading) {
+      return (
+        <div className="qc-no-sections qc-loading-sections">
+          <p>Loading sections…</p>
         </div>
+      )
+    }
 
+    if (!listToRender || listToRender.length === 0) {
+      return (
+        <div className="qc-no-sections">
+          <p>No sections added yet. Click "Add Section" to begin.</p>
+        </div>
+      )
+    }
+
+    return (
+      <div className="qc-sections-table-wrap">
+        <table className="qc-sections-table" role="table" aria-label="Sections">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Section Name</th>
+              <th>Location</th>
+              <th>Sum Insured</th>
+              <th>Premium</th>
+              <th>Last Calculated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {listToRender.map((section: any, index) => {
+              const id = index
+              const name = section.sectionName ?? "Unnamed Section"
+              const location = section.location ?? ""
+              /* const itemCount = (calculatedRiskMap[id] ?? section.riskItemCount ?? section.riskItems?.length ?? 0) || 0 */
+              const sumInsured = section.sectionSumInsured ?? section.sectionSumInsured ?? 0
+              const premium = section.sectionGrossPremium ?? section.sectionPremium ?? 0
+              const lastCalc = section.lastCalculated ?? null
+
+              return (
+                <tr key={id} className="qc-section-row">
+                  <td>{index + 1}</td>
+                  <td>{name}</td>
+                  <td>{location || "N/A"}</td>
+                  <td>{formatCurrency(sumInsured)}</td>
+                  <td>{formatCurrency(premium)}</td>
+                  <td>{lastCalc ? new Date(lastCalc).toLocaleString() : "—"}</td>
+                  <td>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <Button onClick={() => handleEditSection(String(index))} size="sm" variant="outline">
+                        Edit
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteSection(id)}
+                        size="sm"
+                        variant="outline"
+                        className="qc-delete-btn"
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    )
+  })()}
+
+  {aggregateTotals && (
+    <>
+      <br />
+      <div className="qc-sections-summary">
+        <h3>Sections Totals</h3>
+
+        <div className="qc-results-grid">
+          <div className="qc-result-item">
+            <Label>Total Sum Insured</Label>
+            <div className="qc-result-value">{formatCurrency(aggregateTotals.totalSumInsured)}</div>
+          </div>
+          <div className="qc-result-item">
+            <Label>Total Aggregate Premium</Label>
+            <div className="qc-result-value">{formatCurrency(aggregateTotals?.totalAggregatePremium)}</div>
+          </div>
+          <div className="qc-result-item">
+            <Label>Section Count</Label>
+            <div className="qc-result-value">{aggregateTotals?.sectionCount}</div>
+          </div>
+        </div>
+      </div>
+    </>
+  )}
+</div>
         {/* Adjustments panel */}
         <div className="qc-adjustments-panel">
         <h3 style={{ display: "flex", justifyContent: "space-between" }}>
