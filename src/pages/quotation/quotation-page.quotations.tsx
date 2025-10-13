@@ -4,31 +4,43 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/UI/tabs";
 import { getAllRisks } from "../../features/reducers/adminReducers/riskSlice";
 import { AppDispatch, RootState } from "@/features/store";
 import { useDispatch, useSelector } from "react-redux";
+import {useParams } from "react-router-dom"
+
 
 
 
 const QuoteQuotations = () => {
   const dispatch = useDispatch<AppDispatch>()
   const { risks } = useSelector((state: RootState) => state.risks)
+  const { businessId: businessIdParam } = useParams<{ businessId?: string }>()
+  const businessId = businessIdParam ?? null
 
   useEffect(() => {
     dispatch(getAllRisks({ pageNumber: 1, pageSize: 100 }) as any)
   }, [dispatch])
+  
+  
+// get a single tab object based on businessId (or "All" if none / not found)
+const tabs = (() => {
+  if (!businessId) {
+    return { title: "All", content: <Quotes businessId={null} /> };
+  }
 
-  const tabs = [
-    { title: "All", content: <Quotes businessId={null} /> },
-    ...risks.map((risk) => ({
-      title: risk.riskName,
-      content: <Quotes businessId={risk.riskID} />,
-    })),
-  ]
+  const risk = risks.find(r => String(r.riskID) === String(businessId));
+  if (risk) {
+    return { title: risk.riskName, content: <Quotes businessId={risk.riskID} /> };
+  }
+
+  // fallback if param doesn't match any risk
+  return { title: "All", content: <Quotes businessId={null} /> };
+})();
 
   const [activeTab, setActiveTab] = useState<string | undefined>(undefined)
 
   // ✅ Whenever risks change, update the default active tab
   useEffect(() => {
-    if (tabs.length > 0 && !activeTab) {
-      setActiveTab(tabs[0]?.title)
+    if (tabs) {
+      setActiveTab(tabs.title)
     }
   }, [tabs, activeTab])
   return (
@@ -39,22 +51,18 @@ const QuoteQuotations = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="w-full flex flex-wrap">
-          {tabs.map((tab,index) => (
             <TabsTrigger
-              key={tab.title+index}
-              value={tab.title}
+              key={tabs.title}
+              value={tabs.title}
               className="flex-1 min-w-[100px] hover:bg-neutral-200"
             >
-              {tab.title}
+              {tabs.title}
             </TabsTrigger>
-          ))}
         </TabsList>
 
-        {tabs.map((tab) => (
-          <TabsContent key={tab.title} value={tab.title}>
-            {tab.content}
+          <TabsContent key={tabs.title} value={tabs.title}>
+            {tabs.content}
           </TabsContent>
-        ))}
       </Tabs>
     </div>
   );

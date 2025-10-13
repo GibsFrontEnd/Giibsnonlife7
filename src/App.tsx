@@ -52,6 +52,7 @@ const App: React.FC = () => {
           </Route>
           <Route path="/quotations" element={<Quotations />}>
             <Route path="quotes" element={<QuoteQuotations />} />
+            <Route path="quotes/:businessId" element={<QuoteQuotations />} />
             <Route path="create" element={<CreateProposal />} />
             <Route path="edit/:proposalNo" element={<EditProposal />} />
             <Route path="quote/:proposalNo" element={<QuoteCreator />} />
