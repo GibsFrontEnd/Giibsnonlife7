@@ -1,6 +1,5 @@
-"use client"
-
 //@ts-nocheck
+
 
 import { Filter, Search } from "lucide-react"
 
