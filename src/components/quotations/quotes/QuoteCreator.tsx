@@ -830,6 +830,7 @@ console.log("full calculation request");
       )
     }
 
+    // --- TABLE UI START ---
     return (
       <div className="qc-sections-table-wrap">
         <table className="qc-sections-table" role="table" aria-label="Sections">
@@ -884,6 +885,7 @@ console.log("full calculation request");
         </table>
       </div>
     )
+    // --- TABLE UI END ---
   })()}
 
   {aggregateTotals && (
@@ -910,6 +912,7 @@ console.log("full calculation request");
     </>
   )}
 </div>
+
         {/* Adjustments panel */}
         <div className="qc-adjustments-panel">
         <h3 style={{ display: "flex", justifyContent: "space-between" }}>
@@ -1081,7 +1084,7 @@ console.log("full calculation request");
             onClick={handleCalculate}
             disabled={loading?.calculate || !localSections || localSections.length === 0}
           >
-            {loading?.calculate ? "Calculating..." : currentCalculation ? "Update Details" : "Save Details"}
+            {loading?.calculate ? "Calculating..." : currentCalculation ? "Save Details" : "Update Details"}
           </Button>
 
         {/* Calculation results & breakdown */}

@@ -20,6 +20,7 @@ import {
   calculateSectionAdjustment,
 } from "../../features/reducers/quoteReducers/quotationSlice"
 import { toast } from "../UI/use-toast"
+import { Checkbox } from "../UI/checkbox"
 
 interface AddSectionModalProps {
   isOpen: boolean
@@ -45,9 +46,9 @@ export const AddSectionModal = ({
   const [sectionAgregate, setSectionAggregate] = useState<any>(null)
   const [adjCollapse, setAdjCollapse] = useState<boolean>(true)
 
-    const sectionAdjustments = section?.sectionAdjustments
-    const sectionAdjustmentsDiscounts = section?.sectionAdjustments?.discountsApplied
-    const sectionAdjustmentsLoadings = section?.sectionAdjustments?.loadingsApplied
+  const sectionAdjustments = section?.sectionAdjustments
+  const sectionAdjustmentsDiscounts = section?.sectionAdjustments?.discountsApplied
+  const sectionAdjustmentsLoadings = section?.sectionAdjustments?.loadingsApplied
 
 
   const [sectionAdjustmentsResult, setSectionAdjustmentsResult] = useState<AdjustmentCalculations>({
@@ -55,28 +56,29 @@ export const AddSectionModal = ({
 
     specialDiscountAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Special Discount")?.amount || 0,
     specialDiscountNetAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Special Discount")?.premiumAfterAdjustment || 0,
-  
+
     deductibleDiscountAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Deductible Discount")?.amount || 0,
     deductibleDiscountNetAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Deductible Discount")?.premiumAfterAdjustment || 0,
-  
+
     spreadDiscountAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Spread Discount")?.amount || 0,
     spreadDiscountNetAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Spread Discount")?.premiumAfterAdjustment || 0,
-  
+
     ltaDiscountAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "LTA Discount")?.amount || 0,
     ltaDiscountNetAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "LTA Discount")?.premiumAfterAdjustment || 0,
-  
+
     theftLoadingAmount: sectionAdjustmentsLoadings?.find((d) => d.name == "Theft Loading")?.amount || 0,
     theftLoadingNetAmount: sectionAdjustmentsLoadings?.find((d) => d.name == "Theft Loading")?.premiumAfterAdjustment || 0,
-  
+
     srccLoadingAmount: sectionAdjustmentsLoadings?.find((d) => d.name == "SRCC Loading")?.amount || 0,
     srccLoadingNetAmount: sectionAdjustmentsLoadings?.find((d) => d.name == "SRCC Loading")?.premiumAfterAdjustment || 0,
-  
+
     otherLoading2Amount: sectionAdjustmentsLoadings?.find((d) => d.name == "Other Loading 2")?.amount || 0,
     otherLoading2NetAmount: sectionAdjustmentsLoadings?.find((d) => d.name == "Other Loading 2")?.premiumAfterAdjustment || 0,
-  
+
     netPremiumDue: section?.sectionAdjustments?.finalNetPremium || 0,
     success: false,
-    message: "",  })
+    message: "",
+  })
   const [adjustments, setAdjustments] = useState({
     specialDiscountRate: sectionAdjustmentsDiscounts?.find((d) => d.name == "Special Discount")?.rate || 0,
     deductibleDiscountRate: sectionAdjustmentsDiscounts?.find((d) => d.name == "Deductible Discount")?.rate || 0,
@@ -85,7 +87,8 @@ export const AddSectionModal = ({
     otherDiscountsRate: sectionAdjustmentsDiscounts?.find((d) => d.name == "Special Discount")?.rate || 0,
     theftLoadingRate: sectionAdjustmentsLoadings?.find((d) => d.name == "Theft Loading")?.rate || 0,
     srccLoadingRate: sectionAdjustmentsLoadings?.find((d) => d.name == "SRCC Loading")?.rate || 0,
-    otherLoading2Rate: sectionAdjustmentsLoadings?.find((d) => d.name == "Other Loading 2")?.rate || 0,  })
+    otherLoading2Rate: sectionAdjustmentsLoadings?.find((d) => d.name == "Other Loading 2")?.rate || 0,
+  })
   const { subRiskSMIs } = useSelector((state: RootState) => state.subRiskSMIs)
   const initialForm = (): QuoteSection => ({
     sectionID: section?.sectionID || "",
@@ -98,32 +101,32 @@ export const AddSectionModal = ({
     proportionRate: /* (section as any)?.proportionRate ?? */ 100,
     riskItems: section?.riskItems
       ? (section.riskItems as any[]).map((it: any, idx: number) => ({
-          itemNo: it.itemNo ?? idx + 1,
-          sectionID: it.sectionID ?? it.sectionId ?? section?.sectionID ?? `section_${Date.now()}`,
-          smiCode: it.smiCode ?? "",
-          itemDescription: it.itemDescription ?? "",
-          actualValue: it.actualValue ?? 0,
-          itemRate: it.itemRate ?? 0,
-          multiplyRate: it.multiplyRate ?? 0,
-          location: section?.location ?? "",
-          feaDiscountRate: it.feaDiscountRate ?? 0,
+        itemNo: it.itemNo ?? idx + 1,
+        sectionID: it.sectionID ?? it.sectionId ?? section?.sectionID ?? `section_${Date.now()}`,
+        smiCode: it.smiCode ?? "",
+        itemDescription: it.itemDescription ?? "",
+        actualValue: it.actualValue ?? 0,
+        itemRate: it.itemRate ?? 0,
+        multiplyRate: it.multiplyRate ?? 0,
+        location: section?.location ?? "",
+        feaDiscountRate: it.feaDiscountRate ?? 0,
 
-          // server-calculated fields (display-only)
-          actualPremium: it.actualPremium ?? 0,
-          actualPremiumFormula: it.actualPremiumFormula ?? "",
-          shareValue: it.shareValue ?? 0,
-          shareValueFormula: it.shareValueFormula ?? "",
-          premiumValue: it.premiumValue ?? 0,
-          premiumValueFormula: it.premiumValueFormula ?? "",
-          stockDiscountAmount: it.stockDiscountAmount ?? 0,
-          feaDiscountAmount: it.feaDiscountAmount ?? 0,
-          netPremiumAfterDiscounts: it.netPremiumAfterDiscounts ?? 0,
-          stockItem: it.stockItem ?? null,
+        // server-calculated fields (display-only)
+        actualPremium: it.actualPremium ?? 0,
+        actualPremiumFormula: it.actualPremiumFormula ?? "",
+        shareValue: it.shareValue ?? 0,
+        shareValueFormula: it.shareValueFormula ?? "",
+        premiumValue: it.premiumValue ?? 0,
+        premiumValueFormula: it.premiumValueFormula ?? "",
+        stockDiscountAmount: it.stockDiscountAmount ?? 0,
+        feaDiscountAmount: it.feaDiscountAmount ?? 0,
+        netPremiumAfterDiscounts: it.netPremiumAfterDiscounts ?? 0,
+        stockItem: it.stockItem ?? null,
 
-          // UI flags
-          _showStock: !!it.stockItem,
-          _collapsed: false,
-        }))
+        // UI flags
+        _showStock: !!it.stockItem,
+        _collapsed: false,
+      }))
       : [],
   })
 
@@ -156,10 +159,10 @@ export const AddSectionModal = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section])
 
-useEffect(()=>{
-  if(formData.riskItems?.length>0)
-  handleCalculateAllItems()
-},[])
+  useEffect(() => {
+    if (formData.riskItems?.length > 0)
+      handleCalculateAllItems()
+  }, [])
 
   const keyFor = (index: number) => `${formData.sectionID || "sec"}|${index}`
 
@@ -226,9 +229,9 @@ useEffect(()=>{
         stockRate: parsed,
       }
     }
-    if (field === "location") 
+    if (field === "location")
       updated[index].location = formData.location;
-      
+
 
 
     setFormData((p) => ({ ...p, riskItems: updated }))
@@ -290,7 +293,7 @@ useEffect(()=>{
           description: "Failed to calculate Aggregate",
           variant: "destructive",
           duration: 2000,
-        });  
+        });
       }
     }
   }
@@ -300,14 +303,14 @@ useEffect(()=>{
         description: "Fill in an Adjustment",
         variant: "warning",
         duration: 2000,
-      });  
+      });
       return
     } else if (sectionAgregate?.aggregatePremium == null || sectionAgregate?.aggregatePremium < 0) {
       toast({
         description: "Aggregate premium must be calculated and > 0",
         variant: "warning",
         duration: 2000,
-      });  
+      });
       return
     }
     const payload = {
@@ -327,7 +330,7 @@ useEffect(()=>{
           description: "Failed to apply Adjustments",
           variant: "destructive",
           duration: 2000,
-        });    
+        });
       }
     }
   }
@@ -356,12 +359,12 @@ useEffect(()=>{
           feaDiscountRate: Number(item.feaDiscountRate) || 0,
           stockItem: item.stockItem
             ? {
-                stockCode: item.stockItem.stockCode || "",
-                stockDescription: item.stockItem.stockDescription || "",
-                stockSumInsured: Number(item.stockItem.stockSumInsured) || 0,
-                stockRate: Number(item.itemRate) || 0,
-                stockDiscountRate: Number(item.stockItem.stockDiscountRate) || 0,
-              }
+              stockCode: item.stockItem.stockCode || "",
+              stockDescription: item.stockItem.stockDescription || "",
+              stockSumInsured: Number(item.stockItem.stockSumInsured) || 0,
+              stockRate: Number(item.itemRate) || 0,
+              stockDiscountRate: Number(item.stockItem.stockDiscountRate) || 0,
+            }
             : null,
         },
       ],
@@ -435,7 +438,7 @@ useEffect(()=>{
         description: "Failed to calculate item",
         variant: "destructive",
         duration: 2000,
-      });    
+      });
     } finally {
       setApplyingMap((m) => {
         const copy = { ...m }
@@ -587,7 +590,7 @@ useEffect(()=>{
     // Finally call onSave with the updated section
     onSave(updatedSection)
     console.log(formData);
-  
+
     console.log("Saved section:", updatedSection)
   }
   const formatCurrency = (amount: number): string =>
@@ -691,16 +694,17 @@ useEffect(()=>{
                   className={`item-card ${item._collapsed ? "collapsed" : ""}`}
                   aria-labelledby={`item-${item.itemNo}`}
                 >
-                  <div className="card-top-controls">
+                  <div className="card-top-controls" onClick={() => toggleCollapse(index)}>
                     <div className="top-left-meta" />
                     <div className="top-actions">
-                      <button
+                      <Checkbox checked={item._collapsed} />
+                      {/* <button
                         className="link-btn"
                         onClick={() => toggleCollapse(index)}
                         aria-label={item._collapsed ? "Expand item" : "Collapse item"}
                       >
                         {item._collapsed ? "Expand ▾" : "Collapse ▴"}
-                      </button>
+                      </button> */}
                     </div>
                   </div>
 
@@ -749,13 +753,16 @@ useEffect(()=>{
                           >
                             Remove
                           </Button>
-                          <button
+                          <div className="" onClick={() => toggleCollapse(index)}>
+                            <Checkbox checked={item._collapsed} /> {item._collapsed ? "Expand" : "Collapse"}
+                          </div>
+                          {/* <button
                             className="link-btn"
                             onClick={() => toggleCollapse(index)}
                             aria-label={item._collapsed ? "Expand item" : "Collapse item"}
                           >
                             {item._collapsed ? "Expand ▾" : "Collapse ▴"}
-                          </button>
+                          </button> */}
                         </div>
                       </footer>
                     </>
@@ -780,8 +787,8 @@ useEffect(()=>{
                                   {!item.smiCode
                                     ? "Select SMI"
                                     : subRiskSMIs.find((s) => {
-                                        s.smiCode == item.smiCode
-                                      })?.smiDetails}
+                                      s.smiCode == item.smiCode
+                                    })?.smiDetails}
                                 </option>
                                 {subRiskSMIs.map((smi, i) => (
                                   <option key={smi.smiCode + "" + i} value={smi.smiCode}>
@@ -832,7 +839,7 @@ useEffect(()=>{
                               />
                             </div>
                             <div className="discounts-area">
-                            {item.itemRate && item.actualValue ? <div>amount: {formatCurrency((item.itemRate/100)*item.actualValue)}</div> : null}
+                              {item.itemRate && item.actualValue ? <div>amount: {formatCurrency((item.itemRate / 100) * item.actualValue)}</div> : null}
                             </div>
                           </div>
                         </div>
@@ -923,8 +930,8 @@ useEffect(()=>{
                                   />
                                 </div>
                                 <div className="discounts-area">
-                            {item.itemRate && item.stockItem.stockSumInsured ? <div>amount: {formatCurrency((item.itemRate/100)*item.stockItem.stockSumInsured)}</div> : null}
-                            </div>
+                                  {item.itemRate && item.stockItem.stockSumInsured ? <div>amount: {formatCurrency((item.itemRate / 100) * item.stockItem.stockSumInsured)}</div> : null}
+                                </div>
                               </div>
                             </div>
                             <div className="stock-row">
@@ -937,12 +944,12 @@ useEffect(()=>{
                                 />
                               </div>
                               <div className="discounts-area">
-                            {item.stockItem?.stockDiscountRate && item.stockItem.stockSumInsured ? <div>amount: {formatCurrency((item.stockItem?.stockDiscountRate/100)*item.stockItem.stockSumInsured)}</div> : null}
-                            </div>
+                                {item.stockItem?.stockDiscountRate && item.stockItem.stockSumInsured ? <div>amount: {formatCurrency((item.stockItem?.stockDiscountRate / 100) * item.stockItem.stockSumInsured)}</div> : null}
+                              </div>
                             </div>
                           </div>
                         )}
-                                                    <div className="card-row" style={{ marginTop: 8 }}>
+                        <div className="card-row" style={{ marginTop: 8 }}>
                           <div className="label">FEA Discount Rate (%)</div>
                           <div className="value">
                             <Input
@@ -981,7 +988,7 @@ useEffect(()=>{
                             }}
                           >
                             <div className="value" style={{ fontWeight: 700 }}>
-                              total Sum Insured: {formatCurrency(item?.totalSumInsured || (item?.actualValue+item?.stockItem?.stockSumInsured) || 0)}
+                              total Sum Insured: {formatCurrency(item?.totalSumInsured || (item?.actualValue + item?.stockItem?.stockSumInsured) || 0)}
                             </div>
                             <div className="value" style={{ fontWeight: 700 }}>
                               Shared Premium: {formatCurrency(item.premiumValue ?? 0)}
@@ -1030,13 +1037,16 @@ useEffect(()=>{
                           >
                             Remove
                           </Button>
-                          <button
+                          <div className="" onClick={() => toggleCollapse(index)}>
+                            <Checkbox checked={item._collapsed} /> {item._collapsed ? "Expand" : "Collapse"}
+                          </div>
+                          {/* <button
                             className="link-btn"
                             onClick={() => toggleCollapse(index)}
                             aria-label={item._collapsed ? "Expand item" : "Collapse item"}
-                          >
+                            >
                             {item._collapsed ? "Expand ▾" : "Collapse ▴"}
-                          </button>
+                          </button> */}
                         </div>
                       </footer>
                     </>
@@ -1049,13 +1059,16 @@ useEffect(()=>{
             <div className="qc-adjustments-panel">
               <h3 style={{ display: "flex", justifyContent: "space-between" }}>
                 <span>Premium Adjustments</span>
-                <button
+                <div className="" onClick={() => setAdjCollapse(!adjCollapse)}>
+                  <Checkbox checked={adjCollapse} /> {adjCollapse ? "Expand" : "Collapse"}
+                </div>
+                {/* <button
                   className="link-btn"
                   onClick={() => setAdjCollapse(!adjCollapse)}
                   aria-label={adjCollapse ? "Expand item" : "Collapse item"}
                 >
                   {adjCollapse ? "Expand ▾" : "Collapse ▴"}
-                </button>
+                </button> */}
               </h3>
               {!adjCollapse && (
                 <>
@@ -1214,7 +1227,7 @@ useEffect(()=>{
                     </Button>
                   </>
                 )}
-                {(sectionAdjustmentsResult.success || sectionAdjustmentsLoadings?.length>0 || sectionAdjustmentsDiscounts?.length>0  )&& (
+                {(sectionAdjustmentsResult.success || sectionAdjustmentsLoadings?.length > 0 || sectionAdjustmentsDiscounts?.length > 0) && (
                   <div className={"proposal-adjustments-card"}>
                     <div className="card-header">
                       <h4>Premium Adjustments</h4>
