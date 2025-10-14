@@ -234,7 +234,7 @@ const Quotations = ({ businessId }: QuotationsProps) => {
     }
 
     if (filterCriteria.status !== "all") {
-      filtered = filtered.filter((quote) => quote.transSTATUS?.toLowerCase() === filterCriteria.status.toUpperCase())
+      filtered = filtered.filter((quote) => quote.transSTATUS?.toLowerCase() === filterCriteria.status.toLowerCase())
     }
 
     if (filterCriteria.coverCode.trim()) {
@@ -280,9 +280,9 @@ const Quotations = ({ businessId }: QuotationsProps) => {
   }
 
   return (
-    <div className="qtns-container">
-      <div className="qtns-header">
-        <h1>Quotations Management</h1>
+    <div className="p-4">
+      <div className="w-full flex justify-between mb-4">
+        <h1 className="text-lg">Quotations Management</h1>
 
         <Button onClick={handleCreateProposal} className="qtns-create-proposal-btn">
           Create New Quotation
@@ -291,6 +291,192 @@ const Quotations = ({ businessId }: QuotationsProps) => {
 
       <div className="qtns-controls">
         <Collapsible open={searchFilter} onOpenChange={setSearchFilter}>
+          <div className="border rounded-lg mb-6 bg-gray-50">
+            <CollapsibleTrigger asChild>
+              <div className="flex items-center justify-between p-4 cursor-pointer">
+                <div className="flex items-center space-x-2">
+                  <Filter className="h-4 w-4" />
+                  <span className="text-sm font-medium">Search Filter</span>
+                </div>
+                <Checkbox checked={searchFilter} />
+              </div>
+            </CollapsibleTrigger>
+
+            <CollapsibleContent>
+              <div className="px-4 pb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                  <div className="lg:col-span-1">
+                    <label className="text-sm text-gray-600 mb-1 block">Search by</label>
+                    <Select
+                      value={filterCriteria.searchField}
+                      onValueChange={(value) =>
+                        setFilterCriteria((prev) => ({
+                          ...prev,
+                          searchField: value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select field" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="fullName">Client Name</SelectItem>
+                        <SelectItem value="proposalNo">Proposal Number</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="lg:col-span-1">
+                    <label className="text-sm text-gray-600 mb-1 block">Search text</label>
+                    <NewInput
+                      value={filterCriteria.searchValue}
+                      onChange={(e) =>
+                        setFilterCriteria((prev) => ({
+                          ...prev,
+                          searchValue: e.target.value,
+                        }))
+                      }
+                      placeholder="Enter search text"
+                    />
+                  </div>
+
+                  {/* <CHANGE> Added Status filter dropdown */}
+                  <div className="lg:col-span-1">
+                    <label className="text-sm text-gray-600 mb-1 block">Status</label>
+                    <Select
+                      value={filterCriteria.status}
+                      onValueChange={(value) =>
+                        setFilterCriteria((prev) => ({
+                          ...prev,
+                          status: value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="All statuses" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All ({proposals.filter((p) => (selectedRiskFilter != null ? selectedRiskFilter == p.riskID : p)).length})</SelectItem>
+                        <SelectItem value="PENDING">Drafts ({proposals.filter((p) => selectedRiskFilter != null ? p.transSTATUS === "PENDING" && selectedRiskFilter == p.riskID : p.transSTATUS === "PENDING").length})</SelectItem>
+                        <SelectItem value="CALCULATED">Calculated ({proposals.filter((p) => selectedRiskFilter != null ? p.transSTATUS === "CALCULATED" && selectedRiskFilter == p.riskID : p.transSTATUS === "CALCULATED").length})</SelectItem>
+                        <SelectItem value="CONVERTED">Converted ({proposals.filter((p) => selectedRiskFilter != null ? p.transSTATUS === "CONVERTED" && selectedRiskFilter == p.riskID : p.transSTATUS === "CONVERTED").length})</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="lg:col-span-1">
+                    <label className="text-sm text-gray-600 mb-1 block">Start Date</label>
+                    <NewInput
+                      type="date"
+                      value={filterCriteria.startDate}
+                      onChange={(e) =>
+                        setFilterCriteria((prev) => ({
+                          ...prev,
+                          startDate: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+
+                  <div className="lg:col-span-1">
+                    <label className="text-sm text-gray-600 mb-1 block">End Date</label>
+                    <NewInput
+                      type="date"
+                      value={filterCriteria.endDate}
+                      onChange={(e) =>
+                        setFilterCriteria((prev) => ({
+                          ...prev,
+                          endDate: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                  <div className="flex items-end">
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={applyFilters}>
+                      <Search className="w-4 h-4 mr-2" />
+                      Apply
+                    </Button>
+                  </div>
+                  <div className="flex items-end">
+                    <Button variant="outline" className="w-full bg-transparent" onClick={clearFilters}>
+                      Clear Filters
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
+
+        {/* <CHANGE> Removed tabs section entirely - status is now a filter */}
+
+        {/* <CHANGE> Replace card list with table */}
+        <div className="qtns-table-container">
+          {(filteredQuotations?.items || filteredProposals).length === 0 ? (
+            <div className="qtns-no-proposals">
+              <p>No proposals found.</p>
+              <Button onClick={handleCreateProposal}>Create Your First Proposal</Button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse bg-white shadow-sm rounded-lg">
+                <thead>
+                  <tr className="bg-gray-100 border-b">
+                    <th className="text-left p-4 font-semibold text-sm">Proposal No.</th>
+                    <th className="text-left p-4 font-semibold text-sm">Client Name</th>
+                    <th className="text-left p-4 font-semibold text-sm">Status</th>
+                    <th className="text-left p-4 font-semibold text-sm">Business</th>
+                    <th className="text-left p-4 font-semibold text-sm">Subclass</th>
+                    <th className="text-left p-4 font-semibold text-sm">Start Date</th>
+                    <th className="text-left p-4 font-semibold text-sm">End Date</th>
+                    <th className="text-right p-4 font-semibold text-sm">Premium</th>
+                    <th className="text-center p-4 font-semibold text-sm">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(filteredQuotations?.items || filteredProposals).map((proposal: any) => (
+                    <tr key={proposal.proposalNo} className="border-b hover:bg-gray-50 transition-colors">
+                      <td className="p-4 text-sm font-medium">{proposal.proposalNo}</td>
+                      <td className="p-4 text-sm">{proposal.insSurname} {proposal.insFirstname}</td>
+                      <td className="p-4 text-sm">{getStatusBadge(proposal.transSTATUS)}</td>
+                      <td className="p-4 text-sm">{risks.find((r) => r.riskID == proposal.riskID)?.riskName}</td>
+                      <td className="p-4 text-sm">{proposal.subRisk}</td>
+                      <td className="p-4 text-sm">{formatDate(proposal.startDate)}</td>
+                      <td className="p-4 text-sm">{formatDate(proposal.endDate)}</td>
+                      <td className="p-4 text-sm text-right font-medium">
+                        {proposal.grossPremium
+                          ? new Intl.NumberFormat("en-NG", {
+                            style: "currency",
+                            currency: "NGN",
+                          }).format(proposal.grossPremium)
+                          : "N/A"}
+                      </td>
+                      <td className="p-4 text-sm">
+                        <div className="flex gap-2 justify-center">
+                          <Button onClick={() => handleEditProposal(proposal.proposalNo)} variant="outline" size="sm">
+                            View/Edit
+                          </Button>
+                          <Button
+                            onClick={() => handleDeleteProposal(proposal.proposalNo)}
+                            variant="outline"
+                            size="sm"
+                            className="qtns-delete-btn"
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+        {/* <Collapsible open={searchFilter} onOpenChange={setSearchFilter}>
           <div className="border rounded-lg mb-6 bg-gray-50">
             <CollapsibleTrigger asChild>
               <div className="flex items-center justify-between p-4 cursor-pointer">
@@ -327,11 +513,9 @@ const Quotations = ({ businessId }: QuotationsProps) => {
                       <SelectContent>
                         <SelectItem value="fullName">Client Name</SelectItem>
 
-                        {/* <SelectItem value="quoteNo">Quote Number</SelectItem> */}
 
                         <SelectItem value="proposalNo">Proposal Number</SelectItem>
 
-                        {/* <SelectItem value="coverCode">Cover Code</SelectItem> */}
                       </SelectContent>
                     </Select>
                   </div>
@@ -393,52 +577,6 @@ const Quotations = ({ businessId }: QuotationsProps) => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                  {/* <div>
-                    <label className="text-sm text-gray-600 mb-1 block">Status</label>
-
-                    <Select
-                      value={filterCriteria.status}
-                      onValueChange={(value) =>
-                        setFilterCriteria((prev) => ({
-                          ...prev,
-
-                          status: value,
-                        }))
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="All statuses" />
-                      </SelectTrigger>
-
-                      <SelectContent>
-                        <SelectItem value="all">All Statuses</SelectItem>
-
-                        <SelectItem value="draft">Draft</SelectItem>
-
-                        <SelectItem value="active">Active</SelectItem>
-
-                        <SelectItem value="pending">Pending</SelectItem>
-
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <label className="text-sm text-gray-600 mb-1 block">Cover Code</label>
-
-                    <Input
-                      value={filterCriteria.coverCode}
-                      onChange={(e) =>
-                        setFilterCriteria((prev) => ({
-                          ...prev,
-
-                          coverCode: e.target.value,
-                        }))
-                      }
-                      placeholder="Enter cover code"
-                    />
-                  </div> */}
 
                   <div className="flex items-end">
                     <Button variant="outline" className="w-full bg-transparent" onClick={clearFilters}>
@@ -449,9 +587,9 @@ const Quotations = ({ businessId }: QuotationsProps) => {
               </div>
             </CollapsibleContent>
           </div>
-        </Collapsible>
+        </Collapsible> */}
 
-        <div className="qtns-tabs-container">
+        {/* <div className="qtns-tabs-container">
           <button
             className={`qtns-tab ${activeTab === "overview" ? "active" : ""}`}
             onClick={() => handleTabChange("overview")}
@@ -504,10 +642,10 @@ const Quotations = ({ businessId }: QuotationsProps) => {
             }
             )
           </button>
-        </div>
+        </div> */}
       </div>
 
-      <div className="qtns-proposals-list">
+      {/* <div className="qtns-proposals-list">
         {(filteredQuotations?.items || filteredProposals).length === 0 ? (
           <div className="qtns-no-proposals">
             <p>No proposals found.</p>
@@ -604,7 +742,7 @@ const Quotations = ({ businessId }: QuotationsProps) => {
             </div>
           ))
         )}
-      </div>
+      </div> */}
 
       <div className="qtns-pagination">
         {/* @ts-ignore */}

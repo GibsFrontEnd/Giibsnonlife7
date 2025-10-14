@@ -1,7 +1,7 @@
 //@ts-nocheck
 "use client"
 
-import {useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch } from "../../../features/store"
 import { useNavigate, useParams } from "react-router-dom"
@@ -151,7 +151,7 @@ const QuoteCreator = () => {
 
   // stores the FULL calculated risk arrays produced by AddSectionModal's "Calculate All" button
   const [calculatedRiskMap, setCalculatedRiskMap] = useState<Record<string, any[]>>({})
-const [editedSections,setEditedSections] = useState<number[]>([]);
+  const [editedSections, setEditedSections] = useState<number[]>([]);
   // store the result of applyProposalAdjustments call (startingPremium, discount amounts, netPremiumDue, etc.)
   const [proposalAdjustmentsResult, setProposalAdjustmentsResult] = useState<any | null>(null)
 
@@ -203,7 +203,7 @@ const [editedSections,setEditedSections] = useState<number[]>([]);
 
   useEffect(() => {
     const sectionInputs = calculationBreakdown?.inputs?.sectionInputs
-console.log(sectionInputs);
+    console.log(sectionInputs);
 
     // If no section inputs, clear the sections
     if (!sectionInputs || sectionInputs.length === 0) {
@@ -233,15 +233,15 @@ console.log(sectionInputs);
       })
       if (currentCalculation?.remarks) setRemarks(currentCalculation.remarks)
     }
-    
+
   }, [calculationBreakdown?.inputs?.proposalAdjustments])
 
   // initialize coverDays from currentProposal (if present)
   useEffect(() => {
     if (currentProposal && typeof currentProposal.proRataDays === "number") {
       const start = new Date(currentProposal.startDate)
-const end = new Date(currentProposal.endDate)
-const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24))
+      const end = new Date(currentProposal.endDate)
+      const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24))
       setCoverDays(dayRange)
     }
   }, [currentProposal])
@@ -304,17 +304,17 @@ const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24
       otherLoading2Rate,
       ...section
     } = fullsection;
-  
+
     // --- PAYLOAD SECTIONS ---
     setPayloadSection((prev) => {
       const list = prev ? [...prev] : [];
       if (editingSectionId == null) {                  // <-- check null/undefined directly
         list.push(fullsection);
       } else {
-        setEditedSections(prev => 
+        setEditedSections(prev =>
           prev.includes(Number(editingSectionId)) ? prev : [...prev, Number(editingSectionId)]
         )
-          const idx = Number(editingSectionId);
+        const idx = Number(editingSectionId);
         if (!Number.isNaN(idx) && idx >= 0 && idx < list.length) {
           list[idx] = fullsection;
         } else {
@@ -323,7 +323,7 @@ const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24
       }
       return list;
     });
-  
+
     // --- LOCAL SECTIONS ---
     setLocalSections((prev) => {
       const list = prev ? [...prev] : [];
@@ -339,12 +339,12 @@ const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24
       }
       return list;
     });
-  
+
     // --- LOCAL SECTIONS SUMMARY ---
     setLocalSectionsSummary((prev: any) => {
       const copy = prev ? { ...prev } : { sections: [] };
       const sections = copy.sections ? [...copy.sections] : [];
-  
+
       const summarySection = {
         sectionID: section.sectionID,
         sectionName: section.sectionName,
@@ -354,7 +354,7 @@ const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24
         riskItems: section.riskItems,
         lastCalculated: new Date().toISOString(),
       };
-  
+
       if (editingSectionId == null) {
         sections.push(summarySection);
       } else {
@@ -365,24 +365,24 @@ const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24
           sections.push(summarySection);
         }
       }
-  
+
       copy.sections = sections;
       return copy;
     });
-  
+
     setShowAddSectionModal(false);
     setEditingSectionId(null);
     calculateMultiSectionAggregateLocal();
   };
-    
+
   const handleDeleteSection = async (sectionId: number) => {
     if (!window.confirm("Are you sure you want to delete this section?")) return
-    setPayloadSection((prev) => (prev ? prev.filter((s,index:any) => index !== sectionId) : null))
+    setPayloadSection((prev) => (prev ? prev.filter((s, index: any) => index !== sectionId) : null))
 
-    setLocalSections((prev) => (prev ? prev.filter((s,index) => index !== sectionId) : null))
+    setLocalSections((prev) => (prev ? prev.filter((s, index) => index !== sectionId) : null))
     setLocalSectionsSummary((prev: any) => {
       if (!prev) return prev
-      return { ...prev, sections: (prev.sections || []).filter((s: any,index) => index !== sectionId) }
+      return { ...prev, sections: (prev.sections || []).filter((s: any, index) => index !== sectionId) }
     })
     setCalculatedRiskMap((m) => {
       const copy = { ...m }
@@ -491,17 +491,17 @@ const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24
     } catch (err: any) {
       toast({
         description: `Failed to calculate aggregate: ${err?.message ?? err}`,
-        variant:"destructive",
+        variant: "destructive",
         duration: 2000,
       });
       console.error("Aggregate calculation failed:", err)
     }
   }
 
-  useEffect(()=>{
-    if(localSections?.length!=undefined && localSections?.length>0)
-    calculateMultiSectionAggregateLocal();
-  },[localSections?.length])
+  useEffect(() => {
+    if (localSections?.length != undefined && localSections?.length > 0)
+      calculateMultiSectionAggregateLocal();
+  }, [localSections?.length])
 
 
   // Handler that dispatches applyProposalAdjustments and stores returned amounts locally
@@ -513,9 +513,9 @@ const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24
     }
 
     const payload = {
-      totalAggregatePremium:aggregateTotals?.totalAggregatePremium,
-      otherDiscountsRate:adjustments.otherDiscountsRate,
-      otherLoadingsRate:adjustments.otherLoadingsRate
+      totalAggregatePremium: aggregateTotals?.totalAggregatePremium,
+      otherDiscountsRate: adjustments.otherDiscountsRate,
+      otherLoadingsRate: adjustments.otherLoadingsRate
     }
 
     try {
@@ -575,7 +575,7 @@ const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24
 
     try {
       // @ts-ignore
-      const res =(await (dispatch(calculateProRata(payload)) as any).unwrap?.()) 
+      const res = (await (dispatch(calculateProRata(payload)) as any).unwrap?.())
       setProRataResult(res || null)
 
       // optionally refresh breakdown if server persisted something
@@ -619,9 +619,9 @@ const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24
       }) => riskRest)
     }));
     console.log(editedSections);
-    
-    const breakdownSections = (calculationBreakdown?.inputs?.sectionInputs).filter((si:any,index)=> !editedSections.includes(index)).map((si: any) => {
-    
+
+    const breakdownSections = (calculationBreakdown?.inputs?.sectionInputs).filter((si: any, index) => !editedSections.includes(index)).map((si: any) => {
+
       return {
         sectionID: si.sectionID ?? si.sectionId ?? "",
         sectionName: si.sectionName ?? "",
@@ -634,7 +634,7 @@ const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24
         lastCalculated: new Date().toISOString(),
         // preserve existing proportionRate if available otherwise fallback to currentProposal or 0
         proportionRate: currentProposal?.proportionRate ?? 0,
-    
+
         // riskItems mapped to exact payload item shape (including UI flags & totals)
         riskItems: (si.riskItems || []).map((it: any) => ({
           itemNo: it.itemNo ?? 0,
@@ -646,7 +646,7 @@ const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24
           multiplyRate: it.multiplyRate ?? 1,
           location: it.location ?? si.location ?? "",
           feaDiscountRate: it.feaDiscountRate ?? 0,
-    
+
           // premium-related fields (keep formulas if present)
           actualPremium: it.actualPremium ?? 0,
           actualPremiumFormula: it.actualPremiumFormula ?? "",
@@ -654,22 +654,22 @@ const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24
           shareValueFormula: it.shareValueFormula ?? "",
           premiumValue: it.premiumValue ?? 0,
           premiumValueFormula: it.premiumValueFormula ?? "",
-    
+
           // stock/discount amounts and net premium
           stockDiscountAmount: it.stockDiscountAmount ?? 0,
           feaDiscountAmount: it.feaDiscountAmount ?? 0,
           netPremiumAfterDiscounts: it.netPremiumAfterDiscounts ?? it.stockNetPremium ?? 0,
-    
+
           stockItem: it.stockItem ?? null,
-    
+
           // UI flags exactly like your payload uses
           _showStock: !!it.stockItem,
           _collapsed: false,
-    
+
           // try to preserve totalSumInsured if present or compute a reasonable fallback
           totalSumInsured: it.totalSumInsured ?? it.stockSumInsured ?? (it.actualValue ? it.actualValue * (it.multiplyRate ?? 1) : 0)
         })),
-    
+
         // section-level rates: look into sectionAdjustments for rates first, else fallback to 0 or si fields
         specialDiscountRate: si.sectionAdjustments?.discountsApplied?.find((d: any) => d.name === "Special Discount")?.rate ?? si.specialDiscountRate ?? 0,
         deductibleDiscountRate: si.sectionAdjustments?.discountsApplied?.find((d: any) => d.name === "Deductible Discount")?.rate ?? si.deductibleDiscountRate ?? 0,
@@ -681,18 +681,18 @@ const dayRange = Math.floor((Number(end) - Number(start)) / (1000 * 60 * 60 * 24
         otherLoading2Rate: si.sectionAdjustments?.loadingsApplied?.find((d: any) => d.name === "Other Loading 2")?.rate ?? si.otherLoading2Rate ?? 0,
       };
     });
-    
+
     const finalSectionsToCalculate = [
       ...(breakdownSections || []),
       ...(sectionsToCalculate || [])
     ];
-    
-console.log(breakdownSections);
-console.log(sectionsToCalculate);
+
+    console.log(breakdownSections);
+    console.log(sectionsToCalculate);
 
     console.log(finalSectionsToCalculate);
-    
-        const calculationRequest: CompleteCalculationRequest = {
+
+    const calculationRequest: CompleteCalculationRequest = {
       proposalNo,
       sections: finalSectionsToCalculate, // Use local sections
       proportionRate: currentProposal.proportionRate,
@@ -703,15 +703,15 @@ console.log(sectionsToCalculate);
       calculatedBy: "SYSTEM",
       remarks,
     }
-console.log("full calculation request");
+    console.log("full calculation request");
 
     console.log(calculationRequest);
-    
+
 
     try {
       if (currentCalculation) {
         console.log("recalc");
-        
+
         // @ts-ignore
         await (dispatch(recalculateComplete({ proposalNo, calculationData: calculationRequest }) as any).unwrap?.() ??
           dispatch(recalculateComplete({ proposalNo, calculationData: calculationRequest }) as any))
@@ -732,7 +732,7 @@ console.log("full calculation request");
           const payload = res?.payload ?? res
           if (payload && sectionsFetchIdRef.current === fetchId) setLocalSectionsSummary(payload)
         })
-        .catch(() => {})
+        .catch(() => { })
         .finally(() => {
           if (sectionsFetchIdRef.current === fetchId) setSectionsLoading(false)
         })
@@ -792,208 +792,208 @@ console.log("full calculation request");
       <div className="qc-content">
         {/* Sections Panel */}
         <div className="qc-sections-panel">
-  <div className="qc-sections-header">
-    <h3>
-      Sections (
-      {localSectionsSummary?.sections && localSectionsSummary.length > 0
-        ? getLatestSectionSummaries(localSectionsSummary).length
-        : (localSections && localSections.length) || 0}
-      {/* Removed sections.length fallback */})
-    </h3>
-    <Button onClick={handleAddSection} size="sm">
-      Add Section
-    </Button>
-  </div>
+          <div className="qc-sections-header">
+            <h3>
+              Sections (
+              {localSectionsSummary?.sections && localSectionsSummary.length > 0
+                ? getLatestSectionSummaries(localSectionsSummary).length
+                : (localSections && localSections.length) || 0}
+              {/* Removed sections.length fallback */})
+            </h3>
+            <Button onClick={handleAddSection} size="sm">
+              Add Section
+            </Button>
+          </div>
 
-  {(() => {
-    const summaryList = localSectionsSummary?.sections ? getLatestSectionSummaries(localSectionsSummary) : null
-    const listToRender =
-      localSections && localSections.length > 0
-        ? localSections
-        : summaryList && summaryList.length > 0
-        ? summaryList
-        : [] // Changed from sections to []
+          {(() => {
+            const summaryList = localSectionsSummary?.sections ? getLatestSectionSummaries(localSectionsSummary) : null
+            const listToRender =
+              localSections && localSections.length > 0
+                ? localSections
+                : summaryList && summaryList.length > 0
+                  ? summaryList
+                  : [] // Changed from sections to []
 
-    if (sectionsLoading) {
-      return (
-        <div className="qc-no-sections qc-loading-sections">
-          <p>Loading sections…</p>
-        </div>
-      )
-    }
-
-    if (!listToRender || listToRender.length === 0) {
-      return (
-        <div className="qc-no-sections">
-          <p>No sections added yet. Click "Add Section" to begin.</p>
-        </div>
-      )
-    }
-
-    // --- TABLE UI START ---
-    return (
-      <div className="qc-sections-table-wrap">
-        <table className="qc-sections-table" role="table" aria-label="Sections">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Section Name</th>
-              <th>Location</th>
-              <th>Sum Insured</th>
-              <th>Premium</th>
-              <th>Last Calculated</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {listToRender.map((section: any, index) => {
-              const id = index
-              const name = section.sectionName ?? "Unnamed Section"
-              const location = section.location ?? ""
-              /* const itemCount = (calculatedRiskMap[id] ?? section.riskItemCount ?? section.riskItems?.length ?? 0) || 0 */
-              const sumInsured = section.sectionSumInsured ?? section.sectionSumInsured ?? 0
-              const premium = section.sectionGrossPremium ?? section.sectionPremium ?? 0
-              const lastCalc = section.lastCalculated ?? null
-
+            if (sectionsLoading) {
               return (
-                <tr key={id} className="qc-section-row">
-                  <td>{index + 1}</td>
-                  <td>{name}</td>
-                  <td>{location || "N/A"}</td>
-                  <td>{formatCurrency(sumInsured)}</td>
-                  <td>{formatCurrency(premium)}</td>
-                  <td>{lastCalc ? new Date(lastCalc).toLocaleString() : "—"}</td>
-                  <td>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <Button onClick={() => handleEditSection(String(index))} size="sm" variant="outline">
-                        Edit
-                      </Button>
-                      <Button
-                        onClick={() => handleDeleteSection(id)}
-                        size="sm"
-                        variant="outline"
-                        className="qc-delete-btn"
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
+                <div className="qc-no-sections qc-loading-sections">
+                  <p>Loading sections…</p>
+                </div>
               )
-            })}
-          </tbody>
-        </table>
-      </div>
-    )
-    // --- TABLE UI END ---
-  })()}
+            }
 
-  {aggregateTotals && (
-    <>
-      <br />
-      <div className="qc-sections-summary">
-        <h3>Sections Totals</h3>
+            if (!listToRender || listToRender.length === 0) {
+              return (
+                <div className="qc-no-sections">
+                  <p>No sections added yet. Click "Add Section" to begin.</p>
+                </div>
+              )
+            }
 
-        <div className="qc-results-grid">
-          <div className="qc-result-item">
-            <Label>Total Sum Insured</Label>
-            <div className="qc-result-value">{formatCurrency(aggregateTotals.totalSumInsured)}</div>
-          </div>
-          <div className="qc-result-item">
-            <Label>Total Aggregate Premium</Label>
-            <div className="qc-result-value">{formatCurrency(aggregateTotals?.totalAggregatePremium)}</div>
-          </div>
-          <div className="qc-result-item">
-            <Label>Section Count</Label>
-            <div className="qc-result-value">{aggregateTotals?.sectionCount}</div>
-          </div>
+            // --- TABLE UI START ---
+            return (
+              <div className="qc-sections-table-wrap">
+                <table className="qc-sections-table" role="table" aria-label="Sections">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Section Name</th>
+                      <th>Location</th>
+                      <th>Sum Insured</th>
+                      <th>Premium</th>
+                      <th>Last Calculated</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {listToRender.map((section: any, index) => {
+                      const id = index
+                      const name = section.sectionName ?? "Unnamed Section"
+                      const location = section.location ?? ""
+                      /* const itemCount = (calculatedRiskMap[id] ?? section.riskItemCount ?? section.riskItems?.length ?? 0) || 0 */
+                      const sumInsured = section.sectionSumInsured ?? section.sectionSumInsured ?? 0
+                      const premium = section.sectionGrossPremium ?? section.sectionPremium ?? 0
+                      const lastCalc = section.lastCalculated ?? null
+
+                      return (
+                        <tr key={id} className="qc-section-row">
+                          <td>{index + 1}</td>
+                          <td>{name}</td>
+                          <td>{location || "N/A"}</td>
+                          <td>{formatCurrency(sumInsured)}</td>
+                          <td>{formatCurrency(premium)}</td>
+                          <td>{lastCalc ? new Date(lastCalc).toLocaleString() : "—"}</td>
+                          <td>
+                            <div style={{ display: "flex", gap: 8 }}>
+                              <Button onClick={() => handleEditSection(String(index))} size="sm" variant="outline">
+                                Edit
+                              </Button>
+                              <Button
+                                onClick={() => handleDeleteSection(id)}
+                                size="sm"
+                                variant="outline"
+                                className="qc-delete-btn"
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )
+            // --- TABLE UI END ---
+          })()}
+
+          {aggregateTotals && (
+            <>
+              <br />
+              <div className="qc-sections-summary">
+                <h3>Sections Totals</h3>
+
+                <div className="qc-results-grid">
+                  <div className="qc-result-item">
+                    <Label>Total Sum Insured</Label>
+                    <div className="qc-result-value">{formatCurrency(aggregateTotals.totalSumInsured)}</div>
+                  </div>
+                  <div className="qc-result-item">
+                    <Label>Total Aggregate Premium</Label>
+                    <div className="qc-result-value">{formatCurrency(aggregateTotals?.totalAggregatePremium)}</div>
+                  </div>
+                  <div className="qc-result-item">
+                    <Label>Section Count</Label>
+                    <div className="qc-result-value">{aggregateTotals?.sectionCount}</div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
-      </div>
-    </>
-  )}
-</div>
 
         {/* Adjustments panel */}
         <div className="qc-adjustments-panel">
-        <h3 style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Proposal Adjustments</span>
-                <button
-                  className="link-btn"
-                  onClick={() => setAdjCollapse(!adjCollapse)}
-                  aria-label={adjCollapse ? "Expand item" : "Collapse item"}
-                >
-                  {adjCollapse ? "Expand ▾" : "Collapse ▴"}
-                </button>
-              </h3>
-{!adjCollapse && 
-          <div className="qc-adjustments-grid">
-            <div className="qc-adjustment-section">
-              <h4>Discounts</h4>
-              <div className="qc-adjustment-field">
-                <Label htmlFor="otherDiscountsRate">Other Discounts (%)</Label>
-                <Input
-                  id="otherDiscountsRate"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value={adjustments.otherDiscountsRate}
-                  onChange={(e) => setAdjustments((prev) => ({ ...prev, otherDiscountsRate: Number(e.target.value) }))}
-                />
-              </div>
-              <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8}}>
-            <Label htmlFor="coverDaysSmall">Cover Days</Label>
-            <Input
-              id="coverDaysSmall"
-              type="number"
-              min="0"
-              step="1"
-              value={coverDays}
-              onChange={(e) => setCoverDays(Number(e.target.value || 0))}
-              style={{ width: 120 }}
-              disabled
-            />
-            <div style={{ fontSize: 12, color: "#666" }}>Used for pro-rata calculation</div>
-          </div>
+          <h3 style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>Proposal Adjustments</span>
+            <button
+              className="link-btn"
+              onClick={() => setAdjCollapse(!adjCollapse)}
+              aria-label={adjCollapse ? "Expand item" : "Collapse item"}
+            >
+              {adjCollapse ? "Expand ▾" : "Collapse ▴"}
+            </button>
+          </h3>
+          {!adjCollapse &&
+            <div className="qc-adjustments-grid">
+              <div className="qc-adjustment-section">
+                <h4>Discounts</h4>
+                <div className="qc-adjustment-field">
+                  <Label htmlFor="otherDiscountsRate">Other Discounts (%)</Label>
+                  <Input
+                    id="otherDiscountsRate"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={adjustments.otherDiscountsRate}
+                    onChange={(e) => setAdjustments((prev) => ({ ...prev, otherDiscountsRate: Number(e.target.value) }))}
+                  />
+                </div>
+                <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                  <Label htmlFor="coverDaysSmall">Cover Days</Label>
+                  <Input
+                    id="coverDaysSmall"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={coverDays}
+                    onChange={(e) => setCoverDays(Number(e.target.value || 0))}
+                    style={{ width: 120 }}
+                    disabled
+                  />
+                  <div style={{ fontSize: 12, color: "#666" }}>Used for pro-rata calculation</div>
+                </div>
 
-            </div>
-
-            <div className="qc-adjustment-section">
-              <h4>Loadings</h4>
-              <div className="qc-adjustment-field">
-                <Label htmlFor="otherLoadingsRate">Other Loadings (%)</Label>
-                <Input
-                  id="otherLoadingsRate"
-                  type="number"
-                  min="0"
-                  max="100"
-                  step="0.01"
-                  value={adjustments.otherLoadingsRate}
-                  onChange={(e) => setAdjustments((prev) => ({ ...prev, otherLoadingsRate: Number(e.target.value) }))}
-                />
               </div>
-              <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-            <Button onClick={handleApplyProposalAdjustments} size="sm" variant="outline">
-              Apply Proposal Adjustments
-            </Button>
-            {/*             <Button onClick={handleApplyAndCalculate} size="sm">
+
+              <div className="qc-adjustment-section">
+                <h4>Loadings</h4>
+                <div className="qc-adjustment-field">
+                  <Label htmlFor="otherLoadingsRate">Other Loadings (%)</Label>
+                  <Input
+                    id="otherLoadingsRate"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={adjustments.otherLoadingsRate}
+                    onChange={(e) => setAdjustments((prev) => ({ ...prev, otherLoadingsRate: Number(e.target.value) }))}
+                  />
+                </div>
+                <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
+                  <Button onClick={handleApplyProposalAdjustments} size="sm" variant="outline">
+                    Apply Proposal Adjustments
+                  </Button>
+                  {/*             <Button onClick={handleApplyAndCalculate} size="sm">
               Apply & Calculate Proposal
             </Button>
  */}{" "}
-            <Button onClick={handleCalculateProRata} size="sm" variant="outline">
-              Calculate Pro-Rata
-            </Button>
-            {/*             <Button onClick={handleProRataAndCalculate} size="sm">
+                  <Button onClick={handleCalculateProRata} size="sm" variant="outline">
+                    Calculate Pro-Rata
+                  </Button>
+                  {/*             <Button onClick={handleProRataAndCalculate} size="sm">
               Pro-Rata & Calculate Proposal
             </Button>
  */}{" "}
-          </div>
+                </div>
 
+              </div>
             </div>
-          </div>
-        }
+          }
           {/* Show proposal-adjustments response (if present) */}
-          {(calculationBreakdown?.calculationSteps?.proposalAdjustments?.discountsApplied.length>0 || calculationBreakdown?.calculationSteps?.proposalAdjustments?.loadingsApplied.length>0 || proposalAdjustmentsResult) && (
+          {(calculationBreakdown?.calculationSteps?.proposalAdjustments?.discountsApplied.length > 0 || calculationBreakdown?.calculationSteps?.proposalAdjustments?.loadingsApplied.length > 0 || proposalAdjustmentsResult) && (
             <div className="proposal-adjustments-card">
               <div className="card-header">
                 <h4>Proposal Adjustments</h4>
@@ -1026,7 +1026,7 @@ console.log("full calculation request");
                 <div className="summary-column">
                   <div className="section-title">Loadings</div>
                   <div className="mini-grid">
-                  <div className="mini-item">
+                    <div className="mini-item">
                       <div className="mini-label">Other Loadings</div>
                       <div className="mini-value">{formatCurrency(proposalAdjustmentsResult?.otherLoadingsAmount || calculationBreakdown?.calculationSteps?.proposalAdjustments?.loadingsApplied[0]?.amount || 0)}</div>
                       <div className="mini-value">Net Amount:{formatCurrency(proposalAdjustmentsResult?.otherLoadingsNetAmount || 0)}</div>
@@ -1045,7 +1045,7 @@ console.log("full calculation request");
             </div>
           )}
           {/* Show Pro-Rata result (if present) */}
-          {(calculationBreakdown?.calculationSteps?.proRataCalculations || proRataResult) &&  (
+          {(calculationBreakdown?.calculationSteps?.proRataCalculations || proRataResult) && (
             <div className="pro-rata-card">
               <div className="card-header">
                 <h4>Pro-Rata</h4>
@@ -1057,7 +1057,7 @@ console.log("full calculation request");
               <div className="card-body pro-rata-grid">
                 <div className="pr-row">
                   <div className="pr-label">Base Net Premium</div>
-                  <div className="pr-value">{(formatCurrency(proRataResult?.netPremiumDue || calculationBreakdown?.calculationSteps?.proRataCalculations.netPremiumBeforeProRata||0))}</div>
+                  <div className="pr-value">{(formatCurrency(proRataResult?.netPremiumDue || calculationBreakdown?.calculationSteps?.proRataCalculations.netPremiumBeforeProRata || 0))}</div>
                 </div>
 
                 <div className="pr-row">
@@ -1081,11 +1081,11 @@ console.log("full calculation request");
           )}
         </div>
         <Button
-            onClick={handleCalculate}
-            disabled={loading?.calculate || !localSections || localSections.length === 0}
-          >
-            {loading?.calculate ? "Calculating..." : currentCalculation ? "Save Details" : "Update Details"}
-          </Button>
+          onClick={handleCalculate}
+          disabled={loading?.calculate || !localSections || localSections.length === 0}
+        >
+          {loading?.calculate ? "Calculating..." : currentCalculation ? "Save Details" : "Update Details"}
+        </Button>
 
         {/* Calculation results & breakdown */}
         {currentCalculation && (
@@ -1327,7 +1327,7 @@ console.log("full calculation request");
                                 <div className="qc-value">+{formatCurrency(loading.amount)}</div>
                               </div>
                             ))}
-                                                        {sectionCalc.sectionAdjustments.discountsApplied?.map((discount: any, idx: number) => (
+                            {sectionCalc.sectionAdjustments.discountsApplied?.map((discount: any, idx: number) => (
                               <div key={idx} className="qc-adjustment-step qc-discount">
                                 <Label>{discount.name}</Label>
                                 <div className="qc-value">-{formatCurrency(discount.amount)}</div>
@@ -1478,7 +1478,7 @@ console.log("full calculation request");
           onSave={handleSaveSection}
           section={
             editingSectionId != null
-            ? (
+              ? (
                 calculationBreakdown?.inputs.sectionInputs?.find(
                   (s, index: number) => String(index) === editingSectionId
                 ) ??
