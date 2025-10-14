@@ -8,6 +8,7 @@ import {
   getProposalByNumber,
   updateProposal,
   clearMessages,
+  fetchProposalReport,
 } from "../../../features/reducers/quoteReducers/quotationSlice"
 import { getAllRisks } from "../../../features/reducers/adminReducers/riskSlice"
 import { getAllProducts } from "../../../features/reducers/productReducers/productSlice"
@@ -18,13 +19,17 @@ import Input from "../../UI/Input"
 import { Label } from "../../UI/label"
 import type { UpdateProposalRequest } from "../../../types/quotation"
 import "./EditProposal.css"
+import { useToast } from "@/components/UI/use-toast"
+import useProposalPDF from "@/hooks/use-proposal-pdf"
 
 const EditProposal = () => {
+  const { toast } = useToast()
   const { proposalNo } = useParams<{ proposalNo: string }>()
   const dispatch = useDispatch()
   const navigate = useNavigate()
+  const { downloadPDF } = useProposalPDF();
 
-  const { currentProposal, loading, success, error } = useSelector((state: RootState) => state.quotations)
+  const { currentProposal, proposalReport, loading, success, error } = useSelector((state: RootState) => state.quotations)
   const { risks } = useSelector((state: RootState) => state.risks)
   const { products } = useSelector((state: RootState) => state.products)
   const { branches } = useSelector((state: RootState) => state.branches)
@@ -43,6 +48,26 @@ const EditProposal = () => {
   })
 
   const [validationErrors, setValidationErrors] = useState<string[]>([])
+
+  useEffect(() => {
+    if (success.fetchProposalReport) {
+      dispatch(clearMessages())
+      toast({
+        title: "Report fetched succesfully!",
+        description: "You can proceed to view the report in the downloads",
+        duration: 3000,
+        variant: "success",
+      })
+      downloadPDF(proposalReport)
+    } else if (error.fetchProposalReport) {
+      dispatch(clearMessages())
+      toast({
+        title: "Failed to download proposal",
+        duration: 3000,
+        variant: "destructive"
+      })
+    }
+  }, [dispatch, success.fetchProposalReport, error.fetchProposalReport])
 
   useEffect(() => {
     if (proposalNo) {
@@ -154,6 +179,9 @@ const EditProposal = () => {
           <p className="proposal-number">Proposal No: {currentProposal.proposalNo}</p>
         </div>
         <div className="header-actions">
+          <Button className="w-[150px] text-black" loading={loading.fetchProposalReport} onClick={() => dispatch(fetchProposalReport(proposalNo))} variant="outline" size="sm">
+            Get Report
+          </Button>
           <Button onClick={handleCancel} variant="outline">
             Back to List
           </Button>          
@@ -198,7 +226,7 @@ const EditProposal = () => {
             </div>
             <div className="info-item">
               <Label>Business Category</Label>
-              <div className="info-value">{risks.find((r)=> r.riskID == currentProposal.riskID)?.riskName}</div>
+              <div className="info-value">{risks.find((r) => r.riskID == currentProposal.riskID)?.riskName}</div>
             </div>
             <div className="info-item">
               <Label>Subclass</Label>
