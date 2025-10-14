@@ -20,6 +20,7 @@ import type {
   CalculatedRiskItem,
 } from "../../../types/quotation"
 import { decryptData } from "../../../utils/encrypt-utils"
+import apiCall from "@/utils/api-call";
 
 const API_BASE_URL = "https://core-api.newgibsonline.com/api"
 const getAuthToken = () => {
@@ -53,8 +54,8 @@ export const fetchProposals = createAsyncThunk<
   },
   { rejectValue: string }
 >("quotations/fetchProposals", async (args, { rejectWithValue }) => {
-      try {
-const AUTH_TOKEN = getAuthToken();
+  try {
+    const AUTH_TOKEN = getAuthToken();
 
     const { page = 1, pageSize = 50, sortBy = "TransDate", sortDirection = "DESC", riskClass = "" } = args
     let url = `${API_BASE_URL}/Quotation?page=${page}&pageSize=${pageSize}&sortBy=${sortBy}&sortDirection=${sortDirection}`
@@ -77,8 +78,8 @@ const AUTH_TOKEN = getAuthToken();
 export const getProposalByNumber = createAsyncThunk<Proposal, string, { rejectValue: string }>(
   "quotations/getProposalByNumber",
   async (proposalNo, { rejectWithValue }) => {
-        try {
-const AUTH_TOKEN = getAuthToken();
+    try {
+      const AUTH_TOKEN = getAuthToken();
 
       const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}?proposalNo=${proposalNo}`, {
         method: "GET",
@@ -93,12 +94,44 @@ const AUTH_TOKEN = getAuthToken();
   },
 )
 
+// export const fetchProposalReport = createAsyncThunk<ProposalReport, string, { rejectValue: string }>(
+//   "quotations/fetchProposalReport",
+//   async (proposalNo, { rejectWithValue }) => {
+//     try {
+//       const AUTH_TOKEN = getAuthToken();
+
+//       const response = await fetch(`${API_BASE_URL} /QuotationReport/detailed/${proposalNo}`, {
+//         method: "GET",
+//         headers: { accept: "text/plain", Authorization: `Bearer ${AUTH_TOKEN}` },
+//       })
+//       if (!response.ok) await handleFetchError(response)
+//       const data = await response.json()
+//       return data as ProposalReport
+//     } catch (error) {
+//       return rejectWithValue(error instanceof Error ? error.message : "Failed to fetch proposal")
+//     }
+//   },
+// )
+
+export const fetchProposalReport = createAsyncThunk(
+  "quotations/fetchProposalReport",
+  async (proposalNo: string, { rejectWithValue }) => {
+    try {
+      console.log(proposalNo)
+      const response = await apiCall.get(`/QuotationReport/detailed/${proposalNo}?proposalNo=${proposalNo}`)
+      console.log(response.data)
+      return response.data
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || error.message || "Failed to fetch proposal report")
+    }
+  })
+
 // createProposal
 export const createProposal = createAsyncThunk<Proposal, CreateProposalRequest, { rejectValue: string }>(
   "quotations/createProposal",
   async (proposalData, { rejectWithValue }) => {
-        try {
-const AUTH_TOKEN = getAuthToken();
+    try {
+      const AUTH_TOKEN = getAuthToken();
 
       const response = await fetch(`${API_BASE_URL}/Quotation`, {
         method: "POST",
@@ -120,8 +153,8 @@ export const updateProposal = createAsyncThunk<
   { proposalNo: string; proposalData: UpdateProposalRequest },
   { rejectValue: string }
 >("quotations/updateProposal", async ({ proposalNo, proposalData }, { rejectWithValue }) => {
-      try {
-const AUTH_TOKEN = getAuthToken();
+  try {
+    const AUTH_TOKEN = getAuthToken();
 
     const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}?proposalNo=${proposalNo}`, {
       method: "PUT",
@@ -140,8 +173,8 @@ const AUTH_TOKEN = getAuthToken();
 export const deleteProposal = createAsyncThunk<string, string, { rejectValue: string }>(
   "quotations/deleteProposal",
   async (proposalNo, { rejectWithValue }) => {
-        try {
-const AUTH_TOKEN = getAuthToken();
+    try {
+      const AUTH_TOKEN = getAuthToken();
 
       const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}?proposalNo=${proposalNo}`, {
         method: "DELETE",
@@ -161,8 +194,8 @@ export const calculateComplete = createAsyncThunk<
   { proposalNo: string; calculationData: CompleteCalculationRequest },
   { rejectValue: string }
 >("quotations/calculateComplete", async ({ proposalNo, calculationData }, { rejectWithValue }) => {
-      try {
-const AUTH_TOKEN = getAuthToken();
+  try {
+    const AUTH_TOKEN = getAuthToken();
 
     const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}/calculate/fire/complete`, {
       method: "POST",
@@ -183,8 +216,8 @@ export const recalculateComplete = createAsyncThunk<
   { proposalNo: string; calculationData: CompleteCalculationRequest },
   { rejectValue: string }
 >("quotations/recalculateComplete", async ({ proposalNo, calculationData }, { rejectWithValue }) => {
-      try {
-const AUTH_TOKEN = getAuthToken();
+  try {
+    const AUTH_TOKEN = getAuthToken();
 
     const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}/calculate/fire/complete`, {
       method: "PUT",
@@ -203,8 +236,8 @@ const AUTH_TOKEN = getAuthToken();
 export const getCalculationBreakdown = createAsyncThunk<CalculationBreakdown, string, { rejectValue: string }>(
   "quotations/getCalculationBreakdown",
   async (proposalNo, { rejectWithValue }) => {
-        try {
-const AUTH_TOKEN = getAuthToken();
+    try {
+      const AUTH_TOKEN = getAuthToken();
 
       const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}/calculation/fire/breakdown`, {
         method: "GET",
@@ -223,8 +256,8 @@ const AUTH_TOKEN = getAuthToken();
 export const getCurrentCalculation = createAsyncThunk<any, string, { rejectValue: string }>(
   "quotations/getCurrentCalculation",
   async (proposalNo, { rejectWithValue }) => {
-        try {
-const AUTH_TOKEN = getAuthToken();
+    try {
+      const AUTH_TOKEN = getAuthToken();
 
       const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}/calculation/current`, {
         method: "GET",
@@ -243,8 +276,8 @@ const AUTH_TOKEN = getAuthToken();
 export const getSectionsSummary = createAsyncThunk<any, string, { rejectValue: string }>(
   "quotations/getSectionsSummary",
   async (proposalNo, { rejectWithValue }) => {
-        try {
-const AUTH_TOKEN = getAuthToken();
+    try {
+      const AUTH_TOKEN = getAuthToken();
 
       const response = await fetch(`${API_BASE_URL}/Quotation/${proposalNo}/calculation/sections/summary`, {
         method: "GET",
@@ -265,8 +298,8 @@ export const calculateRiskItems = createAsyncThunk<
   { subRisk: string; riskItems: (RiskItem | Partial<RiskItem>)[]; proportionRate?: number },
   { rejectValue: string }
 >("quotations/calculateRiskItems", async (payload, { rejectWithValue }) => {
-      try {
-const AUTH_TOKEN = getAuthToken();
+  try {
+    const AUTH_TOKEN = getAuthToken();
 
     const response = await fetch(`${API_BASE_URL}/Quotation/calculate/risk-items`, {
       method: "POST",
@@ -281,7 +314,7 @@ const AUTH_TOKEN = getAuthToken();
     if (!response.ok) await handleFetchError(response)
     const data = await response.json()
     console.log(payload);
-    
+
     return data as CalculateRiskItemsResponse
   } catch (error) {
     return rejectWithValue(error instanceof Error ? error.message : "Failed to calculate risk items")
@@ -297,8 +330,8 @@ const AUTH_TOKEN = getAuthToken();
 export const calculateSectionAggregate = createAsyncThunk<CalculatedAggregate, { calculatedItems: CalculatedRiskItem[] }, { rejectValue: string }>(
   "quotations/calculateSectionAggregate",
   async (payload, { rejectWithValue }) => {
-        try {
-const AUTH_TOKEN = getAuthToken();
+    try {
+      const AUTH_TOKEN = getAuthToken();
 
       const response = await fetch(`${API_BASE_URL}/Quotation/calculate/section-aggregate`, {
         method: "POST",
@@ -306,7 +339,7 @@ const AUTH_TOKEN = getAuthToken();
         body: JSON.stringify(payload),
       })
       if (!response.ok) await handleFetchError(response)
-      const data:CalculatedAggregate = await response.json()
+      const data: CalculatedAggregate = await response.json()
       return data
     } catch (err) {
       return rejectWithValue(err instanceof Error ? err.message : "Failed to calculate section aggregate")
@@ -314,12 +347,12 @@ const AUTH_TOKEN = getAuthToken();
   },
 )
 
-export const calculateSectionAdjustment = createAsyncThunk<AdjustmentCalculations,sectionAdjustments, { rejectValue: string }>(
+export const calculateSectionAdjustment = createAsyncThunk<AdjustmentCalculations, sectionAdjustments, { rejectValue: string }>(
   "quotations/calculateSectionAdjustment",
   async (payload, { rejectWithValue }) => {
-        try {
-const AUTH_TOKEN = getAuthToken();
-console.log(payload);
+    try {
+      const AUTH_TOKEN = getAuthToken();
+      console.log(payload);
 
       const response = await fetch(`${API_BASE_URL}/Quotation/calculate/section-adjustments`, {
         method: "POST",
@@ -327,7 +360,7 @@ console.log(payload);
         body: JSON.stringify(payload),
       })
       if (!response.ok) await handleFetchError(response)
-      const data:AdjustmentCalculations = await response.json()
+      const data: AdjustmentCalculations = await response.json()
       return data
     } catch (err) {
       return rejectWithValue(err instanceof Error ? err.message : "Failed to calculate section aggregate")
@@ -343,8 +376,8 @@ console.log(payload);
 export const calculateMultiSectionAggregate = createAsyncThunk<aggregateTotals, { adjustedSections: any[] }, { rejectValue: string }>(
   "quotations/calculateMultiSectionAggregate",
   async (payload, { rejectWithValue }) => {
-        try {
-const AUTH_TOKEN = getAuthToken();
+    try {
+      const AUTH_TOKEN = getAuthToken();
 
       const response = await fetch(`${API_BASE_URL}/Quotation/calculate/aggregate-adjusted-sections`, {
         method: "POST",
@@ -353,7 +386,7 @@ const AUTH_TOKEN = getAuthToken();
       })
       if (!response.ok) await handleFetchError(response)
       const data = await response.json()
-      
+
       return data
     } catch (err) {
       return rejectWithValue(err instanceof Error ? err.message : "Failed to calculate multi-section aggregate")
@@ -368,8 +401,8 @@ const AUTH_TOKEN = getAuthToken();
 export const applyProposalAdjustments = createAsyncThunk<any, any, { rejectValue: string }>(
   "quotations/applyProposalAdjustments",
   async (payload, { rejectWithValue }) => {
-        try {
-const AUTH_TOKEN = getAuthToken();
+    try {
+      const AUTH_TOKEN = getAuthToken();
 
       const response = await fetch(`${API_BASE_URL}/Quotation/calculate/proposal-adjustments`, {
         method: "POST",
@@ -392,8 +425,8 @@ const AUTH_TOKEN = getAuthToken();
 export const calculateProRata = createAsyncThunk<any, { netPremiumDue: number; coverDays: number }, { rejectValue: string }>(
   "quotations/calculateProRata",
   async (payload, { rejectWithValue }) => {
-        try {
-const AUTH_TOKEN = getAuthToken();
+    try {
+      const AUTH_TOKEN = getAuthToken();
 
       const response = await fetch(`${API_BASE_URL}/Quotation/calculate/pro-rata`, {
         method: "POST",
@@ -416,8 +449,8 @@ const AUTH_TOKEN = getAuthToken();
 export const previewSection = createAsyncThunk<any, { section: any; proportionRate?: number }, { rejectValue: string }>(
   "quotations/previewSection",
   async (payload, { rejectWithValue }) => {
-        try {
-const AUTH_TOKEN = getAuthToken();
+    try {
+      const AUTH_TOKEN = getAuthToken();
 
       const response = await fetch(`${API_BASE_URL}/Quotation/calculate/section-preview`, {
         method: "POST",
@@ -440,8 +473,8 @@ const AUTH_TOKEN = getAuthToken();
 export const previewCompleteCalculation = createAsyncThunk<any, Partial<CompleteCalculationRequest>, { rejectValue: string }>(
   "quotations/previewCompleteCalculation",
   async (payload, { rejectWithValue }) => {
-        try {
-const AUTH_TOKEN = getAuthToken();
+    try {
+      const AUTH_TOKEN = getAuthToken();
 
       const response = await fetch(`${API_BASE_URL}/Quotation/calculate/preview-complete`, {
         method: "POST",
@@ -464,8 +497,8 @@ export const createSectionForProposal = createAsyncThunk<
   { proposalNo: string; section: QuoteSection; calculatedBy?: string; remarks?: string },
   { state: any; rejectValue: string }
 >("quotations/createSectionForProposal", async ({ proposalNo, section, calculatedBy = "USER", remarks = "" }, { getState, rejectWithValue }) => {
-      try {
-const AUTH_TOKEN = getAuthToken();
+  try {
+    const AUTH_TOKEN = getAuthToken();
 
     const state: any = getState()
     const currentProposal: Proposal | null = state.quotations.currentProposal
@@ -515,8 +548,8 @@ export const updateSectionForProposal = createAsyncThunk<
   { proposalNo: string; sectionID: string; section: QuoteSection; calculatedBy?: string; remarks?: string },
   { state: any; rejectValue: string }
 >("quotations/updateSectionForProposal", async ({ proposalNo, sectionID, section, calculatedBy = "USER", remarks = "" }, { getState, rejectWithValue }) => {
-      try {
-const AUTH_TOKEN = getAuthToken();
+  try {
+    const AUTH_TOKEN = getAuthToken();
 
     const state: any = getState()
     const currentProposal: Proposal | null = state.quotations.currentProposal
@@ -564,8 +597,8 @@ export const deleteSectionForProposal = createAsyncThunk<
   { proposalNo: string; sectionID: string; calculatedBy?: string; remarks?: string },
   { state: any; rejectValue: string }
 >("quotations/deleteSectionForProposal", async ({ proposalNo, sectionID, calculatedBy = "USER", remarks = "" }, { getState, rejectWithValue }) => {
-      try {
-const AUTH_TOKEN = getAuthToken();
+  try {
+    const AUTH_TOKEN = getAuthToken();
 
     const state: any = getState()
     const currentProposal: Proposal | null = state.quotations.currentProposal
@@ -618,8 +651,11 @@ const initialState: QuotationState = {
   sectionsSummary: null,
   sections: [],
   selectedRiskFilter: null,
+  proposalReport: null,
+
   loading: {
     fetchProposals: false,
+    fetchProposalReport: false,
     createProposal: false,
     updateProposal: false,
     deleteProposal: false,
@@ -629,6 +665,7 @@ const initialState: QuotationState = {
   },
   success: {
     createProposal: false,
+    fetchProposalReport: false,
     updateProposal: false,
     deleteProposal: false,
     calculate: false,
@@ -636,6 +673,7 @@ const initialState: QuotationState = {
   },
   error: {
     fetchProposals: null,
+    fetchProposalReport: false,
     createProposal: null,
     updateProposal: null,
     deleteProposal: null,
@@ -691,6 +729,7 @@ const quotationSlice = createSlice({
         deleteProposal: false,
         calculate: false,
         calculateRiskItems: false,
+        fetchProposalReport: false,
       }
       state.error = {
         fetchProposals: null,
@@ -700,6 +739,7 @@ const quotationSlice = createSlice({
         calculate: null,
         fetchCalculation: null,
         calculateRiskItems: null,
+        fetchProposalReport: null,
       }
     },
   },
@@ -725,6 +765,20 @@ const quotationSlice = createSlice({
       .addCase(fetchProposals.rejected, (state, action) => {
         state.loading.fetchProposals = false
         state.error.fetchProposals = action.payload ?? action.error.message ?? "Failed to fetch proposals"
+      })
+
+      .addCase(fetchProposalReport.pending, (state) => {
+        state.loading.fetchProposalReport = true
+        state.error.fetchProposalReport = null
+      })
+      .addCase(fetchProposalReport.fulfilled, (state, action) => {
+        state.loading.fetchProposalReport = false
+        state.success.fetchProposalReport = true
+        state.proposalReport = action.payload
+      })
+      .addCase(fetchProposalReport.rejected, (state, action) => {
+        state.loading.fetchProposalReport = false
+        state.error.fetchProposalReport = action.payload as string
       })
 
       /* getProposalByNumber */
@@ -1242,8 +1296,8 @@ const quotationSlice = createSlice({
       })
       .addCase(calculateSectionAggregate.fulfilled, (state, action) => {
         state.loading.calculate = false
-        // store result to a friendly key so UI can use it if needed
-        ;(state as any).sectionAggregate = action.payload
+          // store result to a friendly key so UI can use it if needed
+          ; (state as any).sectionAggregate = action.payload
       })
       .addCase(calculateSectionAggregate.rejected, (state, action) => {
         state.loading.calculate = false
@@ -1257,7 +1311,7 @@ const quotationSlice = createSlice({
       })
       .addCase(calculateMultiSectionAggregate.fulfilled, (state, action) => {
         state.loading.calculate = false
-        ;(state as any).multiSectionAggregate = action.payload
+          ; (state as any).multiSectionAggregate = action.payload
       })
       .addCase(calculateMultiSectionAggregate.rejected, (state, action) => {
         state.loading.calculate = false
@@ -1271,7 +1325,7 @@ const quotationSlice = createSlice({
       })
       .addCase(applyProposalAdjustments.fulfilled, (state, action) => {
         state.loading.calculate = false
-        ;(state as any).proposalAdjustmentDetails = action.payload
+          ; (state as any).proposalAdjustmentDetails = action.payload
       })
       .addCase(applyProposalAdjustments.rejected, (state, action) => {
         state.loading.calculate = false
@@ -1285,7 +1339,7 @@ const quotationSlice = createSlice({
       })
       .addCase(calculateProRata.fulfilled, (state, action) => {
         state.loading.calculate = false
-        ;(state as any).proRataDetails = action.payload
+          ; (state as any).proRataDetails = action.payload
       })
       .addCase(calculateProRata.rejected, (state, action) => {
         state.loading.calculate = false
@@ -1299,7 +1353,7 @@ const quotationSlice = createSlice({
       })
       .addCase(previewSection.fulfilled, (state, action) => {
         state.loading.calculate = false
-        ;(state as any).sectionPreview = action.payload
+          ; (state as any).sectionPreview = action.payload
       })
       .addCase(previewSection.rejected, (state, action) => {
         state.loading.calculate = false
@@ -1313,7 +1367,7 @@ const quotationSlice = createSlice({
       })
       .addCase(previewCompleteCalculation.fulfilled, (state, action) => {
         state.loading.calculate = false
-        ;(state as any).calculationPreview = action.payload
+          ; (state as any).calculationPreview = action.payload
       })
       .addCase(previewCompleteCalculation.rejected, (state, action) => {
         state.loading.calculate = false

@@ -17,6 +17,7 @@ import {
   setActiveTab,
   setSelectedRiskFilter,
   deleteProposal,
+  fetchProposalReport,
 } from "../../../features/reducers/quoteReducers/quotationSlice"
 
 import { getAllRisks } from "../../../features/reducers/adminReducers/riskSlice"

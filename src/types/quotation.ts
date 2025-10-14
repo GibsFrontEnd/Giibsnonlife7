@@ -9,7 +9,7 @@ export interface Proposal {
   bizSource: string
   subRiskID: string
   subRisk: string
-  riskID:string
+  riskID: string
   partyID: string
   party: string
   mktStaffID: string
@@ -108,15 +108,15 @@ export interface RiskItem {
   feaDiscountRate: number
 }
 
-export interface CalculatedAggregate{
-    aggregateSumInsured: number,
-    aggregatePremium: number,
-    success: boolean,
-    message: string
-  
+export interface CalculatedAggregate {
+  aggregateSumInsured: number,
+  aggregatePremium: number,
+  success: boolean,
+  message: string
+
 }
 
-export interface sectionAdjustments extends Omit<ProposalAdjustments, 'otherLoadingsRate'>{
+export interface sectionAdjustments extends Omit<ProposalAdjustments, 'otherLoadingsRate'> {
   aggregatePremium: number,
 }
 
@@ -162,7 +162,7 @@ export type RiskItemUI = RiskItem &
     // optional client-side id (if you need something stable for matching)
     uiId?: string
   }
-  
+
 export interface QuoteSection {
   sectionID: string
   sectionName: string
@@ -174,7 +174,7 @@ export interface QuoteSection {
   riskItems: RiskItemUI[]
 }
 
-export interface aggregateTotals{
+export interface aggregateTotals {
   sectionSummaries: [
     {
       sectionID: string,
@@ -369,6 +369,166 @@ export interface CalculateRiskItemsResponse {
   message?: string | null
 }
 
+export interface ProposalReport {
+  proposalSummary: ProposalSummary;
+  insuredDetails: InsuredDetails;
+  sections: Section[];
+  calculationSummary: CalculationSummary;
+  adjustmentsSummary: AdjustmentsSummary;
+  financialSummary: FinancialSummary;
+  generatedOn: string;
+  generatedBy: string;
+}
+
+export interface ProposalSummary {
+  proposalNo: string;
+  transDate: string;
+  branchID: string;
+  branchName: string;
+  subRiskID: string;
+  subRiskName: string;
+  riskID: string;
+  partyID: string;
+  partyName: string;
+  mktStaffID: string;
+  mktStaffName: string;
+  bizSource: string;
+  startDate: string;
+  endDate: string;
+  coverDays: number;
+  status: string;
+  lastCalculatedOn: string;
+  lastCalculatedBy: string;
+}
+
+export interface InsuredDetails {
+  insuredID: string;
+  insuredType: string;
+  fullName: string;
+  surname: string;
+  firstName: string;
+  otherNames: string;
+  address: string;
+  mobilePhone: string;
+  landPhone: string;
+  email: string;
+  occupation: string;
+}
+
+export interface Section {
+  sectionID: string;
+  sectionName: string;
+  location: string;
+  riskItemCount: number;
+  sectionSumInsured: number;
+  sectionGrossPremium: number;
+  sectionNetPremium: number;
+  riskItems: RiskItem[];
+  adjustments: Adjustments;
+}
+
+export interface RiskItem {
+  itemNo: number;
+  smiCode: string;
+  itemDescription: string;
+  location: string;
+  actualValue: number;
+  itemRate: number;
+  multiplyRate: number;
+  actualPremium: number;
+  shareValue: number;
+  premiumValue: number;
+  hasStockItem: boolean;
+  stockItem?: StockItem;
+  totalSumInsured: number;
+  totalGrossPremium: number;
+  feaDiscountRate: number;
+  feaDiscountAmount: number;
+  netPremiumAfterDiscounts: number;
+}
+
+export interface StockItem {
+  stockCode: string;
+  stockDescription: string;
+  stockSumInsured: number;
+  stockRate: number;
+  stockGrossPremium: number;
+  stockDiscountRate: number;
+  stockDiscountAmount: number;
+  stockNetPremium: number;
+}
+
+export interface Adjustments {
+  startingPremium: number;
+  specialDiscountRate: number;
+  specialDiscountAmount: number;
+  deductibleDiscountRate: number;
+  deductibleDiscountAmount: number;
+  spreadDiscountRate: number;
+  spreadDiscountAmount: number;
+  ltaDiscountRate: number;
+  ltaDiscountAmount: number;
+  totalDiscounts: number;
+  theftLoadingRate: number;
+  theftLoadingAmount: number;
+  srccLoadingRate: number;
+  srccLoadingAmount: number;
+  otherLoading2Rate: number;
+  otherLoading2Amount: number;
+  totalLoadings: number;
+  netPremium: number;
+}
+
+export interface CalculationSummary {
+  proportionRate: number;
+  currency: string;
+  exchangeRate: number;
+  coverDays: number;
+  isProRated: boolean;
+  proRataFactor: number;
+}
+
+export interface AdjustmentsSummary {
+  sectionAdjustments: SectionAdjustment[];
+  proposalAdjustments: ProposalAdjustments;
+}
+
+export interface SectionAdjustment {
+  sectionID: string;
+  sectionName: string;
+  totalDiscounts: number;
+  totalLoadings: number;
+  netAdjustment: number;
+}
+
+export interface ProposalAdjustments {
+  startingPremium: number;
+  otherDiscountsRate: number;
+  otherDiscountsAmount: number;
+  otherLoadingsRate: number;
+  otherLoadingsAmount: number;
+  netPremiumDue: number;
+}
+
+export interface FinancialSummary {
+  totalSumInsured: number;
+  totalGrossPremium: number;
+  totalSectionAdjustments: number;
+  totalAfterSectionAdjustments: number;
+  totalProposalAdjustments: number;
+  netPremiumBeforeProRata: number;
+  proRataPremium: number;
+  finalPremiumDue: number;
+  shareSumInsured: number;
+  sharePremium: number;
+  foreignSumInsured: number;
+  foreignPremium: number;
+  foreignCurrency: string;
+  overallPremiumRate: number;
+  effectivePremiumRate: number;
+}
+
+
 // Update QuotationState to include calculateRiskItems flags in loading/success/error
 export interface QuotationState {
   proposals: Proposal[]
@@ -378,8 +538,11 @@ export interface QuotationState {
   sectionsSummary: SectionsSummary | null
   sections: QuoteSection[]
   selectedRiskFilter: string | null
+  proposalReport: ProposalReport | null
+
   loading: {
     fetchProposals: boolean
+    fetchProposalReport: boolean
     createProposal: boolean
     updateProposal: boolean
     deleteProposal: boolean
@@ -390,12 +553,14 @@ export interface QuotationState {
   success: {
     createProposal: boolean
     updateProposal: boolean
+    fetchProposalReport: boolean
     deleteProposal: boolean
     calculate: boolean
     calculateRiskItems: boolean  // << added
   }
   error: {
     fetchProposals: string | null
+    fetchProposalReport: string | null
     createProposal: string | null
     updateProposal: string | null
     deleteProposal: string | null
