@@ -390,12 +390,12 @@ const ClauseManager = () => {
         <div className="add-clauses-section" style={{ marginTop: 18 }}>
           <div className="section-header">
             <h2>Add / Edit Clauses</h2>
-            <div style={{ display: "flex", gap: 8 }}>
+{/*             <div style={{ display: "flex", gap: 8 }}>
               <Button onClick={handleAddClauseForm} variant="outline">
                 + Add Another Clause (stage)
               </Button>
             </div>
-          </div>
+ */}          </div>
 
           {/* Staged Clauses Table */}
           <div className="staged-clauses-section" style={{ marginTop: 12 }}>
@@ -409,10 +409,10 @@ const ClauseManager = () => {
                     <tr>
                       <th>#</th>
                       <th>Clause</th>
-                      <th>Subheader 1</th>
+{/*                       <th>Subheader 1</th>
                       <th>Subheader 2</th>
                       <th>Details</th>
-                      <th>Tag</th>
+ */}                      <th>Tag</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -421,10 +421,10 @@ const ClauseManager = () => {
                       <tr key={s.localId}>
                         <td>{idx + 1}</td>
                         <td>{s.clauseHeader}</td>
-                        <td>{s.subheader1}</td>
+{/*                         <td>{s.subheader1}</td>
                         <td>{s.subheader2}</td>
                         <td className="truncate-cell">{s.details}</td>
-                        <td>{s.tag}</td>
+ */}                        <td>{s.tag}</td>
                         <td>
                           <div style={{ display: "flex", gap: 8 }}>
                             <Button size="sm" variant="outline" onClick={() => handleEditStagedClause(s.localId)}>
@@ -496,6 +496,11 @@ const ClauseManager = () => {
               </div>
             ))}
           </div>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop:20 }}>
+              <Button onClick={handleAddClauseForm} variant="outline">
+                + Add Another Clause (stage)
+              </Button>
+            </div>
         </div>
         <Button onClick={handleSubmit} disabled={loading.createClauses || loading.updateClause}>
             {loading.createClauses || loading.updateClause ? "Saving..." : "Save Clauses"}
@@ -513,9 +518,9 @@ const ClauseManager = () => {
                   <tr>
                     <th>#</th>
                     <th>ClauseID</th>
-                    <th>Subheader 1</th>
+{/*                     <th>Subheader 1</th>
                     <th>Subheader 2</th>
-                    <th>Details</th>
+ */}                    <th>Details</th>
                     <th>Tag</th>
                     <th>Actions</th>
                   </tr>
@@ -525,9 +530,9 @@ const ClauseManager = () => {
                     <tr key={c.id}>
                       <td>{idx + 1}</td>
                       <td>{c.clauseID}</td>
-                      <td>{c.subheader1}</td>
+{/*                       <td>{c.subheader1}</td>
                       <td>{c.subheader2}</td>
-                      <td className="truncate-cell">{c.details}</td>
+ */}                      <td className="truncate-cell">{c.details}</td>
                       <td>{c.tag}</td>
                       <td>
                         <div style={{ display: "flex", gap: 8 }}>
