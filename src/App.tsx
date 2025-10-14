@@ -25,6 +25,7 @@ import AdminCompany from "./pages/admin/admin-page.Company";
 import Quotations from "./pages/Quotations";
 import QuoteQuotations from "./pages/quotation/quotation-page.quotations";
 import EditProposal from "./components/quotations/quotes/EditProposal";
+import ClauseManager from "./components/quotations/quotes/ClauseManager";
 import CreateProposal from "./components/quotations/quotes/CreateProposal";
 import QuoteCreator from "./components/quotations/quotes/QuoteCreator";
 
@@ -53,6 +54,7 @@ const App: React.FC = () => {
           <Route path="/quotations" element={<Quotations />}>
             <Route path="quotes" element={<QuoteQuotations />} />
             <Route path="quotes/:businessId" element={<QuoteQuotations />} />
+            <Route path="clauses/:proposalNo" element={<ClauseManager />} />
             <Route path="create" element={<CreateProposal />} />
             <Route path="edit/:proposalNo" element={<EditProposal />} />
             <Route path="quote/:proposalNo" element={<QuoteCreator />} />

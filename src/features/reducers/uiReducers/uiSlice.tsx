@@ -1,6 +1,7 @@
+// src/store/slices/uiSlice.ts
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-interface UiState {
+export interface UiState {
   // Role dialogs
   showCreateRoleDialog: boolean;
   showEditRoleDialog: boolean;

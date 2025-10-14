@@ -123,6 +123,13 @@ const EditProposal = () => {
     }
   }
 
+  const handleDoClause = () => {
+    if (proposalNo) {
+      navigate(`/quotations/clauses/${proposalNo}`)
+    }
+  }
+
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString()
   }
@@ -149,7 +156,11 @@ const EditProposal = () => {
         <div className="header-actions">
           <Button onClick={handleCancel} variant="outline">
             Back to List
+          </Button>          
+          <Button onClick={handleDoClause} variant="outline">
+            Do Clause
           </Button>
+
           <Button onClick={handleDoQuote} variant="outline">
             Do Quote
           </Button>
