@@ -457,6 +457,9 @@ const Quotations = ({ businessId }: QuotationsProps) => {
                       </td>
                       <td className="p-4 text-sm">
                         <div className="flex gap-2 justify-center">
+                        <Button variant="default" size="sm">
+                            Approve
+                          </Button>
                           <Button onClick={() => handleEditProposal(proposal.proposalNo)} variant="outline" size="sm">
                             View/Edit
                           </Button>
