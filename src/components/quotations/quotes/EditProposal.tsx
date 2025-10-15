@@ -180,7 +180,7 @@ const EditProposal = () => {
         </div>
         <div className="header-actions">
           <Button className="w-[150px] text-black" loading={loading.fetchProposalReport} onClick={() => dispatch(fetchProposalReport(proposalNo))} variant="outline" size="sm">
-            Get Report
+            Print Quote
           </Button>
           <Button onClick={handleCancel} variant="outline">
             Back to List
