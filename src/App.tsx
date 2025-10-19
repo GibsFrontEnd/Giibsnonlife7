@@ -56,6 +56,7 @@ const App: React.FC = () => {
             <Route path="quotes/:businessId" element={<QuoteQuotations />} />
             <Route path="clauses/:proposalNo" element={<ClauseManager />} />
             <Route path="create" element={<CreateProposal />} />
+            <Route path="create/:businessId" element={<CreateProposal />} />
             <Route path="edit/:proposalNo" element={<EditProposal />} />
             <Route path="quote/:proposalNo" element={<QuoteCreator />} />
             <Route path="customers" element={<CSUCustomers />} />

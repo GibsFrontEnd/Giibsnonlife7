@@ -31,6 +31,10 @@ const tabs = (() => {
     return { title: risk.riskName, content: <Quotes businessId={risk.riskID} /> };
   }
 
+  if (businessId =="Package") {
+    return { title: "Package", content: <Quotes businessId={"Package"} /> };
+  }
+
   // fallback if param doesn't match any risk
   return { title: "All", content: <Quotes businessId={null} /> };
 })();

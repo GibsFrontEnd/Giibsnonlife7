@@ -156,13 +156,15 @@ const QuoteCreator = () => {
   const [proposalAdjustmentsResult, setProposalAdjustmentsResult] = useState<any | null>(null)
 
   // pro-rata: coverDays (user input) + result storage
-  const [coverDays, setCoverDays] = useState<number>(20)
+  const [coverDays, setCoverDays] = useState<number>(365)
   const [proRataResult, setProRataResult] = useState<any | null>(null)
 
   // fetch token to prevent race conditions
   const sectionsFetchIdRef = useRef(0)
 
   useEffect(() => {
+    console.log(proposalNo);
+    
     setLocalSections(null)
     setLocalSectionsSummary(null)
     setCalculatedRiskMap({})
@@ -620,7 +622,7 @@ const QuoteCreator = () => {
     }));
     console.log(editedSections);
 
-    const breakdownSections = (calculationBreakdown?.inputs?.sectionInputs).filter((si: any, index) => !editedSections.includes(index)).map((si: any) => {
+    const breakdownSections = (calculationBreakdown?.inputs?.sectionInputs || []).filter((si: any, index) => !editedSections.includes(index)).map((si: any) => {
 
       return {
         sectionID: si.sectionID ?? si.sectionId ?? "",

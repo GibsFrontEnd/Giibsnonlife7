@@ -36,7 +36,9 @@ const EditProposal = () => {
   const { agents } = useSelector((state: RootState) => state.parties)
 
   const [formData, setFormData] = useState<UpdateProposalRequest>({
-    insuredName: "",
+    surname: "",
+    firstName: "",
+    otherNames: "",
     insAddress: "",
     insMobilePhone: "",
     insEmail: "",
@@ -79,9 +81,15 @@ const EditProposal = () => {
   }, [dispatch, proposalNo])
 
   useEffect(() => {
+    console.log("it's log");
+    
     if (currentProposal) {
+      console.log(currentProposal);
+
       setFormData({
-        insuredName: `${currentProposal.insSurname} ${currentProposal.insFirstname}`,
+        surname: `${currentProposal.insSurname}`,
+        firstName: `${currentProposal.insFirstname}`,
+        otherNames: `${currentProposal.insOthernames}`,
         insAddress: currentProposal.insAddress,
         insMobilePhone: currentProposal.insMobilePhone,
         insEmail: currentProposal.insEmail,
@@ -114,7 +122,7 @@ const EditProposal = () => {
   const validateForm = (): string[] => {
     const errors: string[] = []
 
-    if (!formData.insuredName) errors.push("Insured name is required")
+    if (!formData.surname) errors.push("Insured name is required")
     if (!formData.insAddress) errors.push("Address is required")
     if (!formData.insMobilePhone) errors.push("Mobile phone is required")
     if (!formData.insEmail) errors.push("Email is required")
@@ -135,6 +143,7 @@ const EditProposal = () => {
 
     if (proposalNo) {
       dispatch(updateProposal({ proposalNo, proposalData: formData }) as any)
+        dispatch(getProposalByNumber(proposalNo) as any)  
     }
   }
 
@@ -275,17 +284,38 @@ const EditProposal = () => {
         <div className="form-section">
           <h3>Insured Information (Editable)</h3>
           <div className="form-grid">
-            <div className="form-field form-field-full">
-              <Label htmlFor="insuredName">Insured Name *</Label>
+            <div className="form-field">
+              <Label htmlFor="surname">Last Name *</Label>
               <Input
-                id="insuredName"
-                value={formData.insuredName}
-                onChange={(e) => handleInputChange("insuredName", e.target.value)}
+                id="surname"
+                value={formData.surname}
+                onChange={(e) => handleInputChange("surname", e.target.value)}
+                placeholder="Enter last name"
+              />
+            </div>
+
+            <div className="form-field">
+            <Label htmlFor="firstName">First Name *</Label>
+              <Input
+                id="firstName"
+                value={formData.firstName}
+                onChange={(e) => handleInputChange("firstName", e.target.value)}
+                placeholder="Enter first name"
+              />
+            </div>
+            <div className="form-field form-field-full">
+            <Label htmlFor="insuredName">Other Names *</Label>
+              <Input
+                id="fistName"
+                value={formData.otherNames}
+                onChange={(e) => handleInputChange("otherNames", e.target.value)}
                 placeholder="Enter insured name"
               />
             </div>
 
-            <div className="form-field form-field-full">
+
+
+            <div className="form-field">
               <Label htmlFor="insAddress">Address *</Label>
               <textarea
                 id="insAddress"

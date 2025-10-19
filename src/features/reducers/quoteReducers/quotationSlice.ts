@@ -953,6 +953,7 @@ const quotationSlice = createSlice({
       .addCase(getCalculationBreakdown.pending, (state) => {
         state.loading.fetchCalculation = true
         state.error.fetchCalculation = null
+        state.calculationBreakdown = null; 
       })
       .addCase(getCalculationBreakdown.fulfilled, (state, action) => {
         state.loading.fetchCalculation = false
@@ -975,6 +976,7 @@ const quotationSlice = createSlice({
       .addCase(getCalculationBreakdown.rejected, (state, action) => {
         state.loading.fetchCalculation = false
         state.error.fetchCalculation = action.payload ?? action.error.message ?? "Failed to fetch breakdown"
+        state.calculationBreakdown = null;
       })
 
       /* getCurrentCalculation */

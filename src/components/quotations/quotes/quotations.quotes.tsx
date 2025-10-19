@@ -124,6 +124,9 @@ const Quotations = ({ businessId }: QuotationsProps) => {
   }
 
   const handleCreateProposal = () => {
+    if(businessId)
+    navigate(`/quotations/create/${businessId}`)
+    else
     navigate("/quotations/create")
   }
 

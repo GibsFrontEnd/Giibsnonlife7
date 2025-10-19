@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { useDispatch } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import Select from "react-select"
-
+import CreatableSelect from "react-select/creatable";
 import type { RootState } from "../../../features/store"
 import { useSelector } from "react-redux"
 import { createProposal, clearMessages } from "../../../features/reducers/quoteReducers/quotationSlice"
@@ -20,6 +20,7 @@ import Input from "../../UI/Input"
 import { Label } from "../../UI/label"
 import type { CreateProposalRequest } from "../../../types/quotation"
 import { useAppSelector } from "@/hooks/use-apps"
+import {useParams } from "react-router-dom"
 
 import "./CreateProposal.css"
 
@@ -27,6 +28,9 @@ const CreateProposal = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const errorRef = useRef<HTMLDivElement | null>(null)
+  const { businessId: businessIdParam } = useParams<{ businessId?: string }>()
+  const businessId = businessIdParam ?? null
+
 
   const { loading, success, error } = useSelector((state: RootState) => state.quotations)
   const { risks } = useSelector((state: RootState) => state.risks)
@@ -64,6 +68,15 @@ const CreateProposal = () => {
     isOrg: false,
   })
   const [validationErrors, setValidationErrors] = useState<string[]>([])
+
+useEffect(()=>{
+/*   if(businessId && businessId =="Package")
+  setRiskClass("");
+ */if(businessId)
+  setRiskClass(businessId);
+  console.log(businessId);
+  
+},[businessId])
 
   // Fetch all data on mount
   useEffect(() => {
@@ -226,7 +239,12 @@ const CreateProposal = () => {
                 value={riskClass ? { value: riskClass, label: risks.find(r => r.riskID === riskClass)?.riskName } : null}
                 onChange={opt => setRiskClass(opt?.value ?? "")}
                 placeholder="Select Business Category"
-                isClearable
+                isDisabled={
+                  businessId !== "All" &&
+/*                   businessId !== "Package" &&
+ */                  businessId !== null
+                }
+                                isClearable
               />
             </div>
 
@@ -277,14 +295,24 @@ const CreateProposal = () => {
               <button
                 type="button"
                 className={`toggle-btn ${insuredType === "individual" ? "active" : ""}`}
-                onClick={() => { setInsuredType("individual"); setFormData(prev => ({ ...prev, isOrg: false })); }}
+                onClick={() => { setInsuredType("individual"); setFormData(prev => ({ ...prev, isOrg: false }));     handleInputChange("insuredID", "");
+                handleInputChange("surname", "");
+                handleInputChange("firstName", "");
+                handleInputChange("insAddress", "");
+                handleInputChange("insEmail", "");
+                handleInputChange("insMobilePhone","");
+             }}
               >
                 Individual
               </button>
               <button
                 type="button"
                 className={`toggle-btn ${insuredType === "corporate" ? "active" : ""}`}
-                onClick={() => { setInsuredType("corporate"); setFormData(prev => ({ ...prev, isOrg: true })); }}
+                onClick={() => { setInsuredType("corporate"); setFormData(prev => ({ ...prev, isOrg: true }));handleInputChange("insuredID", "");
+                handleInputChange("insAddress", "");
+                handleInputChange("insEmail", "");
+                handleInputChange("insMobilePhone","");
+                 }}
               >
                 Corporate
               </button>
@@ -296,38 +324,67 @@ const CreateProposal = () => {
               <>
                 <div className="form-field form-field-full">
                   <Label htmlFor="customerName">Customer Name *</Label>
-                  <Select
-                    options={individualCustomerOptions}
-                    inputValue={customerSearch}
-                    onInputChange={(value, { action }) => {
-                      // only set local search when user types or blurs; react-select calls this for other actions too
-                      if (action === 'input-change' || action === 'input-blur' || action === 'menu-close') {
-                        setCustomerSearch(value)
-                      }
-                    }}
-                    value={individualCustomerOptions.find(c => c.value === formData.insuredID) || null}
-                    onChange={opt => {
-                      if (!opt) {
-                        handleInputChange("insuredID", "")
-                        handleInputChange("surname", "")
-                        handleInputChange("firstName", "")
-                        setCustomerSearch("")
-                        return
-                      }
-                      const customer = customers.find(c => c.insuredID === opt.value)
-                      if (customer) {
-                        handleInputChange("insuredID", customer.insuredID)
-                        handleInputChange("surname", customer.lastName ?? "")
-                        handleInputChange("firstName", customer.firstName ?? "")
-                        // you can also set other fields from customer here if needed
-                      }
-                      // clear the typed input after selection
-                      setCustomerSearch("")
-                    }}
-                    placeholder="Type to search customers..."
-                    isClearable
-                  />
-                </div>
+                  <CreatableSelect
+  options={individualCustomerOptions}
+  inputValue={customerSearch}
+  onInputChange={(value, { action }) => {
+    if (action === "input-change" || action === "input-blur" || action === "menu-close") {
+      setCustomerSearch(value);
+    }
+  }}
+  value={
+    individualCustomerOptions.find((c) => c.value === formData.insuredID) ||
+    (formData.insuredID ? { label: formData.insuredID, value: formData.insuredID } : null)
+  }
+  onChange={(opt: any) => {
+    // opt will be null or { label, value }
+    if (!opt) {
+      handleInputChange("insuredID", "");
+      handleInputChange("surname", "");
+      handleInputChange("firstName", "");
+      setCustomerSearch("");
+      return;
+    }
+
+    // if this option corresponds to an existing customer record, populate extra fields
+    const customer = customers.find((c) => c.insuredID === opt.value);
+    if (customer) {
+      handleInputChange("insuredID", customer.insuredID);
+      handleInputChange("surname", customer.surname ?? "");
+      handleInputChange("firstName", customer.firstName ?? "");
+      handleInputChange("insAddress", customer.address ?? "");
+      handleInputChange("insEmail", customer.email ?? "");
+      handleInputChange("insMobilePhone", customer.mobilePhone || "");
+
+    } else {
+      // it was a creatable/custom value — store it and clear name fields (or set them from opt.label if you want)
+      handleInputChange("insuredID", opt.value);
+      handleInputChange("surname", "");
+      handleInputChange("firstName", "");
+      handleInputChange("insAddress", "");
+      handleInputChange("insEmail", "");
+      handleInputChange("insMobilePhone","");
+      setIndividualCustomerOptions(prev => [...prev, { label: opt.label ?? opt.value, value: opt.value }]);
+    }
+
+    setCustomerSearch("");
+  }}
+  onCreateOption={(inputValue: string) => {
+    // triggered when user types a new value and hits Enter (or the create button)
+    handleInputChange("insuredID", inputValue);
+    handleInputChange("surname", "");
+    handleInputChange("firstName", "");
+    handleInputChange("insAddress","");
+    handleInputChange("insEmail","");
+    handleInputChange("insMobilePhone","");
+    setCustomerSearch("");
+
+    // OPTIONAL: persist the created option into your options state so it appears in future selections
+    // setIndividualCustomerOptions(prev => [...prev, { label: inputValue, value: inputValue }]);
+  }}
+  placeholder="Type to search customers..."
+  isClearable
+/>                </div>
 
                 <div className="form-field">
                   <Label htmlFor="surname">Surname *</Label>
@@ -352,29 +409,55 @@ const CreateProposal = () => {
             ) : (
               <div className="form-field form-field-full">
                 <Label htmlFor="companyName">Company Name *</Label>
-                <Select
-                  options={companyCustomerOptions}
-                  value={companyCustomerOptions.find(c => c.value === formData.insuredID) || null}
-                  onChange={opt => {
-                    if (!opt) {
-                      handleInputChange("insuredID", "")
-                      handleInputChange("insAddress", "")
-                      handleInputChange("insMobilePhone", "")
-                      handleInputChange("insEmail", "")
-                      return
-                    }
-                    const customer = customers.find(c => c.insuredID === opt.value)
-                    if (customer) {
-                      handleInputChange("insuredID", customer.insuredID)
-                      handleInputChange("insAddress", customer.address ?? "")
-                      handleInputChange("insEmail", customer.email ?? "")
-                      handleInputChange("insMobilePhone", customer.phoneLine1 || customer.phoneLine2 || "")
-                    }
-                  }}
-                  placeholder="Select Company"
-                  isClearable
-                />
-              </div>
+                <CreatableSelect
+  options={companyCustomerOptions}
+  inputValue={customerSearch} // reuse same search state or separate if you prefer
+  onInputChange={(value, { action }) => {
+    if (action === "input-change" || action === "input-blur" || action === "menu-close") {
+      setCustomerSearch(value);
+    }
+  }}
+  value={
+    companyCustomerOptions.find((c) => c.value === formData.insuredID) ||
+    (formData.insuredID ? { label: formData.insuredID, value: formData.insuredID } : null)
+  }
+  onChange={(opt: any) => {
+    if (!opt) {
+      handleInputChange("insuredID", "");
+      handleInputChange("insAddress", "");
+      handleInputChange("insMobilePhone", "");
+      handleInputChange("insEmail", "");
+      return;
+    }
+
+    const customer = customers.find((c) => c.insuredID === opt.value);
+    if (customer) {
+      handleInputChange("insuredID", customer.insuredID);
+      handleInputChange("insAddress", customer.address ?? "");
+      handleInputChange("insEmail", customer.email ?? "");
+      handleInputChange("insMobilePhone", customer.mobilePhone || "");
+    } else {
+      // created/custom company value
+      handleInputChange("insuredID", opt.value);
+      handleInputChange("insAddress", "");
+      handleInputChange("insMobilePhone", "");
+      handleInputChange("insEmail", "");
+      // OPTIONAL: add the new option:
+      // setCompanyCustomerOptions(prev => [...prev, { label: opt.label ?? opt.value, value: opt.value }]);
+    }
+  }}
+  onCreateOption={(inputValue: string) => {
+    handleInputChange("insuredID", inputValue);
+    handleInputChange("insAddress", "");
+    handleInputChange("insMobilePhone", "");
+    handleInputChange("insEmail", "");
+    setCustomerSearch("");
+    // OPTIONAL: persist created option
+    // setCompanyCustomerOptions(prev => [...prev, { label: inputValue, value: inputValue }]);
+  }}
+  placeholder="Select Company"
+  isClearable
+/>              </div>
             )}
 
             <div className="form-field form-field-full">
@@ -454,26 +537,38 @@ const CreateProposal = () => {
         <div className="form-section">
           <h3>Policy Period</h3>
           <div className="form-grid">
-            <div className="form-field">
+          <div className="form-field">
               <Label htmlFor="startDate">Start Date *</Label>
               <Input
-                id="startDate"
-                type="date"
-                value={formData.startDate}
-                onChange={e => handleInputChange("startDate", e.target.value)}
-              />
-            </div>
+  id="startDate"
+  type="date"
+  value={formData.startDate}
+  onChange={(e) => {
+    const start = e.target.value;
+    handleInputChange("startDate", start);
 
-            <div className="form-field">
+    if (start) {
+      const startDateObj = new Date(start);
+      const endDateObj = new Date(startDateObj);
+      endDateObj.setFullYear(endDateObj.getFullYear() + 1);
+
+      const endDateFormatted = endDateObj.toISOString().split("T")[0];
+      handleInputChange("endDate", endDateFormatted);
+    } else {
+      handleInputChange("endDate", "");
+    }
+  }}
+/>            </div>
+<div className="form-field">
               <Label htmlFor="endDate">End Date *</Label>
               <Input
                 id="endDate"
                 type="date"
                 value={formData.endDate}
                 onChange={e => handleInputChange("endDate", e.target.value)}
+                disabled
               />
             </div>
-
             <div className="form-field">
               <Label htmlFor="proportionRate">Proportion Rate (%)</Label>
               <Input
@@ -500,6 +595,7 @@ const CreateProposal = () => {
                 onChange={opt => handleInputChange("currency", opt?.value ?? "NGN")}
               />
             </div>
+
 
             <div className="form-field">
               <Label htmlFor="exRate">Exchange Rate</Label>

@@ -1,4 +1,3 @@
-//@ts-nocheck
 "use client"
 
 import { useEffect, useState } from "react"
@@ -7,6 +6,9 @@ import type { AppDispatch } from "../../features/store"
 import type { RootState } from "../../features/store"
 import { getSubRiskSectionsBySubRisk } from "../../features/reducers/productReducers/subRiskSectionSlice"
 import { getSubRiskSMIsBySectionCode } from "../../features/reducers/productReducers/subRiskSMISlice"
+import { getAllRisks } from "../../features/reducers/adminReducers/riskSlice"
+import { getAllProducts } from "../../features/reducers/productReducers/productSlice"
+import Select from "react-select"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../UI/dialog"
 import { Button } from "../UI/new-button"
 import Input from "../UI/Input"
@@ -28,8 +30,6 @@ interface AddSectionModalProps {
   onSave: (section: QuoteSection) => void
   section?: QuoteSection | any
   productId: string
-
-  // NEW optional prop: modal will call this with the full calculated risk array
   onCalculateFullRiskArray?: (sectionID: string, fullRiskArray: any[]) => void
 }
 
@@ -45,40 +45,39 @@ export const AddSectionModal = ({
   const { subRiskSections } = useSelector((state: RootState) => state.subRiskSections)
   const [sectionAgregate, setSectionAggregate] = useState<any>(null)
   const [adjCollapse, setAdjCollapse] = useState<boolean>(true)
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const { risks } = useSelector((state: RootState) => state.risks)
+  const { products } = useSelector((state: RootState) => state.products)
+  const [riskClass, setRiskClass] = useState("")
+  const [subRiskClass, setSubRiskClass] = useState("")
 
+  const filteredProducts = products.filter(p => p.riskID === riskClass)
+  const productOptions = filteredProducts.map(p => ({ value: p.productID, label: p.productName }))
   const sectionAdjustments = section?.sectionAdjustments
   const sectionAdjustmentsDiscounts = section?.sectionAdjustments?.discountsApplied
   const sectionAdjustmentsLoadings = section?.sectionAdjustments?.loadingsApplied
 
-
   const [sectionAdjustmentsResult, setSectionAdjustmentsResult] = useState<AdjustmentCalculations>({
     startingPremium: sectionAdjustments?.startingPremium || 0,
-
     specialDiscountAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Special Discount")?.amount || 0,
     specialDiscountNetAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Special Discount")?.premiumAfterAdjustment || 0,
-
     deductibleDiscountAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Deductible Discount")?.amount || 0,
     deductibleDiscountNetAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Deductible Discount")?.premiumAfterAdjustment || 0,
-
     spreadDiscountAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Spread Discount")?.amount || 0,
     spreadDiscountNetAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "Spread Discount")?.premiumAfterAdjustment || 0,
-
     ltaDiscountAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "LTA Discount")?.amount || 0,
     ltaDiscountNetAmount: sectionAdjustmentsDiscounts?.find((d) => d.name == "LTA Discount")?.premiumAfterAdjustment || 0,
-
     theftLoadingAmount: sectionAdjustmentsLoadings?.find((d) => d.name == "Theft Loading")?.amount || 0,
     theftLoadingNetAmount: sectionAdjustmentsLoadings?.find((d) => d.name == "Theft Loading")?.premiumAfterAdjustment || 0,
-
     srccLoadingAmount: sectionAdjustmentsLoadings?.find((d) => d.name == "SRCC Loading")?.amount || 0,
     srccLoadingNetAmount: sectionAdjustmentsLoadings?.find((d) => d.name == "SRCC Loading")?.premiumAfterAdjustment || 0,
-
     otherLoading2Amount: sectionAdjustmentsLoadings?.find((d) => d.name == "Other Loading 2")?.amount || 0,
     otherLoading2NetAmount: sectionAdjustmentsLoadings?.find((d) => d.name == "Other Loading 2")?.premiumAfterAdjustment || 0,
-
     netPremiumDue: section?.sectionAdjustments?.finalNetPremium || 0,
     success: false,
     message: "",
   })
+
   const [adjustments, setAdjustments] = useState({
     specialDiscountRate: sectionAdjustmentsDiscounts?.find((d) => d.name == "Special Discount")?.rate || 0,
     deductibleDiscountRate: sectionAdjustmentsDiscounts?.find((d) => d.name == "Deductible Discount")?.rate || 0,
@@ -89,7 +88,9 @@ export const AddSectionModal = ({
     srccLoadingRate: sectionAdjustmentsLoadings?.find((d) => d.name == "SRCC Loading")?.rate || 0,
     otherLoading2Rate: sectionAdjustmentsLoadings?.find((d) => d.name == "Other Loading 2")?.rate || 0,
   })
+
   const { subRiskSMIs } = useSelector((state: RootState) => state.subRiskSMIs)
+  
   const initialForm = (): QuoteSection => ({
     sectionID: section?.sectionID || "",
     sectionName: section?.sectionName || "",
@@ -98,7 +99,7 @@ export const AddSectionModal = ({
     sectionPremium: section?.sectionGrossPremium || 0,
     sectionNetPremium: (section as any)?.sectionNetPremium ?? 0,
     lastCalculated: (section as any)?.lastCalculated ?? null,
-    proportionRate: /* (section as any)?.proportionRate ?? */ 100,
+    proportionRate: 100,
     riskItems: section?.riskItems
       ? (section.riskItems as any[]).map((it: any, idx: number) => ({
         itemNo: it.itemNo ?? idx + 1,
@@ -110,8 +111,6 @@ export const AddSectionModal = ({
         multiplyRate: it.multiplyRate ?? 0,
         location: section?.location ?? "",
         feaDiscountRate: it.feaDiscountRate ?? 0,
-
-        // server-calculated fields (display-only)
         actualPremium: it.actualPremium ?? 0,
         actualPremiumFormula: it.actualPremiumFormula ?? "",
         shareValue: it.shareValue ?? 0,
@@ -122,8 +121,6 @@ export const AddSectionModal = ({
         feaDiscountAmount: it.feaDiscountAmount ?? 0,
         netPremiumAfterDiscounts: it.netPremiumAfterDiscounts ?? 0,
         stockItem: it.stockItem ?? null,
-
-        // UI flags
         _showStock: !!it.stockItem,
         _collapsed: false,
       }))
@@ -132,20 +129,33 @@ export const AddSectionModal = ({
 
   const [formData, setFormData] = useState<QuoteSection>(initialForm)
   const [selectedSectionCode, setSelectedSectionCode] = useState<string>(section?.sectionID || "")
-  // track applying state per-item (key: sectionID|index)
   const [applyingMap, setApplyingMap] = useState<Record<string, boolean>>({})
+  const [itemsInTable, setItemsInTable] = useState<Set<number>>(new Set())
 
   useEffect(() => {
-    if (productId) dispatch(getSubRiskSectionsBySubRisk(productId) as any)
+    if (productId){ dispatch(getSubRiskSectionsBySubRisk(productId) as any)
+      dispatch(getAllRisks({ pageNumber: 1, pageSize: 100 }) as any)
+    }
+
   }, [dispatch, productId])
+  useEffect(() => {
+    if (riskClass) {
+      dispatch(getAllProducts({ riskId: riskClass, pageNumber: 1, pageSize: 100 }) as any)
+    }
+  }, [dispatch, riskClass])
 
   useEffect(() => {
     if (subRiskSections && subRiskSections.length > 0 && section?.sectionID) {
       setSelectedSectionCode(section.sectionID)
       setFormData(initialForm())
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subRiskSections])
+
+  useEffect(() => {
+    if (productId && productId=="1234" && subRiskClass) {
+      console.log(productId,subRiskClass);   
+      dispatch(getSubRiskSectionsBySubRisk(subRiskClass))}  }, [subRiskClass])
+
 
   useEffect(() => {
     if (selectedSectionCode) dispatch(getSubRiskSMIsBySectionCode(selectedSectionCode) as any)
@@ -156,13 +166,24 @@ export const AddSectionModal = ({
       setFormData(initialForm())
       setSelectedSectionCode(section.sectionID)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [section])
 
   useEffect(() => {
     if (formData.riskItems?.length > 0)
       handleCalculateAllItems()
   }, [])
+
+  useEffect(() => {
+    if (formData.riskItems?.length > 0) {
+      setItemsInTable(() => {
+        const allIndexes = new Set(
+          formData.riskItems.map((_, i) => i)
+        )
+        return allIndexes
+      })
+    }  }, [])
+
+
 
   const keyFor = (index: number) => `${formData.sectionID || "sec"}|${index}`
 
@@ -180,9 +201,8 @@ export const AddSectionModal = ({
 
   const handleAddItem = () => {
     const newItem: any = {
-      // itemNo is not unique by your note — it's still displayed but not used to match server results
       itemNo: (formData.riskItems || []).length + 1,
-      id: `local_${Date.now()}`, // internal local id for mapping UI reliably (not sent to API)
+      id: `local_${Date.now()}`,
       sectionID: formData.sectionID || `section_${Date.now()}`,
       smiCode: "",
       itemDescription: "",
@@ -208,6 +228,10 @@ export const AddSectionModal = ({
       ...prev,
       riskItems: [...(prev.riskItems || []), newItem],
     }))
+    setEditingIndex(formData.riskItems.length);
+    console.log(formData.riskItems.length);
+    
+    if(formData.riskItems.length>0)handleAddToTable(formData.riskItems.length-1);
   }
 
   const handleItemChange = (index: number, field: keyof RiskItem | string, value: any) => {
@@ -232,8 +256,6 @@ export const AddSectionModal = ({
     if (field === "location")
       updated[index].location = formData.location;
 
-
-
     setFormData((p) => ({ ...p, riskItems: updated }))
   }
 
@@ -241,8 +263,34 @@ export const AddSectionModal = ({
     const updated = (formData.riskItems as any[])
       .filter((_, i) => i !== index)
       .map((it, i) => ({ ...it, itemNo: i + 1 }))
+    
+    const newItemsInTable = new Set<number>()
+    itemsInTable.forEach(oldIndex => {
+      if (oldIndex < index) {
+        newItemsInTable.add(oldIndex)
+      } else if (oldIndex > index) {
+        newItemsInTable.add(oldIndex - 1)
+      }
+    })
+    setItemsInTable(newItemsInTable)
+    
     setFormData((p) => ({ ...p, riskItems: updated }))
+    if (editingIndex === index) setEditingIndex(null);
   }
+
+  const handleAddToTable = async (index: number) => {
+    setItemsInTable(prev => new Set([...prev, index]))
+  }
+
+  const handleEditFromTable = (index: number) => {
+    setItemsInTable(prev => {
+      const newSet = new Set(prev)
+      newSet.delete(index)
+      return newSet
+    })
+  }
+
+  
 
   const toggleStockUI = (index: number) => {
     const updated = [...(formData.riskItems as any[])]
@@ -288,7 +336,6 @@ export const AddSectionModal = ({
           aggregatePremium: resp.aggregatePremium,
         })
       } catch (err: any) {
-        // adapt to your error UI (toasts, etc). For now simple alert:
         toast({
           description: "Failed to calculate Aggregate",
           variant: "destructive",
@@ -297,6 +344,7 @@ export const AddSectionModal = ({
       }
     }
   }
+
   const handleApplySectionAdjustments = async () => {
     if (!adjustments) {
       toast({
@@ -325,7 +373,6 @@ export const AddSectionModal = ({
         console.log(resp)
         setSectionAdjustmentsResult(resp)
       } catch (err: any) {
-        // adapt to your error UI (toasts, etc). For now simple alert:
         toast({
           description: "Failed to apply Adjustments",
           variant: "destructive",
@@ -335,7 +382,6 @@ export const AddSectionModal = ({
     }
   }
 
-  // ---------- SERVER-CALLED Apply for a single item ----------
   const handleApplyItem = async (index: number) => {
     const item = (formData.riskItems || [])[index]
     if (!item) return
@@ -343,12 +389,10 @@ export const AddSectionModal = ({
     const mapKey = keyFor(index)
     setApplyingMap((m) => ({ ...m, [mapKey]: true }))
 
-    // build payload according to your API contract
     const payload = {
       subRisk: productId || "",
       riskItems: [
         {
-          // fields accepted by API for calculation
           sectionID: item.sectionID,
           smiCode: item.smiCode,
           itemDescription: item.itemDescription,
@@ -374,18 +418,14 @@ export const AddSectionModal = ({
     try {
       const resp = await (dispatch(calculateRiskItems(payload)) as any).unwrap()
 
-      // merge server result: server returns calculatedItems array and global totals
       if (resp && Array.isArray(resp.calculatedItems) && resp.calculatedItems?.length > 0) {
-        const c = resp.calculatedItems[0] // calculated item
+        const c = resp.calculatedItems[0]
         setFormData((prev) => {
           const items = [...(prev.riskItems || [])]
 
-          // match item to update. Prefer the exact index passed in, but also attempt a safer match:
           let targetIndex = index
           const serverMatch = items.findIndex((it, i) => {
-            // prefer exact id if present
             if (i === index) return true
-            // fallback: match by sectionID + smiCode + itemDescription + actualValue
             return (
               it.sectionID === (c.sectionID ?? it.sectionID) &&
               (it.smiCode || "") === (c.smiCode || "") &&
@@ -395,18 +435,14 @@ export const AddSectionModal = ({
           })
           if (serverMatch !== -1) targetIndex = serverMatch
 
-          // merge server fields into UI item
           items[targetIndex] = {
             ...items[targetIndex],
-            // keep editable fields from UI, but take server-updated values if provided
             actualValue: c.actualValue ?? items[targetIndex]?.actualValue,
             itemRate: c.itemRate ?? items[targetIndex]?.itemRate,
             multiplyRate: c.multiplyRate ?? items[targetIndex]?.multiplyRate,
             location: c.location ?? items[targetIndex]?.location,
             itemDescription: c.itemDescription ?? items[targetIndex]?.itemDescription,
             smiCode: c.smiCode ?? items[targetIndex]?.smiCode,
-
-            // server-calculated fields
             actualPremium: c.actualPremium ?? items[targetIndex]?.actualPremium,
             actualPremiumFormula: (c as any).actualPremiumFormula ?? items[targetIndex]?.actualPremiumFormula,
             shareValue: (c as any).shareValue ?? items[targetIndex]?.shareValue,
@@ -421,7 +457,6 @@ export const AddSectionModal = ({
             stockItem: c.stockItem ?? items[targetIndex]?.stockItem ?? null,
           }
 
-          // update section totals from server totals if present
           return {
             ...prev,
             riskItems: items,
@@ -429,11 +464,9 @@ export const AddSectionModal = ({
           }
         })
       } else {
-        // server returned nothing useful
         console.warn("calculateRiskItems: empty response", resp)
       }
     } catch (err: any) {
-      // adapt to your error UI (toasts, etc). For now simple alert:
       toast({
         description: "Failed to calculate item",
         variant: "destructive",
@@ -448,7 +481,6 @@ export const AddSectionModal = ({
     }
   }
 
-  // ---------- SERVER-CALLED Calculate ALL items ----------
   const handleCalculateAllItems = async () => {
     if (!formData.riskItems || formData.riskItems?.length === 0) return
 
@@ -471,17 +503,14 @@ export const AddSectionModal = ({
       proportionRate: (formData as any).proportionRate ?? 0,
     }
 
-    // capture sectionID early for callback
     try {
       const resp = await (dispatch(calculateRiskItems(payload)) as any).unwrap()
       handleSectionAggregate(resp)
 
       if (resp && Array.isArray(resp.calculatedItems)) {
-        // build merged items array (same logic as before) but do it locally so we can pass it up immediately
         const mergedItems = [...(formData.riskItems || [])]
 
         resp.calculatedItems.forEach((cItem: any) => {
-          // find best match (sectionID + smiCode + actualValue + description)
           const matchIndex = mergedItems.findIndex(
             (it) =>
               it.sectionID === (cItem.sectionID ?? it.sectionID) &&
@@ -490,7 +519,6 @@ export const AddSectionModal = ({
               Number(it.actualValue || 0) === Number(cItem.actualValue || it.actualValue || 0),
           )
 
-          // fallback strategy: match by  f no good match found (keeps previous behavior)
           const target = matchIndex !== -1 ? matchIndex : mergedItems.findIndex((_, i) => i === 0)
 
           if (target !== -1) {
@@ -502,7 +530,6 @@ export const AddSectionModal = ({
               location: cItem.location ?? mergedItems[target]?.location,
               itemDescription: cItem.itemDescription ?? mergedItems[target]?.itemDescription,
               smiCode: cItem.smiCode ?? mergedItems[target]?.smiCode,
-
               actualPremium: cItem.actualPremium ?? mergedItems[target]?.actualPremium,
               actualPremiumFormula: cItem.actualPremiumFormula ?? mergedItems[target]?.actualPremiumFormula,
               shareValue: cItem.shareValue ?? mergedItems[target]?.shareValue,
@@ -517,12 +544,10 @@ export const AddSectionModal = ({
           }
         })
 
-        // compute new section totals from response (if provided) or keep old
         const newSectionSum = resp.totalActualValue ?? resp.totalSumInsured ?? formData.sectionSumInsured
         const newSectionPremium = resp.totalActualPremium ?? resp.totalGrossPremium ?? formData.sectionPremium
         const newSectionNet = resp.totalNetPremiumAfterDiscounts ?? formData.sectionNetPremium
 
-        // update UI with merged result
         setFormData((prev) => ({
           ...prev,
           riskItems: mergedItems,
@@ -538,7 +563,6 @@ export const AddSectionModal = ({
         variant: "destructive",
         duration: 2000,
       });
-
     } finally {
       setApplyingMap((m) => {
         const c = { ...m }
@@ -551,12 +575,12 @@ export const AddSectionModal = ({
   const handleApplyAndCalculate = async (index: number) => {
     await handleCalculateAllItems()
     await handleApplyItem(index)
-    // run your top-level calculate to persist final totals if needed
+    await handleAddToTable(index);
   }
-
 
   const handleSave = () => {
     handleCalculateAllItems()
+setEditingIndex(null);
     if (!formData.sectionName) {
       toast({
         description: "Please select a section name",
@@ -566,15 +590,11 @@ export const AddSectionModal = ({
       return
     }
 
-    // Use location as the basis of the "unique" id, append a short random suffix.
-    // If location is empty, fall back to 'loc' so the id is still valid.
-    // Don't mutate formData directly — create an updated copy to pass up
     const updatedSection: QuoteSection = {
       ...formData,
       ...adjustments,
     }
 
-    // If parent wants the calculated risk array, ensure each item has the sectionID
     try {
       if (onCalculateFullRiskArray) {
         const prepared = (updatedSection.riskItems || []).map((mi) => ({
@@ -587,12 +607,11 @@ export const AddSectionModal = ({
       console.warn("onCalculateFullRiskArray callback failed:", cbErr)
     }
 
-    // Finally call onSave with the updated section
     onSave(updatedSection)
     console.log(formData);
-
     console.log("Saved section:", updatedSection)
   }
+
   const formatCurrency = (amount: number): string =>
     new Intl.NumberFormat("en-NG", {
       style: "currency",
@@ -616,6 +635,32 @@ export const AddSectionModal = ({
           <div className="form-section">
             <h4>Section Information</h4>
             <div className="form-grid">
+              {productId =="1234" && <>
+            <div className="form-field">
+              <Label htmlFor="riskClass">Business Category *</Label>
+              <Select
+                options={risks.map(r => ({ value: r.riskID, label: r.riskName }))}
+                value={riskClass ? { value: riskClass, label: risks.find(r => r.riskID === riskClass)?.riskName } : null}
+                onChange={opt => setRiskClass(opt?.value ?? "")}
+                placeholder="Select Business Category"
+                isDisabled={itemsInTable.size > 0 || !!formData?.riskItems?.[0]?.smiCode}
+              isClearable
+              />
+            </div>
+
+            <div className="form-field">
+              <Label htmlFor="subriskID">Subclass / Product *</Label>
+              <Select
+                options={productOptions}
+                value={productOptions.find(p => p.value === subRiskClass) || null}
+                onChange={opt => {setSubRiskClass(opt?.value ?? ""); handleSectionNameChange("")}}
+                placeholder="Select Subclass"
+                isDisabled={!riskClass || itemsInTable.size > 0 || !!formData?.riskItems?.[0]?.smiCode}
+                isClearable
+              />
+            </div>
+            </>
+}
               <div className="form-field">
                 <Label htmlFor="sectionName">Section Name *</Label>
                 <select
@@ -623,6 +668,7 @@ export const AddSectionModal = ({
                   value={selectedSectionCode}
                   onChange={(e) => handleSectionNameChange(e.target.value)}
                   className="form-select"
+                  disabled={itemsInTable.size > 0  || !!formData?.riskItems?.[0]?.smiCode}
                 >
                   <option value="">{!formData.sectionName ? "Select Section" : formData.sectionName}</option>
                   {subRiskSections.map((s, index) => (
@@ -632,7 +678,6 @@ export const AddSectionModal = ({
                   ))}
                 </select>
               </div>
-
               <div className="form-field">
                 <Label htmlFor="location">Location</Label>
                 <Input
@@ -640,10 +685,73 @@ export const AddSectionModal = ({
                   value={formData.location}
                   onChange={(e) => setFormData((p) => ({ ...p, location: e.target.value }))}
                   placeholder="Enter location"
+                  disabled={itemsInTable.size > 0 || !!formData?.riskItems?.[0]?.smiCode}
                 />
               </div>
             </div>
           </div>
+
+          {itemsInTable.size > 0 && (
+              <div className="Sc-items-table-section" style={{ marginBottom: 24 }}>
+              <h4 style={{ marginBottom: 12 }}>Items in Table ({itemsInTable.size})</h4>
+              <div className="Sc-staged-table-wrapper">
+                <table className="Sc-staged-table">
+                  <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>SMI</th>
+                        <th>Actual Value</th>
+                        <th>Premium</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(formData.riskItems || [])
+                        .map((item: any, index: number) => ({ item, index }))
+                        .filter(({ index }) => itemsInTable.has(index))
+                        .map(({ item, index }) => (
+                          <tr key={`${item.sectionID}-${index}`}>
+                            <td>{index + 1}</td>
+                            <td>{getSmiLabel(item.smiCode)}</td>
+                            <td>{formatCurrency(item.actualValue || 0)}</td>
+                            <td>{formatCurrency(item.actualPremium ?? 0)}</td>
+                            <td>
+                              <div style={{ display: "flex", gap: 8 }}>
+                              <Button
+  size="sm"
+  variant="outline"
+  onClick={() => {
+    setItemsInTable(prev => {
+      const next = new Set(prev);
+
+      next.delete(index);
+
+      if (editingIndex !== null && editingIndex !== index) {
+        next.add(editingIndex);
+      }
+
+      return next;
+    });
+
+    handleEditFromTable(index);
+
+    setEditingIndex(index);
+  }}
+>
+  Edit/View
+</Button>                                <Button size="sm" variant="ghost" onClick={() => handleRemoveItem(index)}>
+                                  Remove
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
 
           <div className="form-section">
             <div
@@ -657,7 +765,7 @@ export const AddSectionModal = ({
             >
               <div style={{ fontWeight: 700 }}>Risk Items ({formData.riskItems?.length})</div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Button onClick={handleAddItem} size="sm">
+                <Button onClick={()=>{handleAddItem();}} size="sm">
                   Add Item
                 </Button>
                 <Button onClick={handleCalculateAllItems} size="sm" variant="outline" disabled={!!applyingMap["ALL"]}>
@@ -665,6 +773,7 @@ export const AddSectionModal = ({
                 </Button>
               </div>
             </div>
+
 
             <div className="items-list">
               <div className="proportion-row">
@@ -688,7 +797,10 @@ export const AddSectionModal = ({
                 />
               </div>
 
-              {(formData.riskItems || []).map((item: any, index: number) => (
+              {(formData.riskItems || [])
+                .map((item: any, index: number) => ({ item, index }))
+                .filter(({ index }) => !itemsInTable.has(index))
+                .map(({ item, index }) => (
                 <article
                   key={`${item.sectionID}-${index}`}
                   className={`item-card ${item._collapsed ? "collapsed" : ""}`}
@@ -698,13 +810,6 @@ export const AddSectionModal = ({
                     <div className="top-left-meta" />
                     <div className="top-actions">
                       <Checkbox checked={item._collapsed} />
-                      {/* <button
-                        className="link-btn"
-                        onClick={() => toggleCollapse(index)}
-                        aria-label={item._collapsed ? "Expand item" : "Collapse item"}
-                      >
-                        {item._collapsed ? "Expand ▾" : "Collapse ▴"}
-                      </button> */}
                     </div>
                   </div>
 
@@ -738,14 +843,22 @@ export const AddSectionModal = ({
                       <footer className="card-footer">
                         <div className="footer-actions centered">
                           <Button
-                            onClick={() => handleApplyAndCalculate(index)}
+                            onClick={() => {handleApplyAndCalculate(index);}}
                             size="sm"
                             className="apply-btn"
                             disabled={!!applyingMap[keyFor(index)]}
                           >
                             {applyingMap[keyFor(index)] ? "Applying..." : "Apply"}
                           </Button>
-                          <Button
+{/*                           <Button
+                            onClick={() => handleAddToTable(index)}
+                            size="sm"
+                            variant="secondary"
+                            className="stage-btn"
+                          >
+                            Add to Table
+                          </Button>
+ */}                          <Button
                             onClick={() => handleRemoveItem(index)}
                             size="sm"
                             variant="outline"
@@ -756,13 +869,6 @@ export const AddSectionModal = ({
                           <div className="" onClick={() => toggleCollapse(index)}>
                             <Checkbox checked={item._collapsed} /> {item._collapsed ? "Expand" : "Collapse"}
                           </div>
-                          {/* <button
-                            className="link-btn"
-                            onClick={() => toggleCollapse(index)}
-                            aria-label={item._collapsed ? "Expand item" : "Collapse item"}
-                          >
-                            {item._collapsed ? "Expand ▾" : "Collapse ▴"}
-                          </button> */}
                         </div>
                       </footer>
                     </>
@@ -871,7 +977,6 @@ export const AddSectionModal = ({
                           </div>
                         </div>
 
-
                         <div className="card-row" style={{ marginTop: 8 }}>
                           <div className="label">Stock</div>
                           <div className="value">
@@ -962,7 +1067,6 @@ export const AddSectionModal = ({
                           </div>
                         </div>
 
-
                         <div className="discounts-area">
                           {item.stockDiscountAmount ? (
                             <div>Stock: {formatCurrency(item.stockDiscountAmount)}</div>
@@ -992,7 +1096,7 @@ export const AddSectionModal = ({
                             </div>
                             <div className="value" style={{ fontWeight: 700 }}>
                               Shared Premium: {formatCurrency(item.premiumValue ?? 0)}
-                            </div>{" "}
+                            </div>
                             <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
                               <div className="muted">
                                 Stock Discount:{" "}
@@ -1018,19 +1122,23 @@ export const AddSectionModal = ({
                       <footer className="card-footer">
                         <div className="footer-actions centered">
                           <Button
-                            onClick={() => {
-                              handleApplyAndCalculate(index)
-                            }}
+                            onClick={() => handleApplyAndCalculate(index)}
                             size="sm"
                             className="apply-btn"
                             disabled={!!applyingMap[keyFor(index)]}
                           >
                             {applyingMap[keyFor(index)] ? "Applying..." : "Apply"}
                           </Button>
-                          <Button
-                            onClick={() => {
-                              handleRemoveItem(index)
-                            }}
+{/*                           <Button
+                            onClick={() => handleAddToTable(index)}
+                            size="sm"
+                            variant="secondary"
+                            className="stage-btn"
+                          >
+                            Add to Table
+                          </Button>
+ */}                          <Button
+                            onClick={() => handleRemoveItem(index)}
                             size="sm"
                             variant="outline"
                             className="remove-btn"
@@ -1040,13 +1148,6 @@ export const AddSectionModal = ({
                           <div className="" onClick={() => toggleCollapse(index)}>
                             <Checkbox checked={item._collapsed} /> {item._collapsed ? "Expand" : "Collapse"}
                           </div>
-                          {/* <button
-                            className="link-btn"
-                            onClick={() => toggleCollapse(index)}
-                            aria-label={item._collapsed ? "Expand item" : "Collapse item"}
-                            >
-                            {item._collapsed ? "Expand ▾" : "Collapse ▴"}
-                          </button> */}
                         </div>
                       </footer>
                     </>
@@ -1055,6 +1156,7 @@ export const AddSectionModal = ({
               ))}
             </div>
           </div>
+          
           <div className="form-section">
             <div className="qc-adjustments-panel">
               <h3 style={{ display: "flex", justifyContent: "space-between" }}>
@@ -1062,13 +1164,6 @@ export const AddSectionModal = ({
                 <div className="" onClick={() => setAdjCollapse(!adjCollapse)}>
                   <Checkbox checked={adjCollapse} /> {adjCollapse ? "Expand" : "Collapse"}
                 </div>
-                {/* <button
-                  className="link-btn"
-                  onClick={() => setAdjCollapse(!adjCollapse)}
-                  aria-label={adjCollapse ? "Expand item" : "Collapse item"}
-                >
-                  {adjCollapse ? "Expand ▾" : "Collapse ▴"}
-                </button> */}
               </h3>
               {!adjCollapse && (
                 <>
@@ -1313,7 +1408,7 @@ export const AddSectionModal = ({
                   </div>
                 )}
               </div>
-            </div>{" "}
+            </div>
           </div>
 
           <div className="summary-section">
@@ -1353,10 +1448,6 @@ export const AddSectionModal = ({
           </div>
 
           <div className="modal-actions">
-            {/*           <Button onClick={handleCalculateAllItems} size="default" variant="outline" disabled={!!applyingMap["ALL"]}>
-                  {applyingMap["ALL"] ? "Calculating..." : "Calculate All"}
-                </Button>
- */}{" "}
             <Button onClick={handleSave}>Save & Update</Button>
             <Button onClick={onClose} variant="outline">
               Cancel
