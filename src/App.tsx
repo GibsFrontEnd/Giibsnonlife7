@@ -28,6 +28,7 @@ import EditProposal from "./components/quotations/quotes/EditProposal";
 import ClauseManager from "./components/quotations/quotes/ClauseManager";
 import CreateProposal from "./components/quotations/quotes/CreateProposal";
 import QuoteCreator from "./components/quotations/quotes/QuoteCreator";
+import MotorQuoteCreator from "./components/quotations/quotes/MotorQuoteCreator";
 
 
 const App: React.FC = () => {
@@ -59,6 +60,7 @@ const App: React.FC = () => {
             <Route path="create/:businessId" element={<CreateProposal />} />
             <Route path="edit/:proposalNo" element={<EditProposal />} />
             <Route path="quote/:proposalNo" element={<QuoteCreator />} />
+            <Route path="quote/motor/:proposalNo" element={<MotorQuoteCreator />} />
             <Route path="customers" element={<CSUCustomers />} />
             <Route path="partners" element={<CSUParty />} />
             <Route path="messaging" element={<CSUMessaging />} />

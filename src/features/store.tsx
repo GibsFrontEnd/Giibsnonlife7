@@ -19,6 +19,7 @@ import quoteReducer from './reducers/quoteReducers/quotationSlice'
 import companySlice from "./reducers/companyReducers/companySlice";
 import marketingChannelsReducer from "./reducers/companyReducers/marketingChannelSlice";
 import clauseReducer from "./reducers/quoteReducers/clauseSlice";
+import motorQuotationReducer from "./reducers/quoteReducers/motorQuotationSlice";
 
 export const store = configureStore({
   reducer: {
@@ -42,6 +43,7 @@ export const store = configureStore({
     companies: companySlice,
     marketingChannels: marketingChannelsReducer,
     clauses: clauseReducer,
+    motorQuotations: motorQuotationReducer,
   },
 });
 

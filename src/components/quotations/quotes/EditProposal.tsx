@@ -82,7 +82,7 @@ const EditProposal = () => {
 
   useEffect(() => {
     console.log("it's log");
-    
+
     if (currentProposal) {
       console.log(currentProposal);
 
@@ -143,7 +143,7 @@ const EditProposal = () => {
 
     if (proposalNo) {
       dispatch(updateProposal({ proposalNo, proposalData: formData }) as any)
-        dispatch(getProposalByNumber(proposalNo) as any)  
+      dispatch(getProposalByNumber(proposalNo) as any)
     }
   }
 
@@ -152,8 +152,14 @@ const EditProposal = () => {
   }
 
   const handleDoQuote = () => {
-    if (proposalNo) {
-      navigate(`/quotations/quote/${proposalNo}`)
+    if (risks.find((r) => r.riskID == currentProposal.riskID)?.riskName == "Motor") {
+      if (proposalNo) {
+        navigate(`/quotations/quote/motor/${proposalNo}`)
+      }
+    } else {
+      if (proposalNo) {
+        navigate(`/quotations/quote/${proposalNo}`)
+      }
     }
   }
 
@@ -193,7 +199,7 @@ const EditProposal = () => {
           </Button>
           <Button onClick={handleCancel} variant="outline">
             Back to List
-          </Button>          
+          </Button>
           <Button onClick={handleDoClause} variant="outline">
             Do Clause
           </Button>
@@ -295,7 +301,7 @@ const EditProposal = () => {
             </div>
 
             <div className="form-field">
-            <Label htmlFor="firstName">First Name *</Label>
+              <Label htmlFor="firstName">First Name *</Label>
               <Input
                 id="firstName"
                 value={formData.firstName}
@@ -304,7 +310,7 @@ const EditProposal = () => {
               />
             </div>
             <div className="form-field form-field-full">
-            <Label htmlFor="insuredName">Other Names *</Label>
+              <Label htmlFor="insuredName">Other Names *</Label>
               <Input
                 id="fistName"
                 value={formData.otherNames}
