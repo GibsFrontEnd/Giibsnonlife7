@@ -1,5 +1,4 @@
 //@ts-nocheck
-"use client"
 
 import { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
@@ -142,24 +141,16 @@ const QuoteCreator = () => {
   const [remarks, setRemarks] = useState("")
   const [normalizedBreakdown, setNormalizedBreakdown] = useState<any | null>(null)
   const [aggregateTotals, setAggregateTotals] = useState<aggregateTotals | null>(null)
-  // local (component) state to avoid showing stale summaries
   const [sectionsLoading, setSectionsLoading] = useState(false)
   const [localSectionsSummary, setLocalSectionsSummary] = useState<any | null>(null)
   const [payloadSection, setPayloadSection] = useState<any[] | null>([])
-  // local-only sections array (used while server endpoints are disabled)
   const [localSections, setLocalSections] = useState<QuoteSection[] | null>(null)
-
-  // stores the FULL calculated risk arrays produced by AddSectionModal's "Calculate All" button
   const [calculatedRiskMap, setCalculatedRiskMap] = useState<Record<string, any[]>>({})
   const [editedSections, setEditedSections] = useState<number[]>([]);
-  // store the result of applyProposalAdjustments call (startingPremium, discount amounts, netPremiumDue, etc.)
   const [proposalAdjustmentsResult, setProposalAdjustmentsResult] = useState<any | null>(null)
-
-  // pro-rata: coverDays (user input) + result storage
   const [coverDays, setCoverDays] = useState<number>(365)
   const [proRataResult, setProRataResult] = useState<any | null>(null)
 
-  // fetch token to prevent race conditions
   const sectionsFetchIdRef = useRef(0)
 
   useEffect(() => {
@@ -175,7 +166,6 @@ const QuoteCreator = () => {
     setShowDetailedBreakdown(false)
   }, [proposalNo])
 
-  // load proposal, current calculation, breakdown and sectionsSummary (with local clearing)
   useEffect(() => {
     if (!proposalNo) return
 
@@ -222,7 +212,7 @@ const QuoteCreator = () => {
       sectionPremium: s.sectionGrossPremium ?? 0,
       sectionNetPremium: s.sectionNetPremium ?? 0,
       riskItems: s.riskItems ?? [],
-    }))
+      lastCalculated: calculationBreakdown?.calculatedOn ?? null    }))
 
     setLocalSections(freshSections)
   }, [calculationBreakdown])
@@ -554,11 +544,13 @@ const QuoteCreator = () => {
       });
     }
   }
-
-
+  const netPremium = proposalAdjustmentsResult?.netPremiumDue || calculationBreakdown?.calculationSteps?.proRataCalculations.netPremiumBeforeProRata
+useEffect(()=>{
+  if(netPremium)
+  handleCalculateProRata();
+},[])
 
   const handleCalculateProRata = async () => {
-    const netPremium = proposalAdjustmentsResult?.netPremiumDue || calculationBreakdown?.calculationSteps?.proRataCalculations.netPremiumBeforeProRata
     if (!netPremium || Number(netPremium) <= 0) {
       toast({
         description: "No net premium available to pro-rate. Run proposal adjustments or a calculation first.",
