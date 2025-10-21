@@ -70,9 +70,9 @@
 }
 
 .add-vehicle-modal .adjustment-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px;
+  /* display: grid; */
+  /* grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px; */
   align-items: flex-end;
 }
 

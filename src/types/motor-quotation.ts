@@ -39,40 +39,75 @@ export interface MotorVehicle {
 }
 
 export interface CalculatedMotorVehicle extends MotorVehicle {
-  basicPremium: number
-  premiumAfterDiscounts: number
-  grossPremium: number
-  netPremium: number
-  totalDiscountAmount: number
-  totalLoadingAmount: number
+  itemNo: number,
+  vehicleRegNo: string,
+  certificateNo: string,
+  vehicleType: string,
+  coverType: string,
+  vehicleValue: number,
+  premiumRate: number,
   step1_BasicPremium?: {
     stepName: string
     startingAmount: number
-    adjustments: any[]
-    finalAmount: number
+    adjustments: {
+      name: string,
+      type: string,
+      rate: number,
+      amount: number,
+      sequenceOrder: number,
+      formula: string
+    }[]
+    totalAdjustment: number,
+    resultingAmount: number
     formula: string
   }
-  step2_Discounts?: {
+  step2_AfterDiscounts?: {
     stepName: string
     startingAmount: number
-    adjustments: MotorAdjustment[]
-    finalAmount: number
-    totalDiscountAmount: number
+    adjustments: {
+      name: string,
+      type: string,
+      rate: number,
+      amount: number,
+      sequenceOrder: number,
+      formula: string
+    }[]
+    totalAdjustment: number,
+    resultingAmount: number
+    formula: string
   }
-  step3_Loadings?: {
+  step3_AfterLoadings?: {
     stepName: string
     startingAmount: number
-    adjustments: MotorAdjustment[]
-    finalAmount: number
-    totalLoadingAmount: number
+    adjustments: {
+      name: string,
+      type: string,
+      rate: number,
+      amount: number,
+      sequenceOrder: number,
+      formula: string
+    }[]
+    totalAdjustment: number,
+    resultingAmount: number
+    formula: string
   }
   step4_FinalPremium?: {
     stepName: string
-    grossPremium: number
-    trackingCost: number
-    rescueCost: number
-    netPremium: number
+    startingAmount: number
+    adjustments: {
+      name: string,
+      type: string,
+      rate: number,
+      amount: number,
+      sequenceOrder: number,
+      formula: string
+    }[]
+    totalAdjustment: number,
+    resultingAmount: number
+    formula: string
   }
+  shareValue: number,
+  sharePremium: number
 }
 
 export interface MotorVehicleUI extends MotorVehicle {
@@ -127,6 +162,19 @@ export interface MotorCalculationBreakdown {
     otherDiscountRate: number
     otherLoadingRate: number
   }
+  vehicleAggregation: {
+    totalVehicles: number,
+    totalVehicleValue: number,
+    totalNetPremium: number,
+    vehicleSummaries: [
+      {
+        itemNo: number,
+        vehicleRegNo: string,
+        vehicleValue: number,
+        netPremium: number
+      }
+    ]
+  }
   vehicleCalculations: CalculatedMotorVehicle[]
   proposalAdjustments: {
     aggregatePremium: number
@@ -137,16 +185,16 @@ export interface MotorCalculationBreakdown {
     otherLoadingAmount: number
     netPremiumDue: number
   }
-  finalCalculation: {
-    netPremium: number
-    totalVehicleValue: number
-    coverDays: number
-    proRataPremium: number
-    proportionRate: number
-    shareSumInsured: number
-    sharePremium: number
-    foreignSumInsured: number
-    foreignPremium: number
+  finalResults: {
+    totalVehicleValue: number,
+    totalNetPremium: number,
+    netPremiumAfterProposalAdjustments: number,
+    proRataPremium: number,
+    shareSumInsured: number,
+    sharePremium: number,
+    foreignSumInsured: number,
+    foreignPremium: number,
+    foreignCurrency: string,
     finalPremiumDue: number
   }
   success: boolean

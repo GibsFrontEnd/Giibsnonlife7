@@ -293,6 +293,7 @@ const motorQuotationSlice = createSlice({
             .addCase(calculateMotorComplete.fulfilled, (state, action) => {
                 state.loading.calculate = false
                 state.currentCalculation = action.payload
+                // state.calculationBreakdown = action.payload
                 state.success.calculate = true
             })
             .addCase(calculateMotorComplete.rejected, (state, action) => {
@@ -325,6 +326,7 @@ const motorQuotationSlice = createSlice({
             .addCase(getMotorCalculationBreakdown.fulfilled, (state, action) => {
                 state.loading.fetchCalculation = false
                 state.calculationBreakdown = action.payload
+                // state.vehicles = action.payload.vehicleCalculations
             })
             .addCase(getMotorCalculationBreakdown.rejected, (state, action) => {
                 state.loading.fetchCalculation = false

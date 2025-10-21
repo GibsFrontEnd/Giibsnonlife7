@@ -19,21 +19,21 @@ export const Dialog = ({ open, onOpenChange, children, maxWidth = "800px", heigh
 
   return ReactDOM.createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-[4000] flex items-center justify-center bg-black/50 p-4"
       // clicking backdrop will close the dialog
-      onClick={() => {
-        try {
-          onOpenChange(false);
-        } catch {
-          onOpenChange();
-        }
-      }}
+      // onClick={() => {
+      //   try {
+      //     onOpenChange(false);
+      //   } catch {
+      //     onOpenChange();
+      //   }
+      // }}
     >
       <div
         className="bg-white rounded-lg shadow-lg w-full relative"
         style={{ maxWidth, height }}
         // prevent clicks inside modal from closing it
-        onClick={(e) => e.stopPropagation()}
+        // onClick={(e) => e.stopPropagation()}
       >
         {/* content area */}
         {children}
