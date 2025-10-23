@@ -327,6 +327,7 @@ const motorQuotationSlice = createSlice({
         builder
             .addCase(getMotorCalculationBreakdown.pending, (state) => {
                 state.loading.fetchCalculation = true
+                state.calculationBreakdown = null
                 state.error.fetchCalculation = null
             })
             .addCase(getMotorCalculationBreakdown.fulfilled, (state, action) => {
