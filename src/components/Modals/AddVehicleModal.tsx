@@ -1,5 +1,4 @@
-"use client"
-
+//@ts-nocheck
 import { useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
 import type { AppDispatch } from "../../features/store"

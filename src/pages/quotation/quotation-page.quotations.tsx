@@ -13,7 +13,7 @@ const QuoteQuotations = () => {
   const dispatch = useDispatch<AppDispatch>()
   const { risks } = useSelector((state: RootState) => state.risks)
   const { businessId: businessIdParam } = useParams<{ businessId?: string }>()
-  const businessId = businessIdParam ?? null
+  const businessId = businessIdParam ?? null;
 
   useEffect(() => {
     dispatch(getAllRisks({ pageNumber: 1, pageSize: 100 }) as any)
@@ -22,6 +22,7 @@ const QuoteQuotations = () => {
   
 // get a single tab object based on businessId (or "All" if none / not found)
 const tabs = (() => {
+  
   if (!businessId) {
     return { title: "All", content: <Quotes businessId={null} /> };
   }
