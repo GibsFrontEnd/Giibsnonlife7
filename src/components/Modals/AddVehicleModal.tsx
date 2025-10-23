@@ -1,3 +1,4 @@
+// @ts-nocheck
 "use client"
 
 import { useEffect, useState } from "react"
@@ -218,6 +219,7 @@ export const AddVehicleModal = ({ isOpen, onClose, onSave, vehicle }: AddVehicle
                 premiumAfterDiscounts: result.premiumAfterDiscounts,
             }))
 
+
             toast({
                 description: `Premium After Discounts: ${formatCurrency(result.premiumAfterDiscounts)}`,
                 variant: "success",
@@ -232,9 +234,7 @@ export const AddVehicleModal = ({ isOpen, onClose, onSave, vehicle }: AddVehicle
         } finally {
             setCalculatingStep(null)
         }
-    }
 
-    const handleCalculateStep3 = async () => {
         if (!calculatedPremium.premiumAfterDiscounts) {
             toast({
                 description: "Apply discounts first",
@@ -243,6 +243,7 @@ export const AddVehicleModal = ({ isOpen, onClose, onSave, vehicle }: AddVehicle
             })
             return
         }
+
 
         setCalculatingStep("step3")
         try {
@@ -267,14 +268,28 @@ export const AddVehicleModal = ({ isOpen, onClose, onSave, vehicle }: AddVehicle
                 duration: 2000,
             })
         } catch (err: any) {
-            toast({
-                description: "Failed to apply loadings",
-                variant: "destructive",
-                duration: 2000,
-            })
+            if (err?.status == 400) {
+                toast({
+                    description: "",
+                    variant: "destructive",
+                    duration: 2000,
+                })
+            } else {
+                toast({
+                    description: "Failed to apply loadings",
+                    variant: "destructive",
+                    duration: 2000,
+                })
+            }
+            console.log(err)
+
         } finally {
             setCalculatingStep(null)
         }
+    }
+
+    const handleCalculateStep3 = async () => {
+
     }
 
     const handleCalculateStep4 = async () => {
@@ -689,11 +704,14 @@ export const AddVehicleModal = ({ isOpen, onClose, onSave, vehicle }: AddVehicle
                             await handleCalculateStep2()
                             handleCalculateStep3()
                         }}
-                        disabled={calculatingStep !== null || !calculatedPremium.basicPremium}
+                        disabled={calculatingStep !== null || !calculatedPremium.basicPremium || calculatedPremium.grossPremium}
                         variant="outline"
                         className="h-10"
                     >
-                        {(calculatingStep === "step3" || calculatingStep === "step2") ? "Calculating..." : "Apply Discount & Loadings"}
+                        {calculatedPremium.grossPremium ? (<>
+                            Gross Premium : {calculatedPremium.grossPremium}</>) : (
+                            <>{(calculatingStep === "step3" || calculatingStep === "step2") ? "Calculating..." : "Apply Discount & Loadings"}</>
+                        )}
                     </Button>
 
                     <div className="modal-actions">

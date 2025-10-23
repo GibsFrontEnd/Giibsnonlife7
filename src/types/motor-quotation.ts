@@ -206,6 +206,7 @@ export interface MotorQuotationState {
   currentCalculation: MotorCalculationResponse | null
   calculationBreakdown: MotorCalculationBreakdown | null
   vehicles: MotorVehicleUI[]
+  hasCalculated: boolean
 
   loading: {
     fetchProposal: boolean
