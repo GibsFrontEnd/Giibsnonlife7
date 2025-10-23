@@ -1,4 +1,6 @@
-//@ts-nocheck
+// @ts-nocheck
+"use client"
+
 import { useEffect, useState } from "react"
 import { useDispatch } from "react-redux"
 import type { AppDispatch } from "../../features/store"
@@ -82,7 +84,7 @@ export const AddVehicleModal = ({ isOpen, onClose, onSave, vehicle }: AddVehicle
             adjustmentName: "",
             adjustmentType: "Discount",
             rate: 0,
-            appliedOn: "SumInsured",
+            appliedOn: "Premium",
             baseAmount: 0,
             amount: 0,
             sequenceOrder: formData.discounts.length + 1,
@@ -199,10 +201,10 @@ export const AddVehicleModal = ({ isOpen, onClose, onSave, vehicle }: AddVehicle
             })
             return
         }
-
+    
         setCalculatingStep("step2")
         try {
-            const result = await (
+            const discountResult = await (
                 dispatch(
                     applyDiscounts({
                         basicPremium: calculatedPremium.basicPremium,
@@ -211,69 +213,61 @@ export const AddVehicleModal = ({ isOpen, onClose, onSave, vehicle }: AddVehicle
                     }),
                 ) as any
             ).unwrap()
-
+    
             setCalculatedPremium((prev) => ({
                 ...prev,
-                premiumAfterDiscounts: result.premiumAfterDiscounts,
+                premiumAfterDiscounts: discountResult.premiumAfterDiscounts,
             }))
-
+    
             toast({
-                description: `Premium After Discounts: ${formatCurrency(result.premiumAfterDiscounts)}`,
+                description: `Premium After Discounts: ${formatCurrency(discountResult.premiumAfterDiscounts)}`,
                 variant: "success",
                 duration: 2000,
             })
-        } catch (err: any) {
-            toast({
-                description: "Failed to apply discounts",
-                variant: "destructive",
-                duration: 2000,
-            })
-        } finally {
-            setCalculatingStep(null)
-        }
-    }
-
-    const handleCalculateStep3 = async () => {
-        if (!calculatedPremium.premiumAfterDiscounts) {
-            toast({
-                description: "Apply discounts first",
-                variant: "warning",
-                duration: 2000,
-            })
-            return
-        }
-
-        setCalculatingStep("step3")
-        try {
-            const result = await (
+    
+            // ✅ Use the new value directly instead of reading from state
+            setCalculatingStep("step3")
+            const loadingResult = await (
                 dispatch(
                     applyLoadings({
-                        premiumAfterDiscounts: calculatedPremium.premiumAfterDiscounts,
+                        premiumAfterDiscounts: discountResult.premiumAfterDiscounts,
                         vehicleValue: formData.vehicleValue,
                         loadings: formData.loadings,
                     }),
                 ) as any
             ).unwrap()
-
+    
             setCalculatedPremium((prev) => ({
                 ...prev,
-                grossPremium: result.grossPremium,
+                grossPremium: loadingResult.grossPremium,
             }))
-
+    
             toast({
-                description: `Gross Premium: ${formatCurrency(result.grossPremium)}`,
+                description: `Gross Premium: ${formatCurrency(loadingResult.grossPremium)}`,
                 variant: "success",
                 duration: 2000,
             })
         } catch (err: any) {
-            toast({
-                description: "Failed to apply loadings",
-                variant: "destructive",
-                duration: 2000,
-            })
+            if (err?.status == 400) {
+                toast({
+                    description: "",
+                    variant: "destructive",
+                    duration: 2000,
+                })
+            } else {
+                toast({
+                    description: "Failed to apply discounts or loadings",
+                    variant: "destructive",
+                    duration: 2000,
+                })
+            }
+            console.log(err)
         } finally {
             setCalculatingStep(null)
         }
+    }
+        const handleCalculateStep3 = async () => {
+
     }
 
     const handleCalculateStep4 = async () => {
@@ -329,6 +323,7 @@ export const AddVehicleModal = ({ isOpen, onClose, onSave, vehicle }: AddVehicle
             return
         }
 
+        handleCalculateStep4()
         onSave(formData)
         setFormData(initialForm())
         setCalculatedPremium({})
@@ -572,54 +567,58 @@ export const AddVehicleModal = ({ isOpen, onClose, onSave, vehicle }: AddVehicle
                                 Add Discount
                             </Button>
                         </div>
+                        <div className="flex flex-col-reverse gap-3">
+                            {formData.discounts.map((discount, index) => (
+                                <div key={index} className="adjustment-item ">
+                                    <div className="flex flex-col">
+                                        <div className="form-field">
+                                            <Label>Name</Label>
+                                            <Input
+                                                value={discount.adjustmentName}
+                                                onChange={(e) => handleAdjustmentChange("discount", index, "adjustmentName", e.target.value)}
+                                                placeholder="e.g., NCB Discount"
+                                            />
+                                        </div>
 
-                        {formData.discounts.map((discount, index) => (
-                            <div key={index} className="adjustment-item">
-                                <div className="adjustment-grid">
-                                    <div className="form-field">
-                                        <Label>Name</Label>
-                                        <Input
-                                            value={discount.adjustmentName}
-                                            onChange={(e) => handleAdjustmentChange("discount", index, "adjustmentName", e.target.value)}
-                                            placeholder="e.g., NCB Discount"
-                                        />
-                                    </div>
+                                        <div className="form-field">
+                                            <div className="w-full flex justify-between">
+                                                <Label>Rate (%)</Label>
+                                                <Label className="">Discount: {calculatedPremium.basicPremium ? formatCurrency(calculatedPremium.basicPremium * (discount.rate / 100)) : "N/A"}</Label>
+                                            </div>
+                                            <Input
+                                                type="number"
+                                                min="0"
+                                                max="100"
+                                                step="0.01"
+                                                value={discount.rate}
+                                                onChange={(e) => handleAdjustmentChange("discount", index, "rate", e.target.value)}
+                                            />
+                                        </div>
 
-                                    <div className="form-field">
-                                        <Label>Rate (%)</Label>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            max="100"
-                                            step="0.01"
-                                            value={discount.rate}
-                                            onChange={(e) => handleAdjustmentChange("discount", index, "rate", e.target.value)}
-                                        />
-                                    </div>
+                                        <div className="form-field">
+                                            <Label>Applied On</Label>
+                                            <select
+                                                value={discount.appliedOn}
+                                                onChange={(e) => handleAdjustmentChange("discount", index, "appliedOn", e.target.value)}
+                                                className="form-select"
+                                            >
+                                                <option value="Premium">Premium</option>
+                                                <option value="SumInsured">Sum Insured</option>
+                                            </select>
+                                        </div>
 
-                                    <div className="form-field">
-                                        <Label>Applied On</Label>
-                                        <select
-                                            value={discount.appliedOn}
-                                            onChange={(e) => handleAdjustmentChange("discount", index, "appliedOn", e.target.value)}
-                                            className="form-select"
+                                        <Button
+                                            onClick={() => handleRemoveDiscount(index)}
+                                            size="sm"
+                                            variant="outline"
+                                            className="remove-btn w-max"
                                         >
-                                            <option value="SumInsured">Sum Insured</option>
-                                            <option value="Premium">Premium</option>
-                                        </select>
+                                            Remove
+                                        </Button>
                                     </div>
-
-                                    <Button
-                                        onClick={() => handleRemoveDiscount(index)}
-                                        size="sm"
-                                        variant="outline"
-                                        className="remove-btn"
-                                    >
-                                        Remove
-                                    </Button>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
 
                     {/* Loadings */}
@@ -630,125 +629,71 @@ export const AddVehicleModal = ({ isOpen, onClose, onSave, vehicle }: AddVehicle
                                 Add Loading
                             </Button>
                         </div>
+                        <div className="flex flex-col-reverse gap-3">
+                            {formData.loadings.map((loading, index) => (
+                                <div key={index} className="adjustment-item">
+                                    <div className="adjustment-grid">
+                                        <div className="form-field">
+                                            <Label>Name</Label>
+                                            <Input
+                                                value={loading.adjustmentName}
+                                                onChange={(e) => handleAdjustmentChange("loading", index, "adjustmentName", e.target.value)}
+                                                placeholder="e.g., Inexperienced Driver"
+                                            />
+                                        </div>
 
-                        {formData.loadings.map((loading, index) => (
-                            <div key={index} className="adjustment-item">
-                                <div className="adjustment-grid">
-                                    <div className="form-field">
-                                        <Label>Name</Label>
-                                        <Input
-                                            value={loading.adjustmentName}
-                                            onChange={(e) => handleAdjustmentChange("loading", index, "adjustmentName", e.target.value)}
-                                            placeholder="e.g., Inexperienced Driver"
-                                        />
+                                        <div className="form-field">
+                                            <div className="w-full flex justify-between">
+                                                <Label>Rate (%)</Label>
+                                                <Label className="">Loading: {calculatedPremium.basicPremium ? formatCurrency(calculatedPremium.basicPremium * (loading.rate / 100)) : "N/A"}</Label>
+                                            </div>
+                                            <Input
+                                                type="number"
+                                                min="0"
+                                                max="100"
+                                                step="0.01"
+                                                value={loading.rate}
+                                                onChange={(e) => handleAdjustmentChange("loading", index, "rate", e.target.value)}
+                                            />
+                                        </div>
+
+                                        <div className="form-field">
+                                            <Label>Applied On</Label>
+                                            <select
+                                                value={loading.appliedOn}
+                                                onChange={(e) => handleAdjustmentChange("loading", index, "appliedOn", e.target.value)}
+                                                className="form-select"
+                                            >
+                                                <option value="SumInsured">Sum Insured</option>
+                                                <option value="Premium">Premium</option>
+                                            </select>
+                                        </div>
+
+                                        <Button onClick={() => handleRemoveLoading(index)} size="sm" variant="outline" className="remove-btn">
+                                            Remove
+                                        </Button>
                                     </div>
-
-                                    <div className="form-field">
-                                        <Label>Rate (%)</Label>
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            max="100"
-                                            step="0.01"
-                                            value={loading.rate}
-                                            onChange={(e) => handleAdjustmentChange("loading", index, "rate", e.target.value)}
-                                        />
-                                    </div>
-
-                                    <div className="form-field">
-                                        <Label>Applied On</Label>
-                                        <select
-                                            value={loading.appliedOn}
-                                            onChange={(e) => handleAdjustmentChange("loading", index, "appliedOn", e.target.value)}
-                                            className="form-select"
-                                        >
-                                            <option value="SumInsured">Sum Insured</option>
-                                            <option value="Premium">Premium</option>
-                                        </select>
-                                    </div>
-
-                                    <Button onClick={() => handleRemoveLoading(index)} size="sm" variant="outline" className="remove-btn">
-                                        Remove
-                                    </Button>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Calculation Steps */}
-                    <div className="form-section">
-                        <h4>Premium Calculation</h4>
-                        <div className="w-full flex items-end justify-between">
-                            {/* <Button onClick={handleCalculateStep1} disabled={calculatingStep !== null} variant="outline" size="sm">
-                                {calculatingStep === "step1" ? "Calculating..." : "Step 1: Basic Premium"}
-                            </Button> */}
-
-                            {/* <Button
-                                onClick={handleCalculateStep2}
-                                disabled={calculatingStep !== null || !calculatedPremium.basicPremium}
-                                variant="outline"
-                                size="sm"
-                            >
-                                {calculatingStep === "step2" ? "Calculating..." : "Step 2: Apply Discounts"}
-                            </Button> */}
-                            {Object.keys(calculatedPremium).length > 0 && (
-                                <div className="calculation-results">
-                                    <h5>Calculation Results</h5>
-                                    {calculatedPremium.basicPremium && (
-                                        <div className="result-row">
-                                            <span>Basic Premium:</span>
-                                            <span>{formatCurrency(calculatedPremium.basicPremium)}</span>
-                                        </div>
-                                    )}
-                                    {calculatedPremium.premiumAfterDiscounts && (
-                                        <div className="result-row">
-                                            <span>After Discounts:</span>
-                                            <span>{formatCurrency(calculatedPremium.premiumAfterDiscounts)}</span>
-                                        </div>
-                                    )}
-                                    {calculatedPremium.grossPremium && (
-                                        <div className="result-row">
-                                            <span>Gross Premium:</span>
-                                            <span>{formatCurrency(calculatedPremium.grossPremium)}</span>
-                                        </div>
-                                    )}
-                                    {calculatedPremium.netPremium && (
-                                        <div className="result-row highlight">
-                                            <span>Net Premium:</span>
-                                            <span>{formatCurrency(calculatedPremium.netPremium)}</span>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            <div className="flex gap-4">
-                                <Button
-                                    onClick={() => {
-                                        handleCalculateStep2()
-                                        handleCalculateStep3()
-                                    }}
-                                    disabled={calculatingStep !== null || !calculatedPremium.basicPremium}
-                                    variant="outline"
-                                    size="sm"
-                                >
-                                    {(calculatingStep === "step3" || calculatingStep === "step2") ? "Calculating..." : "Apply Discount & Loadings"}
-                                </Button>
-
-                                <Button
-                                    onClick={handleCalculateStep4}
-                                    disabled={calculatingStep !== null || !calculatedPremium.grossPremium}
-                                    size="sm"
-                                >
-                                    {calculatingStep === "step4" ? "Calculating..." : "Step 4: Final Premium"}
-                                </Button>
-                            </div>
+                            ))}
                         </div>
-
-
                     </div>
+                    <Button
+                        onClick={async () => {
+                            await handleCalculateStep2()
+                            handleCalculateStep3()
+                        }}
+                        disabled={calculatingStep !== null || !calculatedPremium.basicPremium || calculatedPremium.grossPremium}
+                        variant="outline"
+                        className="h-10"
+                    >
+                        {calculatedPremium.grossPremium ? (<>
+                            Gross Premium : {calculatedPremium.grossPremium}</>) : (
+                            <>{(calculatingStep === "step3" || calculatingStep === "step2") ? "Calculating..." : "Apply Discount & Loadings"}</>
+                        )}
+                    </Button>
 
                     <div className="modal-actions">
-                        <Button onClick={handleSave}>Save Vehicle</Button>
+                        <Button disabled={calculatingStep !== null || !calculatedPremium.grossPremium} loading={calculatingStep === "step4"} onClick={handleSave} className="w-[120px]">Save Vehicle</Button>
                         <Button onClick={onClose} variant="outline">
                             Cancel
                         </Button>

@@ -1,5 +1,6 @@
 //@ts-nocheck
 import type { Quote, QuoteSection, RiskItem, Extension, Discount } from "../types/quotation"
+import type { CalculatedMotorVehicle, MotorVehicleUI } from "../types/motor-quotation"
 
 // Rounding function as specified
 export function round2(value: number): number {
@@ -251,4 +252,67 @@ export function validateQuote(quote: Quote): string[] {
   })
 
   return errors
+}
+
+/**
+ * Converts a CalculatedMotorVehicle (from API response) to MotorVehicleUI format
+ * This ensures both local and calculated vehicles use the same data structure
+ */
+export function parseCalculatedVehicleToUI(calculated: CalculatedMotorVehicle): MotorVehicleUI {
+  return {
+    itemNo: calculated.itemNo,
+    vehicleRegNo: calculated.vehicleRegNo,
+    vehicleUser: "", // Not provided in calculated response
+    vehicleType: calculated.vehicleType,
+    vehicleMake: "", // Not provided in calculated response
+    vehicleModel: "", // Not provided in calculated response
+    chassisNo: "", // Not provided in calculated response
+    engineNo: "", // Not provided in calculated response
+    color: "", // Not provided in calculated response
+    modelYear: new Date().getFullYear(), // Not provided in calculated response
+    coverType: calculated.coverType,
+    usage: "", // Not provided in calculated response
+    vehicleValue: calculated.vehicleValue,
+    premiumRate: calculated.premiumRate,
+    state: "", // Not provided in calculated response
+    seatCapacity: 0, // Not provided in calculated response
+    waxCode: "", // Not provided in calculated response
+    location: "", // Not provided in calculated response
+    startDate: new Date().toISOString().split("T")[0], // Not provided in calculated response
+    endDate: new Date().toISOString().split("T")[0], // Not provided in calculated response
+    trackingCost: 0, // Not provided in calculated response
+    rescueCost: 0, // Not provided in calculated response
+    discounts:
+      calculated.step2_AfterDiscounts?.adjustments?.map((adj) => ({
+        adjustmentName: adj.name,
+        adjustmentType: adj.type,
+        rate: adj.rate,
+        appliedOn: "Premium" as const,
+        baseAmount: calculated.step1_BasicPremium?.resultingAmount || 0,
+        amount: adj.amount,
+        sequenceOrder: adj.sequenceOrder,
+        formula: adj.formula,
+      })) || [],
+    loadings:
+      calculated.step3_AfterLoadings?.adjustments?.map((adj) => ({
+        adjustmentName: adj.name,
+        adjustmentType: adj.type,
+        rate: adj.rate,
+        appliedOn: "Premium" as const,
+        baseAmount: calculated.step2_AfterDiscounts?.resultingAmount || 0,
+        amount: adj.amount,
+        sequenceOrder: adj.sequenceOrder,
+        formula: adj.formula,
+      })) || [],
+    _collapsed: false,
+    _showDetails: false,
+    uiId: `vehicle_${calculated.itemNo}_${calculated.vehicleRegNo}`,
+  }
+}
+
+/**
+ * Converts an array of CalculatedMotorVehicles to MotorVehicleUI format
+ */
+export function parseCalculatedVehiclesToUI(calculated: CalculatedMotorVehicle[]): MotorVehicleUI[] {
+  return calculated.map(parseCalculatedVehicleToUI)
 }

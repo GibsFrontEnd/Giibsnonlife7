@@ -5,6 +5,7 @@ import type {
     MotorCalculationBreakdown,
     MotorQuotationState,
 } from "../../../types/motor-quotation"
+import { parseCalculatedVehiclesToUI } from "@/utils/quotationCalculations";
 
 const API_BASE = "https://core-api.newgibsonline.com/api"
 
@@ -243,6 +244,7 @@ const initialState: MotorQuotationState = {
     currentProposal: null,
     currentCalculation: null,
     calculationBreakdown: null,
+    hasCalculated: false,
     vehicles: [],
     loading: {
         fetchProposal: false,
@@ -272,15 +274,18 @@ const motorQuotationSlice = createSlice({
         },
         addVehicle: (state, action) => {
             state.vehicles.push(action.payload)
+            state.hasCalculated = false
         },
         updateVehicle: (state, action) => {
             const index = state.vehicles.findIndex((v) => v.uiId === action.payload.uiId)
             if (index !== -1) {
                 state.vehicles[index] = action.payload
             }
+            state.hasCalculated = false
         },
         removeVehicle: (state, action) => {
             state.vehicles = state.vehicles.filter((v) => v.uiId !== action.payload)
+            state.hasCalculated = false
         },
     },
     extraReducers: (builder) => {
@@ -293,6 +298,7 @@ const motorQuotationSlice = createSlice({
             .addCase(calculateMotorComplete.fulfilled, (state, action) => {
                 state.loading.calculate = false
                 state.currentCalculation = action.payload
+                state.hasCalculated = true
                 state.success.calculate = true
             })
             .addCase(calculateMotorComplete.rejected, (state, action) => {
@@ -309,6 +315,7 @@ const motorQuotationSlice = createSlice({
             .addCase(recalculateMotorComplete.fulfilled, (state, action) => {
                 state.loading.calculate = false
                 state.currentCalculation = action.payload
+                state.hasCalculated = true
                 state.success.calculate = true
             })
             .addCase(recalculateMotorComplete.rejected, (state, action) => {
@@ -325,6 +332,10 @@ const motorQuotationSlice = createSlice({
             .addCase(getMotorCalculationBreakdown.fulfilled, (state, action) => {
                 state.loading.fetchCalculation = false
                 state.calculationBreakdown = action.payload
+                if (action.payload.vehicleCalculations && action.payload.vehicleCalculations.length > 0) {
+                    state.vehicles = parseCalculatedVehiclesToUI(action.payload.vehicleCalculations)
+                }
+                state.hasCalculated = true
             })
             .addCase(getMotorCalculationBreakdown.rejected, (state, action) => {
                 state.loading.fetchCalculation = false

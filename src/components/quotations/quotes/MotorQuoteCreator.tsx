@@ -1,4 +1,6 @@
-//@ts-nocheck
+// @ts-nocheck
+"use client"
+
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import type { AppDispatch, RootState } from "../../../features/store"
@@ -12,24 +14,25 @@ import {
     calculateMotorComplete,
     recalculateMotorComplete,
     getMotorCalculationBreakdown,
-    setVehicles,
     addVehicle,
     updateVehicle,
     removeVehicle,
-    clearMessages,
 } from "../../../features/reducers/quoteReducers/motorQuotationSlice"
-import "./motor-quote-creator.css"
+import "./QuoteCreator.css"
 import { useNavigate, useParams } from "react-router-dom"
+import { ChevronDown } from "lucide-react"
+import StepDetails from "./StepDetails"
 
 export default function MotorQuoteCreator() {
     const { proposalNo } = useParams<{ proposalNo: string }>()
     const navigate = useNavigate()
     const dispatch = useDispatch<AppDispatch>()
 
-    const { vehicles, currentCalculation, calculationBreakdown, loading, error, success } = useSelector(
+    const { vehicles, currentCalculation, calculationBreakdown, hasCalculated, loading, error, success } = useSelector(
         (state: RootState) => state.motorQuotations,
     )
-
+    const [adjCollapse, setAdjCollapse] = useState(true)
+    const [showDetailedBreakdown, setShowDetailedBreakdown] = useState(false)
     const [showAddVehicleModal, setShowAddVehicleModal] = useState(false)
     const [editingVehicleId, setEditingVehicleId] = useState<string | null>(null)
     const [adjustments, setAdjustments] = useState({
@@ -41,42 +44,23 @@ export default function MotorQuoteCreator() {
     const [exchangeRate, setExchangeRate] = useState(1)
     const [currency, setCurrency] = useState("NGN")
 
-    // Load calculation breakdown if exists
     useEffect(() => {
         if (proposalNo) {
-            dispatch(getMotorCalculationBreakdown(proposalNo) as any)
+            dispatch(getMotorCalculationBreakdown(proposalNo))
         }
-    }, [proposalNo, dispatch])
+    }, [dispatch, proposalNo])
 
-    // Populate vehicles from breakdown if available
-    useEffect(() => {
-        if (calculationBreakdown?.vehicleCalculations && vehicles.length === 0) {
-            const loadedVehicles = calculationBreakdown.vehicleCalculations.map((v, idx) => ({
-                ...v,
-                uiId: `vehicle_${idx}`,
-                _collapsed: false,
-                _showDetails: false,
-            }))
-            dispatch(setVehicles(loadedVehicles))
+    const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set())
 
-            if (calculationBreakdown.inputs) {
-                setAdjustments({
-                    otherDiscountRate: calculationBreakdown.inputs.otherDiscountRate || 0,
-                    otherLoadingRate: calculationBreakdown.inputs.otherLoadingRate || 0,
-                })
-                setCoverDays(calculationBreakdown.inputs.coverDays || 365)
-                setProportionRate(calculationBreakdown.inputs.proportionRate || 100)
-                setExchangeRate(calculationBreakdown.inputs.exchangeRate || 1)
-                setCurrency(calculationBreakdown.inputs.currency || "NGN")
-            }
+    const toggleRow = (itemNo: number) => {
+        const newExpanded = new Set(expandedRows)
+        if (newExpanded.has(itemNo)) {
+            newExpanded.delete(itemNo)
+        } else {
+            newExpanded.add(itemNo)
         }
-    }, [calculationBreakdown, dispatch, vehicles.length])
-
-    useEffect(() => {
-        if (success?.calculate) {
-            dispatch(clearMessages() as any)
-        }
-    }, [success?.calculate, dispatch])
+        setExpandedRows(newExpanded)
+    }
 
     const handleAddVehicle = () => {
         setEditingVehicleId(null)
@@ -94,6 +78,9 @@ export default function MotorQuoteCreator() {
         } else {
             dispatch(addVehicle(vehicle))
         }
+        // if (proposalNo) {
+        //     dispatch(getMotorCalculationBreakdown(proposalNo))
+        // }
         setShowAddVehicleModal(false)
         setEditingVehicleId(null)
         toast({
@@ -137,7 +124,7 @@ export default function MotorQuoteCreator() {
         }
 
         try {
-            if (currentCalculation) {
+            if (!hasCalculated) {
                 await dispatch(
                     recalculateMotorComplete({
                         proposalNo: proposalNo || "",
@@ -184,67 +171,83 @@ export default function MotorQuoteCreator() {
         }).format(amount)
     }
 
+    const getDisplayVehicles = () => {
+        return vehicles
+    }
+
+    const displayVehicles = getDisplayVehicles()
+
     return (
-        <div className="motor-qc-container">
-            <div className="motor-qc-header">
+        <div className="p-2 max-w-6xl mx-auto mb-10">
+            <div className="flex justify-between items-start mb-8 pb-4 border-b-2 border-gray-200">
                 <div>
-                    <h1>Motor Quote Creator</h1>
-                    <p className="motor-qc-proposal-info">Proposal: {proposalNo || "New"}</p>
+                    <h1 className="text-3xl font-bold mb-2 text-gray-900">Motor Quote Creator</h1>
+                    <p className="text-gray-600 text-sm">Proposal: {proposalNo || "New"}</p>
                 </div>
-                <div className="motor-qc-header-actions">
+                <div className="flex gap-3">
                     <Button onClick={handleCancel} variant="outline">
                         Back
                     </Button>
                     <Button onClick={handleCalculate} disabled={loading?.calculate || vehicles.length === 0}>
-                        {loading?.calculate ? "Calculating..." : currentCalculation ? "Recalculate" : "Calculate"}
+                        {loading?.calculate ? "Calculating..." : !hasCalculated ? "Recalculate" : "Calculate"}
                     </Button>
                 </div>
             </div>
 
-            {error?.calculate && <div className="motor-qc-error-message">{error.calculate}</div>}
-            {success?.calculate && <div className="motor-qc-success-message">Calculation completed successfully!</div>}
+            {error?.calculate && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">{error.calculate}</div>
+            )}
+            {success?.calculate && (
+                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-4">
+                    Calculation completed successfully!
+                </div>
+            )}
 
-            <div className="motor-qc-content">
+            <div className="flex flex-col gap-6">
                 {/* Vehicles Panel */}
-                <div className="motor-qc-vehicles-panel">
-                    <div className="motor-qc-vehicles-header">
-                        <h3>Vehicles ({vehicles.length})</h3>
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-xl font-semibold text-gray-900">Vehicles ({displayVehicles.length})</h3>
                         <Button onClick={handleAddVehicle} size="sm">
                             Add Vehicle
                         </Button>
                     </div>
 
-                    {vehicles.length === 0 ? (
-                        <div className="motor-qc-no-vehicles">
+                    {displayVehicles.length === 0 ? (
+                        <div className="text-center py-10 px-5 border-2 border-dashed border-gray-300 rounded-lg text-gray-600">
                             <p>No vehicles added yet. Click "Add Vehicle" to begin.</p>
                         </div>
                     ) : (
-                        <div className="motor-qc-vehicles-table-wrap">
-                            <table className="motor-qc-vehicles-table">
+                        <div className="overflow-x-auto">
+                            <table className="w-full border-collapse text-sm bg-white">
                                 <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Registration</th>
-                                        <th>Type</th>
-                                        <th>Make/Model</th>
-                                        <th>Value</th>
-                                        <th>Premium</th>
-                                        <th>Actions</th>
+                                    <tr className="bg-gray-100 border-b-2 border-gray-300">
+                                        <th className="px-3 py-3 text-left font-semibold text-gray-900">#</th>
+                                        <th className="px-3 py-3 text-left font-semibold text-gray-900">Registration</th>
+                                        <th className="px-3 py-3 text-left font-semibold text-gray-900">Vehicle Type</th>
+                                        <th className="px-3 py-3 text-left font-semibold text-gray-900">Cover Type</th>
+                                        <th className="px-3 py-3 text-left font-semibold text-gray-900">Value</th>
+                                        <th className="px-3 py-3 text-left font-semibold text-gray-900">Premium</th>
+                                        <th className="px-3 py-3 text-left font-semibold text-gray-900">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {vehicles.map((vehicle, index) => (
-                                        <tr key={vehicle.uiId}>
-                                            <td>{index + 1}</td>
-                                            <td>{vehicle.vehicleRegNo}</td>
-                                            <td>{vehicle.vehicleType}</td>
-                                            <td>
-                                                {vehicle.vehicleMake} {vehicle.vehicleModel}
+                                    {displayVehicles.map((vehicle, index) => (
+                                        <tr key={vehicle.uiId || vehicle.itemNo} className="border-b border-gray-200 hover:bg-gray-50">
+                                            <td className="px-3 py-3 text-gray-900">{index + 1}</td>
+                                            <td className="px-3 py-3 text-gray-900">{vehicle.vehicleRegNo}</td>
+                                            <td className="px-3 py-3 text-gray-900">{vehicle.vehicleType}</td>
+                                            <td className="px-3 py-3 text-gray-900">{vehicle.coverType}</td>
+                                            <td className="px-3 py-3 text-gray-900">{formatCurrency(vehicle.vehicleValue)}</td>
+                                            <td className="px-3 py-3 text-gray-900">
+                                                {hasCalculated && vehicle.step4_FinalPremium?.resultingAmount
+                                                    ? formatCurrency(vehicle.step4_FinalPremium?.resultingAmount)
+                                                    : hasCalculated
+                                                        ? "—"
+                                                        : "Pending"}
                                             </td>
-                                            <td>{formatCurrency(vehicle.vehicleValue)}</td>
-                                            <td>{vehicle.netPremium ? formatCurrency(vehicle.netPremium) : "—"}</td>
-                                            <td>
-                                                <div style={{ display: "flex", gap: 8 }}>
+                                            <td className="px-3 py-3">
+                                                <div className="flex gap-2">
                                                     <Button onClick={() => handleEditVehicle(vehicle.uiId || "")} size="sm" variant="outline">
                                                         Edit
                                                     </Button>
@@ -252,7 +255,7 @@ export default function MotorQuoteCreator() {
                                                         onClick={() => handleDeleteVehicle(vehicle.uiId || "")}
                                                         size="sm"
                                                         variant="outline"
-                                                        className="motor-qc-delete-btn"
+                                                        className="text-red-600 border-red-600"
                                                     >
                                                         Delete
                                                     </Button>
@@ -267,196 +270,334 @@ export default function MotorQuoteCreator() {
                 </div>
 
                 {/* Adjustments Panel */}
-                <div className="motor-qc-adjustments-panel">
-                    <h3>Proposal Adjustments</h3>
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 className="flex justify-between items-center text-xl font-semibold text-gray-900 mb-6">
+                        <span>Proposal Adjustments</span>
+                        <button
+                            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                            onClick={() => setAdjCollapse(!adjCollapse)}
+                            aria-label={adjCollapse ? "Expand item" : "Collapse item"}
+                        >
+                            {adjCollapse ? "Expand ▾" : "Collapse ▴"}
+                        </button>
+                    </h3>
 
-                    <div className="motor-qc-adjustments-grid">
-                        <div className="motor-qc-adjustment-section">
-                            <h4>Discounts & Loadings</h4>
+                    {!adjCollapse && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                <h4 className="font-semibold text-gray-900 mb-4">Discounts & Loadings</h4>
 
-                            <div className="motor-qc-adjustment-field">
-                                <Label htmlFor="otherDiscountRate">Other Discount Rate (%)</Label>
-                                <Input
-                                    id="otherDiscountRate"
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    step="0.01"
-                                    value={adjustments.otherDiscountRate}
-                                    onChange={(e) =>
-                                        setAdjustments((prev) => ({
-                                            ...prev,
-                                            otherDiscountRate: Number(e.target.value),
-                                        }))
-                                    }
-                                />
+                                <div className="flex flex-col gap-4 mb-4">
+                                    <div className="flex flex-col gap-2">
+                                        <Label htmlFor="otherDiscountRate">Other Discount Rate (%)</Label>
+                                        <Input
+                                            id="otherDiscountRate"
+                                            type="number"
+                                            min="0"
+                                            max="100"
+                                            step="0.01"
+                                            value={adjustments.otherDiscountRate}
+                                            onChange={(e) =>
+                                                setAdjustments((prev) => ({
+                                                    ...prev,
+                                                    otherDiscountRate: Number(e.target.value),
+                                                }))
+                                            }
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <Label htmlFor="otherLoadingRate">Other Loading Rate (%)</Label>
+                                        <Input
+                                            id="otherLoadingRate"
+                                            type="number"
+                                            min="0"
+                                            max="100"
+                                            step="0.01"
+                                            value={adjustments.otherLoadingRate}
+                                            onChange={(e) =>
+                                                setAdjustments((prev) => ({
+                                                    ...prev,
+                                                    otherLoadingRate: Number(e.target.value),
+                                                }))
+                                            }
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="motor-qc-adjustment-field">
-                                <Label htmlFor="otherLoadingRate">Other Loading Rate (%)</Label>
-                                <Input
-                                    id="otherLoadingRate"
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    step="0.01"
-                                    value={adjustments.otherLoadingRate}
-                                    onChange={(e) =>
-                                        setAdjustments((prev) => ({
-                                            ...prev,
-                                            otherLoadingRate: Number(e.target.value),
-                                        }))
-                                    }
-                                />
+                            <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                                <h4 className="font-semibold text-gray-900 mb-4">Coverage Details</h4>
+
+                                <div className="flex flex-col gap-4">
+                                    <div className="flex flex-col gap-2">
+                                        <Label htmlFor="coverDays">Cover Days</Label>
+                                        <Input
+                                            id="coverDays"
+                                            type="number"
+                                            disabled
+                                            min="0"
+                                            value={coverDays}
+                                            onChange={(e) => setCoverDays(Number(e.target.value))}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <Label htmlFor="proportionRate">Proportion Rate (%)</Label>
+                                        <Input
+                                            id="proportionRate"
+                                            type="number"
+                                            min="0"
+                                            disabled
+                                            max="100"
+                                            step="0.01"
+                                            value={proportionRate}
+                                            onChange={(e) => setProportionRate(Number(e.target.value))}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <Label htmlFor="exchangeRate">Exchange Rate</Label>
+                                        <Input
+                                            id="exchangeRate"
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            value={exchangeRate}
+                                            onChange={(e) => setExchangeRate(Number(e.target.value))}
+                                        />
+                                    </div>
+
+                                    <div className="flex flex-col gap-2">
+                                        <Label htmlFor="currency">Currency</Label>
+                                        <Input
+                                            id="currency"
+                                            value={currency}
+                                            onChange={(e) => setCurrency(e.target.value)}
+                                            placeholder="e.g., NGN"
+                                        />
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        <div className="motor-qc-adjustment-section">
-                            <h4>Coverage Details</h4>
-
-                            <div className="motor-qc-adjustment-field">
-                                <Label htmlFor="coverDays">Cover Days</Label>
-                                <Input
-                                    id="coverDays"
-                                    type="number"
-                                    min="0"
-                                    value={coverDays}
-                                    onChange={(e) => setCoverDays(Number(e.target.value))}
-                                />
-                            </div>
-
-                            <div className="motor-qc-adjustment-field">
-                                <Label htmlFor="proportionRate">Proportion Rate (%)</Label>
-                                <Input
-                                    id="proportionRate"
-                                    type="number"
-                                    min="0"
-                                    max="100"
-                                    step="0.01"
-                                    value={proportionRate}
-                                    onChange={(e) => setProportionRate(Number(e.target.value))}
-                                />
-                            </div>
-
-                            <div className="motor-qc-adjustment-field">
-                                <Label htmlFor="exchangeRate">Exchange Rate</Label>
-                                <Input
-                                    id="exchangeRate"
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    value={exchangeRate}
-                                    onChange={(e) => setExchangeRate(Number(e.target.value))}
-                                />
-                            </div>
-
-                            <div className="motor-qc-adjustment-field">
-                                <Label htmlFor="currency">Currency</Label>
-                                <Input
-                                    id="currency"
-                                    value={currency}
-                                    onChange={(e) => setCurrency(e.target.value)}
-                                    placeholder="e.g., NGN"
-                                />
-                            </div>
-                        </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* Calculation Results */}
-                {currentCalculation && (
-                    <div className="motor-qc-calculation-results">
-                        <h3>Calculation Results</h3>
-
-                        <div className="motor-qc-results-grid">
-                            <div className="motor-qc-result-item">
-                                <Label>Total Vehicle Value</Label>
-                                <div className="motor-qc-result-value">{formatCurrency(currentCalculation.totalVehicleValue)}</div>
-                            </div>
-
-                            <div className="motor-qc-result-item">
-                                <Label>Total Net Premium</Label>
-                                <div className="motor-qc-result-value">{formatCurrency(currentCalculation.totalNetPremium)}</div>
-                            </div>
-
-                            <div className="motor-qc-result-item">
-                                <Label>Vehicle Count</Label>
-                                <div className="motor-qc-result-value">{currentCalculation.vehicleCount}</div>
-                            </div>
-
-                            <div className="motor-qc-result-item">
-                                <Label>Other Discount Amount</Label>
-                                <div className="motor-qc-result-value">{formatCurrency(currentCalculation.otherDiscountAmount)}</div>
-                            </div>
-
-                            <div className="motor-qc-result-item">
-                                <Label>Other Loading Amount</Label>
-                                <div className="motor-qc-result-value">{formatCurrency(currentCalculation.otherLoadingAmount)}</div>
-                            </div>
-
-                            <div className="motor-qc-result-item">
-                                <Label>Net Premium Due</Label>
-                                <div className="motor-qc-result-value highlight">
-                                    {formatCurrency(currentCalculation.netPremiumDue)}
-                                </div>
-                            </div>
-
-                            <div className="motor-qc-result-item">
-                                <Label>Pro-Rata Premium</Label>
-                                <div className="motor-qc-result-value">{formatCurrency(currentCalculation.proRataPremium)}</div>
-                            </div>
-
-                            <div className="motor-qc-result-item">
-                                <Label>Share Sum Insured</Label>
-                                <div className="motor-qc-result-value">{formatCurrency(currentCalculation.shareSumInsured)}</div>
-                            </div>
-
-                            <div className="motor-qc-result-item">
-                                <Label>Share Premium</Label>
-                                <div className="motor-qc-result-value">{formatCurrency(currentCalculation.sharePremium)}</div>
-                            </div>
-
-                            <div className="motor-qc-result-item">
-                                <Label>Final Premium Due</Label>
-                                <div className="motor-qc-result-value highlight">
-                                    {formatCurrency(currentCalculation.finalPremiumDue)}
-                                </div>
-                            </div>
+                {hasCalculated && calculationBreakdown && (
+                    <div className="bg-white border border-gray-200 rounded-lg p-6">
+                        <div className="flex w-full justify-between">
+                            <h3 className="text-xl font-semibold text-gray-900 mb-6">Calculation Results</h3>
+                            {calculationBreakdown && (
+                                <Button onClick={() => setShowDetailedBreakdown(!showDetailedBreakdown)} variant="outline" size="sm">
+                                    {showDetailedBreakdown ? "Show Summary" : "Show Detailed Breakdown"}
+                                </Button>
+                            )}
                         </div>
 
-                        {/* Vehicles Breakdown */}
-                        {currentCalculation.calculatedVehicles && currentCalculation.calculatedVehicles.length > 0 && (
-                            <div className="motor-qc-vehicles-breakdown">
-                                <h4>Vehicles Breakdown</h4>
-                                <div className="motor-qc-breakdown-table-wrap">
-                                    <table className="motor-qc-breakdown-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Reg No</th>
-                                                <th>Type</th>
-                                                <th>Value</th>
-                                                <th>Basic Premium</th>
-                                                <th>After Discounts</th>
-                                                <th>Gross Premium</th>
-                                                <th>Net Premium</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {currentCalculation.calculatedVehicles.map((vehicle) => (
-                                                <tr key={vehicle.vehicleRegNo}>
-                                                    <td>{vehicle.vehicleRegNo}</td>
-                                                    <td>{vehicle.vehicleType}</td>
-                                                    <td>{formatCurrency(vehicle.vehicleValue)}</td>
-                                                    <td>{formatCurrency(vehicle.basicPremium)}</td>
-                                                    <td>{formatCurrency(vehicle.premiumAfterDiscounts)}</td>
-                                                    <td>{formatCurrency(vehicle.grossPremium)}</td>
-                                                    <td className="highlight">{formatCurrency(vehicle.netPremium)}</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                        {!showDetailedBreakdown ? (
+                            <>
+                                <div className="qc-results-grid">
+                                    {/* <div className="qc-result-item">
+                                        <Label>Total Sum Insured</Label>
+                                        <div className="qc-result-value">{formatCurrency(calculationBreakdown.finalResults.)}</div>
+                                    </div> */}
+                                    <div className="qc-result-item">
+                                        <Label>Total Premium</Label>
+                                        <div className="qc-result-value">{formatCurrency(calculationBreakdown.finalResults.totalNetPremium)}</div>
+                                    </div>
+                                    <div className="qc-result-item">
+                                        <Label>Net Premium</Label>
+                                        <div className="qc-result-value">{formatCurrency(calculationBreakdown.finalResults.netPremiumAfterProposalAdjustments)}</div>
+                                    </div>
+                                    <div className="qc-result-item">
+                                        <Label>Pro-Rata Premium</Label>
+                                        <div className="qc-result-value">{formatCurrency(calculationBreakdown.finalResults.proRataPremium)}</div>
+                                    </div>
+                                    <div className="qc-result-item">
+                                        <Label>Share Sum Insured</Label>
+                                        <div className="qc-result-value">{formatCurrency(calculationBreakdown.finalResults.shareSumInsured)}</div>
+                                    </div>
+                                    <div className="qc-result-item">
+                                        <Label>Share Premium</Label>
+                                        <div className="qc-result-value">{formatCurrency(calculationBreakdown.finalResults.sharePremium)}</div>
+                                    </div>
                                 </div>
-                            </div>
+                                {/* {currentCalculation.validationErrors && currentCalculation.validationErrors.length > 0 && (
+                                    <div className="qc-validation-errors">
+                                        <h4>Validation Issues:</h4>
+                                        <ul>
+                                            {currentCalculation.validationErrors.map((err: any, idx: number) => (
+                                                <li key={idx}>{err}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )} */}
+                            </>
+                        ) : (
+                            calculationBreakdown && (
+                                <div className="qc-detailed-breakdown">
+                                    {/* Calculation Metadata */}
+                                    <div className="qc-breakdown-section">
+                                        <h4>Calculation Information</h4>
+                                        <div className="qc-info-grid">
+                                            <div className="qc-info-item">
+                                                <Label>Calculated On</Label>
+                                                <div className="qc-info-value">
+                                                    {calculationBreakdown.calculatedOn ? new Date(calculationBreakdown.calculatedOn).toLocaleString() : "N/A"}
+                                                </div>
+                                            </div>
+                                            <div className="qc-info-item">
+                                                <Label>Calculated By</Label>
+                                                <div className="qc-info-value">{calculationBreakdown.calculatedBy || "N/A"}</div>
+                                            </div>
+                                            {/* <div className="qc-info-item">
+                                                <Label>Type</Label>
+                                                <div className="qc-info-value">{calculationBreakdown.calculationType || "N/A"}</div>
+                                            </div> */}
+                                        </div>
+                                    </div>
+
+                                    {/* Show inputs if present */}
+                                    {calculationBreakdown.inputs && (
+                                        <div className="qc-breakdown-section">
+                                            <h4>Calculation Inputs</h4>
+                                            <div className="qc-info-grid !grid-cols-5">
+                                                <div className="qc-info-item">
+                                                    <Label>Proportion Rate</Label>
+                                                    <div className="qc-info-value">{calculationBreakdown.inputs.proportionRate ?? "N/A"}%</div>
+                                                </div>
+                                                <div className="qc-info-item">
+                                                    <Label>Exchange Rate</Label>
+                                                    <div className="qc-info-value">{calculationBreakdown.inputs.exchangeRate ?? "N/A"}</div>
+                                                </div>
+                                                <div className="qc-info-item">
+                                                    <Label>Currency</Label>
+                                                    <div className="qc-info-value">{calculationBreakdown.inputs.currency ?? "N/A"}</div>
+                                                </div>
+                                                <div className="qc-info-item">
+                                                    <Label>Cover Days</Label>
+                                                    <div className="qc-info-value">{calculationBreakdown.inputs.coverDays ?? "N/A"}</div>
+                                                </div>
+                                                <div className="qc-info-item">
+                                                    <Label>Vehicle Count</Label>
+                                                    <div className="qc-info-value">{calculationBreakdown.inputs.vehicleCount ?? "N/A"}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+
+                                    <div className="overflow-x-auto rounded-lg border border-border">
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr className="border-b border-border bg-muted">
+                                                    <th className="px-6 py-3 text-left text-sm font-semibold text-foreground w-12"></th>
+                                                    {/* <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Item</th> */}
+                                                    <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Reg No</th>
+                                                    {/* <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Certificate No</th> */}
+                                                    <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Vehicle Type</th>
+                                                    <th className="px-6 py-3 text-left text-sm font-semibold text-foreground">Cover Type</th>
+                                                    <th className="px-6 py-3 text-right text-sm font-semibold text-foreground">Vehicle Value</th>
+                                                    <th className="px-6 py-3 text-right text-sm font-semibold text-foreground">Premium Rate</th>
+                                                    <th className="px-6 py-3 text-right text-sm font-semibold text-foreground">Final Premium</th>
+                                                </tr>
+                                            </thead>
+                                            {/* <tbody> */}
+                                            {calculationBreakdown.vehicleCalculations.map((calculation) => (
+                                                <tbody key={calculation.itemNo}>
+                                                    <tr className="border-b border-border hover:bg-muted/50 transition-colors">
+                                                        <td className="px-6 py-4">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => toggleRow(calculation.itemNo)}
+                                                                className="h-8 w-8 p-0"
+                                                            >
+                                                                <ChevronDown
+                                                                    className={`h-4 w-4 transition-transform ${expandedRows.has(calculation.itemNo) ? "rotate-180" : ""
+                                                                        }`}
+                                                                />
+                                                            </Button>
+                                                        </td>
+                                                        {/* <td className="px-6 py-4 text-sm text-foreground">{calculation.itemNo}</td> */}
+                                                        <td className="px-6 py-4 text-sm text-foreground">{calculation.vehicleRegNo}</td>
+                                                        {/* <td className="px-6 py-4 text-sm text-foreground font-mono">{calculation.certificateNo}</td> */}
+                                                        <td className="px-6 py-4 text-sm text-foreground">{calculation.vehicleType}</td>
+                                                        <td className="px-6 py-4 text-sm text-foreground">{calculation.coverType}</td>
+                                                        <td className="px-6 py-4 text-sm text-foreground text-right">
+                                                            {formatCurrency(calculation.vehicleValue)}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-foreground text-right">{calculation.premiumRate}%</td>
+                                                        <td className="px-6 py-4 text-sm font-semibold text-foreground text-right">
+                                                            {formatCurrency(calculation.step4_FinalPremium?.resultingAmount)}
+                                                        </td>
+                                                    </tr>
+                                                    {expandedRows.has(calculation.itemNo) && (
+                                                        <tr className="border-b border-border bg-muted/30">
+                                                            <td colSpan={9} className="px-6 py-4">
+                                                                <StepDetails calculation={calculation} />
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            ))}
+                                            {/* </tbody> */}
+                                        </table>
+                                    </div>
+
+                                    {/* Final Results Summary */}
+                                    {calculationBreakdown.finalResults && (
+                                        <div className="qc-breakdown-section qc-final-results">
+                                            <h4>Final Results Summary</h4>
+                                            <div className="qc-results-grid">
+                                                {/* <div className="qc-result-item">
+                                                    <Label>Total Sum Insured</Label>
+                                                    <div className="qc-result-value">
+                                                        {formatCurrency(calculationBreakdown.finalResults.)}
+                                                    </div>
+                                                </div> */}
+                                                <div className="qc-result-item">
+                                                    <Label>Total Premium</Label>
+                                                    <div className="qc-result-value">{formatCurrency(calculationBreakdown.finalResults.sharePremium)}</div>
+                                                </div>
+                                                <div className="qc-result-item">
+                                                    <Label>Net Premium</Label>
+                                                    <div className="qc-result-value">{formatCurrency(calculationBreakdown.finalResults.totalNetPremium)}</div>
+                                                </div>
+                                                <div className="qc-result-item">
+                                                    <Label>Pro-Rata Premium</Label>
+                                                    <div className="qc-result-value">{formatCurrency(calculationBreakdown.finalResults.proRataPremium)}</div>
+                                                </div>
+                                                <div className="qc-result-item">
+                                                    <Label>Share Sum Insured</Label>
+                                                    <div className="qc-result-value">
+                                                        {formatCurrency(calculationBreakdown.finalResults.shareSumInsured)}
+                                                    </div>
+                                                </div>
+                                                <div className="qc-result-item">
+                                                    <Label>Share Premium</Label>
+                                                    <div className="qc-result-value">{formatCurrency(calculationBreakdown.finalResults.sharePremium)}</div>
+                                                </div>
+                                                <div className="qc-result-item">
+                                                    <Label>Foreign Sum Insured</Label>
+                                                    <div className="qc-result-value">
+                                                        {formatCurrency(calculationBreakdown.finalResults.foreignSumInsured)}{" "}
+                                                        {calculationBreakdown.finalResults.foreignCurrency}
+                                                    </div>
+                                                </div>
+                                                <div className="qc-result-item">
+                                                    <Label>Foreign Premium</Label>
+                                                    <div className="qc-result-value">
+                                                        {formatCurrency(calculationBreakdown.finalResults.foreignPremium)}{" "}
+                                                        {calculationBreakdown.finalResults.foreignCurrency}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )
                         )}
                     </div>
                 )}

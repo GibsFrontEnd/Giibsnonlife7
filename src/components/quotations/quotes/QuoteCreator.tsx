@@ -155,7 +155,7 @@ const QuoteCreator = () => {
 
   useEffect(() => {
     console.log(proposalNo);
-    
+
     setLocalSections(null)
     setLocalSectionsSummary(null)
     setCalculatedRiskMap({})
@@ -212,7 +212,8 @@ const QuoteCreator = () => {
       sectionPremium: s.sectionGrossPremium ?? 0,
       sectionNetPremium: s.sectionNetPremium ?? 0,
       riskItems: s.riskItems ?? [],
-      lastCalculated: calculationBreakdown?.calculatedOn ?? null    }))
+      lastCalculated: calculationBreakdown?.calculatedOn ?? null
+    }))
 
     setLocalSections(freshSections)
   }, [calculationBreakdown])
@@ -545,10 +546,10 @@ const QuoteCreator = () => {
     }
   }
   const netPremium = proposalAdjustmentsResult?.netPremiumDue || calculationBreakdown?.calculationSteps?.proRataCalculations.netPremiumBeforeProRata
-useEffect(()=>{
-  if(netPremium)
-  handleCalculateProRata();
-},[])
+  useEffect(() => {
+    if (netPremium)
+      handleCalculateProRata();
+  }, [])
 
   const handleCalculateProRata = async () => {
     if (!netPremium || Number(netPremium) <= 0) {
