@@ -329,6 +329,9 @@ const motorQuotationSlice = createSlice({
                 state.loading.fetchCalculation = true
                 state.calculationBreakdown = null
                 state.error.fetchCalculation = null
+                state.vehicles = [];
+
+                
             })
             .addCase(getMotorCalculationBreakdown.fulfilled, (state, action) => {
                 state.loading.fetchCalculation = false
@@ -341,6 +344,8 @@ const motorQuotationSlice = createSlice({
             .addCase(getMotorCalculationBreakdown.rejected, (state, action) => {
                 state.loading.fetchCalculation = false
                 state.error.fetchCalculation = action.payload as string
+                state.calculationBreakdown = null;
+                state.vehicles = [];
             })
 
         builder

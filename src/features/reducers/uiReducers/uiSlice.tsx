@@ -47,6 +47,12 @@ export interface UiState {
   showRenewPolicyDialog: boolean;
   showPolicyDetailsDialog: boolean;
 
+  // Added underwriting-related dialogs
+  showPolicyCalculationDialog: boolean; // open calculator UI
+  showPolicyCalculationResultDialog: boolean; // show results
+  showPolicySectionsDialog: boolean; // show sections editor / list
+  showCreatePolicyFromQuoteDialog: boolean; // create policy prefilled from quote
+
   // Party type dialogs
   showCreatePartyTypeDialog: boolean;
   showEditPartyTypeDialog: boolean;
@@ -85,7 +91,7 @@ export interface UiState {
   showDeleteCompanyDialog: boolean;
   showViewCompanyDetailsDialog: boolean;
 
-  // Quotation / Proposal / Quote dialogs (merged from File 1)
+  // Quotation / Proposal / Quote dialogs
   showCreateProposalDialog: boolean;
   showEditProposalDialog: boolean;
   showDeleteProposalDialog: boolean;
@@ -100,7 +106,8 @@ export interface UiState {
   showSectionEditorDialog: boolean;
   showConvertToPolicyDialog: boolean;
 
-  // ... add any other dialogs here as needed
+  // generic modal / toast (optional)
+  // add any other dialogs here as needed
 }
 
 const initialState: UiState = {
@@ -162,6 +169,12 @@ const initialState: UiState = {
   showViewPolicyDetailsDialog: false,
   showRenewPolicyDialog: false,
   showPolicyDetailsDialog: false,
+
+  // Underwriting-specific new dialogs (defaults false)
+  showPolicyCalculationDialog: false,
+  showPolicyCalculationResultDialog: false,
+  showPolicySectionsDialog: false,
+  showCreatePolicyFromQuoteDialog: false,
 
   // Product dialogs
   showCreateProductDialog: false,
@@ -333,12 +346,25 @@ const uiSlice = createSlice({
     setShowPolicyDetailsDialog: (state, action: PayloadAction<boolean>) => {
       state.showPolicyDetailsDialog = action.payload;
     },
-    // FIXED: correctly set the policy details view flag
     setShowViewPolicyDetailsDialog: (
       state,
       action: PayloadAction<boolean>
     ) => {
       state.showViewPolicyDetailsDialog = action.payload;
+    },
+
+    // Underwriting-specific reducers (new)
+    setShowPolicyCalculationDialog: (state, action: PayloadAction<boolean>) => {
+      state.showPolicyCalculationDialog = action.payload;
+    },
+    setShowPolicyCalculationResultDialog: (state, action: PayloadAction<boolean>) => {
+      state.showPolicyCalculationResultDialog = action.payload;
+    },
+    setShowPolicySectionsDialog: (state, action: PayloadAction<boolean>) => {
+      state.showPolicySectionsDialog = action.payload;
+    },
+    setShowCreatePolicyFromQuoteDialog: (state, action: PayloadAction<boolean>) => {
+      state.showCreatePolicyFromQuoteDialog = action.payload;
     },
 
     // Region reducers
@@ -432,7 +458,7 @@ const uiSlice = createSlice({
     },
 
     // ----------------------------
-    // Quotation / Proposal / Quote reducers (from File 1)
+    // Quotation / Proposal / Quote reducers
     // ----------------------------
     setShowCreateProposalDialog: (state, action: PayloadAction<boolean>) => {
       state.showCreateProposalDialog = action.payload;
@@ -534,6 +560,12 @@ export const {
   setShowRenewPolicyDialog,
   setShowPolicyDetailsDialog,
 
+  // underwriting-specific actions (new)
+  setShowPolicyCalculationDialog,
+  setShowPolicyCalculationResultDialog,
+  setShowPolicySectionsDialog,
+  setShowCreatePolicyFromQuoteDialog,
+
   // party type actions
   setShowCreatePartyTypeDialog,
   setShowEditPartyTypeDialog,
@@ -552,13 +584,13 @@ export const {
   setShowDeleteBranchDialog,
   setShowViewBranchDetailsDialog,
 
-  // Company actions (NEW)
+  // Company actions
   setShowCreateCompanyDialog,
   setShowEditCompanyDialog,
   setShowDeleteCompanyDialog,
   setShowViewCompanyDetailsDialog,
 
-  // Quotation / Proposal / Quote actions (from File 1)
+  // Quotation / Proposal / Quote actions
   setShowCreateProposalDialog,
   setShowEditProposalDialog,
   setShowDeleteProposalDialog,

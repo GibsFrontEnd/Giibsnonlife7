@@ -29,7 +29,11 @@ import ClauseManager from "./components/quotations/quotes/ClauseManager";
 import CreateProposal from "./components/quotations/quotes/CreateProposal";
 import QuoteCreator from "./components/quotations/quotes/QuoteCreator";
 import MotorQuoteCreator from "./components/quotations/quotes/MotorQuoteCreator";
-
+import UnderwritingsPage from "./pages/underwriting/underwriting-page.underwritings";
+import Underwritings from "./pages/Underwritings";
+import EditPolicy from "./components/underwritings/underwriting/EditPolicy";
+import CreatePolicy from "./components/underwritings/underwriting/CreatePolicy";
+import PolicyCalculator from "./components/underwritings/underwriting/PolicyCalculator";
 
 const App: React.FC = () => {
   useAuth();
@@ -52,6 +56,7 @@ const App: React.FC = () => {
             <Route path="messaging" element={<CSUMessaging />} />
             <Route path="tickets" element={<CSUTickets />} />
           </Route>
+          
           <Route path="/quotations" element={<Quotations />}>
             <Route path="quotes" element={<QuoteQuotations />} />
             <Route path="quotes/:businessId" element={<QuoteQuotations />} />
@@ -66,6 +71,22 @@ const App: React.FC = () => {
             <Route path="messaging" element={<CSUMessaging />} />
             <Route path="tickets" element={<CSUTickets />} />
           </Route>
+
+
+          <Route path="/underwritings" element={<Underwritings />}>
+            <Route path="underwriting" element={<UnderwritingsPage />} />
+            <Route path="underwriting/:businessId" element={<UnderwritingsPage />} />
+            <Route path="create" element={<CreatePolicy />} />
+            <Route path="create/:businessId" element={<CreatePolicy />} />
+            <Route path="edit/:policyNo" element={<EditPolicy />} />
+            <Route path="calculator/:policyNo" element={<PolicyCalculator />} />
+            <Route path="quote/motor/:proposalNo" element={<MotorQuoteCreator />} />
+            <Route path="customers" element={<CSUCustomers />} />
+            <Route path="partners" element={<CSUParty />} />
+            <Route path="messaging" element={<CSUMessaging />} />
+            <Route path="tickets" element={<CSUTickets />} />
+          </Route>
+
 
 
           <Route path="/admin" element={<Admin />}>
