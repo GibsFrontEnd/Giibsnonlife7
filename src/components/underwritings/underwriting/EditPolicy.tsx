@@ -45,7 +45,7 @@ const EditPolicy = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const { currentPolicy, loading, success, error } = useSelector((state: RootState) => state.underwriting)
+  const { currentPolicy, loading, success, error } = useSelector((state: RootState) => state.underwritings)
   const { risks } = useSelector((state: RootState) => state.risks)
 
   const [formData, setFormData] = useState<UpdatePolicyRequest>({
