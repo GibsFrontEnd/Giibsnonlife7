@@ -1,15 +1,20 @@
 "use client"
 
-//@ts-nocheck
+// @ts-nocheck
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
 import type { RootState } from "../../../features/store"
-import { getPolicyByNumber, updatePolicy } from "../../../features/reducers/underwriteReducers/underwritingSlice"
+import {
+  getPolicyByNumber,
+  updatePolicy,
+  setCurrentPolicy,
+} from "../../../features/reducers/underwriteReducers/underwritingSlice"
 import { getAllRisks } from "../../../features/reducers/adminReducers/riskSlice"
 import { Button } from "../../UI/new-button"
 import Input from "../../UI/Input"
 import { Label } from "../../UI/label"
+import Select from "react-select"
 import type { UpdatePolicyRequest } from "../../../types/underwriting"
 import "./EditPolicy.css"
 
@@ -45,7 +50,9 @@ const EditPolicy = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const { currentPolicy, loading, success, error } = useSelector((state: RootState) => state.underwritings)
+  const { currentPolicy, loading, success, error, policies } = useSelector(
+    (state: RootState) => state.underwritings,
+  )
   const { risks } = useSelector((state: RootState) => state.risks)
 
   const [formData, setFormData] = useState<UpdatePolicyRequest>({
@@ -70,29 +77,38 @@ const EditPolicy = () => {
   const [validationErrors, setValidationErrors] = useState<string[]>([])
 
   useEffect(() => {
-    if (policyNo) {
+    // always load risk list
+    dispatch(getAllRisks({ pageNumber: 1, pageSize: 100 }) as any)
+
+    if (!policyNo) return
+
+    // try local policies first (DUMMY_POLICIES)
+    const local = policies?.find((p: any) => p.policyNo === policyNo)
+    if (local) {
+      dispatch(setCurrentPolicy(local) as any)
+    } else {
+      // fallback to API
       dispatch(getPolicyByNumber(policyNo) as any)
     }
-    dispatch(getAllRisks({ pageNumber: 1, pageSize: 100 }) as any)
-  }, [dispatch, policyNo])
+  }, [dispatch, policyNo, policies])
 
   useEffect(() => {
     if (currentPolicy) {
       setFormData({
         surname: currentPolicy.insSurname || "",
         firstName: currentPolicy.insFirstname || "",
-        insAddress: currentPolicy.insAddress,
-        insMobilePhone: currentPolicy.insMobilePhone,
-        insEmail: currentPolicy.insEmail,
-        insOccupation: currentPolicy.insOccupation,
-        riskLocation: currentPolicy.riskLocation,
-        riskClassification: currentPolicy.riskClassification,
-        businessType: currentPolicy.businessType,
-        accountType: currentPolicy.accountType,
-        bizSource: currentPolicy.bizSource,
-        proportionShare: currentPolicy.proportionShare,
-        ourShare: currentPolicy.ourShare,
-        policyExcess: currentPolicy.policyExcess,
+        insAddress: currentPolicy.insAddress || "",
+        insMobilePhone: currentPolicy.insMobilePhone || "",
+        insEmail: currentPolicy.insEmail || "",
+        insOccupation: currentPolicy.insOccupation || "",
+        riskLocation: currentPolicy.riskLocation || "",
+        riskClassification: currentPolicy.riskClassification || "",
+        businessType: currentPolicy.businessType || "",
+        accountType: currentPolicy.accountType || "",
+        bizSource: currentPolicy.bizSource || "",
+        proportionShare: currentPolicy.proportionShare ?? 100,
+        ourShare: currentPolicy.ourShare ?? 100,
+        policyExcess: currentPolicy.policyExcess ?? 0,
         remarks: currentPolicy.remarks || "",
         modifiedBy: "SYSTEM",
       })
@@ -132,17 +148,25 @@ const EditPolicy = () => {
 
   const handleCalculate = () => {
     if (policyNo) {
-      navigate(`/underwriting/calculator/${policyNo}`)
+      navigate(`/underwritings/calculator/${policyNo}`)
     }
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
+    try {
+      return new Date(dateString).toLocaleDateString()
+    } catch {
+      return dateString
+    }
   }
 
-  if (loading.fetchPolicies || !currentPolicy) {
+  // show loading only when there's truly no currentPolicy yet
+  if (!currentPolicy) {
     return <div className="edit-policy-loading">Loading policy...</div>
   }
+
+  const occupationOptions = OCCUPATIONS.map((occ) => ({ value: occ, label: occ }))
+  const riskClassOptions = RISK_CLASSIFICATIONS.map((rc) => ({ value: rc, label: rc }))
 
   return (
     <div className="edit-policy-container">
@@ -169,8 +193,8 @@ const EditPolicy = () => {
           <div className="validation-errors">
             <h4>Please fix the following errors:</h4>
             <ul>
-              {validationErrors.map((error, index) => (
-                <li key={index}>{error}</li>
+              {validationErrors.map((err, idx) => (
+                <li key={idx}>{err}</li>
               ))}
             </ul>
           </div>
@@ -269,19 +293,13 @@ const EditPolicy = () => {
 
             <div className="form-field">
               <Label htmlFor="insOccupation">Occupation</Label>
-              <select
-                id="insOccupation"
-                value={formData.insOccupation}
-                onChange={(e) => handleInputChange("insOccupation", e.target.value)}
-                className="form-select"
-              >
-                <option value="">Select Occupation</option>
-                {OCCUPATIONS.map((occ) => (
-                  <option key={occ} value={occ}>
-                    {occ}
-                  </option>
-                ))}
-              </select>
+              <Select
+                options={occupationOptions}
+                value={occupationOptions.find((o) => o.value === formData.insOccupation) || null}
+                onChange={(opt) => handleInputChange("insOccupation", opt?.value ?? "")}
+                placeholder="Select Occupation"
+                isClearable
+              />
             </div>
 
             <div className="form-field">
@@ -296,19 +314,12 @@ const EditPolicy = () => {
 
             <div className="form-field">
               <Label htmlFor="riskClassification">Risk Classification</Label>
-              <select
-                id="riskClassification"
-                value={formData.riskClassification}
-                onChange={(e) => handleInputChange("riskClassification", e.target.value)}
-                className="form-select"
-              >
-                <option value="">Select Risk Classification</option>
-                {RISK_CLASSIFICATIONS.map((rc) => (
-                  <option key={rc} value={rc}>
-                    {rc}
-                  </option>
-                ))}
-              </select>
+              <Select
+                options={riskClassOptions}
+                value={riskClassOptions.find((r) => r.value === formData.riskClassification) || null}
+                onChange={(opt) => handleInputChange("riskClassification", opt?.value ?? "")}
+                placeholder="Select Risk Classification"
+              />
             </div>
 
             <div className="form-field">
