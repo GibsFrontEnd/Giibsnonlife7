@@ -115,7 +115,7 @@ const Underwriting = ({ businessId = null }: UnderwritingProps) => {
   return (
     <div className="uw-container">
       <div className="uw-header">
-        <h1>Underwriting Management</h1>
+        <h1>Policy Admin</h1>
         <button className="uw-create-policy-btn" onClick={handleCreatePolicy}>
           + Create New Policy
         </button>

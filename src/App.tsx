@@ -34,6 +34,8 @@ import Underwritings from "./pages/Underwritings";
 import EditPolicy from "./components/underwritings/underwriting/EditPolicy";
 import CreatePolicy from "./components/underwritings/underwriting/CreatePolicy";
 import PolicyCalculator from "./components/underwritings/underwriting/PolicyCalculator";
+import PolicyCalculationsList from "./components/underwritings/underwriting/PolicyCalculationsList";
+
 
 const App: React.FC = () => {
   useAuth();
@@ -79,7 +81,9 @@ const App: React.FC = () => {
             <Route path="create" element={<CreatePolicy />} />
             <Route path="create/:businessId" element={<CreatePolicy />} />
             <Route path="edit/:policyNo" element={<EditPolicy />} />
+            <Route path="calculations/:policyNo" element={<PolicyCalculationsList />} />
             <Route path="calculator/:policyNo" element={<PolicyCalculator />} />
+            <Route path="calculator/:policyNo/:calculationId" element={<PolicyCalculator />} />
             <Route path="quote/motor/:proposalNo" element={<MotorQuoteCreator />} />
             <Route path="customers" element={<CSUCustomers />} />
             <Route path="partners" element={<CSUParty />} />

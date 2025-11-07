@@ -148,7 +148,7 @@ const EditPolicy = () => {
 
   const handleCalculate = () => {
     if (policyNo) {
-      navigate(`/underwritings/calculator/${policyNo}`)
+      navigate(`/underwritings/calculations/${policyNo}`)
     }
   }
 

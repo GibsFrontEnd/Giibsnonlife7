@@ -9,6 +9,9 @@ const UnderwritingSidebar: React.FC = () => {
   const location = useLocation();
   const { risks} = useSelector((s: RootState) => s.risks);
   const [underwritingsOpen, setUnderwritingsOpen] = useState(true);
+  const [renewalsOpen, setRenewalsOpen] = useState(false);
+  const [endorsementsOpen, setEndorsementsOpen] = useState(false);
+
 
   // load risks
   useEffect(() => {
@@ -25,6 +28,26 @@ const UnderwritingSidebar: React.FC = () => {
       id: risk.riskID,
     })),
   ];
+
+  const RenewalItems = [
+    { path: "underwriting", label: "All", icon: "📋", id: "all" },
+    ...(risks || []).map((risk) => ({
+      path: `underwriting/${risk.riskID}`,
+      label: risk.riskName,
+      icon: "🔸",
+      id: risk.riskID,
+    })),
+  ];
+  const EndorsementItems = [
+    { path: "underwriting", label: "All", icon: "📋", id: "all" },
+    ...(risks || []).map((risk) => ({
+      path: `underwriting/${risk.riskID}`,
+      label: risk.riskName,
+      icon: "🔸",
+      id: risk.riskID,
+    })),
+  ];
+
 
   // other static menu items
 
@@ -58,7 +81,7 @@ const UnderwritingSidebar: React.FC = () => {
           >
             <div className="flex items-center">
               <span className="mr-3 text-base max-md:mr-0">🔒</span>
-              <span className="text-sm font-medium max-md:hidden">Underwritings</span>
+              <span className="text-sm font-medium max-md:hidden">Policy Admin</span>
             </div>
             <span className="text-sm max-md:hidden">{underwritingsOpen ? "▾" : "▸"}</span>
           </button>
@@ -85,6 +108,92 @@ const UnderwritingSidebar: React.FC = () => {
             ))}
 
             {risks && UnderwritingItems.length === 1 && (
+              <div className="py-2 px-3 text-xs text-white/70">No risk categories found.</div>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <button
+            onClick={() => setRenewalsOpen((v) => !v)}
+            className={`w-full flex items-center justify-between py-3 px-5 text-white/90 no-underline transition-all duration-200 border-l-4 border-transparent hover:bg-white/10 hover:text-white max-md:justify-center max-md:py-4 max-md:px-2.5 ${
+              location.pathname.startsWith("/underwriting") ? "bg-white/15 text-white border-l-orange-500" : ""
+            }`}
+            aria-expanded={renewalsOpen}
+            aria-controls="quotes-submenu"
+          >
+            <div className="flex items-center">
+              <span className="mr-3 text-base max-md:mr-0">🔒</span>
+              <span className="text-sm font-medium max-md:hidden">Policy Renewals</span>
+            </div>
+            <span className="text-sm max-md:hidden">{renewalsOpen ? "▾" : "▸"}</span>
+          </button>
+
+          <div
+            id="quotes-submenu"
+            className={`pl-6 transition-all max-md:hidden ${renewalsOpen ? "block" : "hidden"}`}
+          >
+            {!risks && (
+              <div className="py-2 px-2 text-xs text-white/70">Loading risks…</div>
+            )}
+
+            {risks && RenewalItems.map((item) => (
+              <Link
+                key={item.id}
+                to={item.path}
+                className={`flex items-center py-2 px-3 text-white/80 no-underline transition-all duration-150 rounded-md hover:bg-white/6 hover:text-white ${
+                  isActive(item.path) ? "bg-white/12 text-white font-semibold" : ""
+                }`}
+              >
+                <span className="mr-3 text-sm">{item.icon}</span>
+                <span className="text-sm max-md:hidden">{item.label}</span>
+              </Link>
+            ))}
+
+            {risks && RenewalItems.length === 1 && (
+              <div className="py-2 px-3 text-xs text-white/70">No risk categories found.</div>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <button
+            onClick={() => setEndorsementsOpen((v) => !v)}
+            className={`w-full flex items-center justify-between py-3 px-5 text-white/90 no-underline transition-all duration-200 border-l-4 border-transparent hover:bg-white/10 hover:text-white max-md:justify-center max-md:py-4 max-md:px-2.5 ${
+              location.pathname.startsWith("/underwriting") ? "bg-white/15 text-white border-l-orange-500" : ""
+            }`}
+            aria-expanded={endorsementsOpen}
+            aria-controls="quotes-submenu"
+          >
+            <div className="flex items-center">
+              <span className="mr-3 text-base max-md:mr-0">🔒</span>
+              <span className="text-sm font-medium max-md:hidden">Endorsements</span>
+            </div>
+            <span className="text-sm max-md:hidden">{endorsementsOpen ? "▾" : "▸"}</span>
+          </button>
+
+          <div
+            id="quotes-submenu"
+            className={`pl-6 transition-all max-md:hidden ${endorsementsOpen ? "block" : "hidden"}`}
+          >
+            {!risks && (
+              <div className="py-2 px-2 text-xs text-white/70">Loading risks…</div>
+            )}
+
+            {risks && EndorsementItems.map((item) => (
+              <Link
+                key={item.id}
+                to={item.path}
+                className={`flex items-center py-2 px-3 text-white/80 no-underline transition-all duration-150 rounded-md hover:bg-white/6 hover:text-white ${
+                  isActive(item.path) ? "bg-white/12 text-white font-semibold" : ""
+                }`}
+              >
+                <span className="mr-3 text-sm">{item.icon}</span>
+                <span className="text-sm max-md:hidden">{item.label}</span>
+              </Link>
+            ))}
+
+            {risks && EndorsementItems.length === 1 && (
               <div className="py-2 px-3 text-xs text-white/70">No risk categories found.</div>
             )}
           </div>

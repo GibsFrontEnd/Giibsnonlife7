@@ -135,6 +135,8 @@ export interface PolicyRiskItem {
 }
 
 export interface PolicyCalculation {
+  id: string
+  calculationName: string
   policyNo: string
   totalSumInsured: number
   totalPremium: number
@@ -157,6 +159,8 @@ export interface PolicyCalculation {
   netPremiumDue: number
   proRataPremium: number
   coverDays: number
+  createdBy: string
+  createdOn: string
 }
 
 export interface PolicyPaginationResponse {
@@ -173,6 +177,7 @@ export interface UnderwritingState {
   policies: Policy[]
   currentPolicy: Policy | null
   currentCalculation: PolicyCalculation | null
+  calculations: PolicyCalculation[]
   sections: PolicySection[]
   selectedRiskFilter: string | null
   marketingStaffs: MarketingStaff[]
