@@ -1,5 +1,3 @@
-"use client"
-
 //@ts-nocheck
 import { useState } from "react"
 import { useDispatch } from "react-redux"

@@ -1,4 +1,4 @@
-// PolicyCalculator.tsx
+//@ts-nocheck
 "use client"
 // @ts-nocheck
 import { useEffect, useMemo, useState } from "react"

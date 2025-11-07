@@ -1,4 +1,4 @@
-"use client"
+//@ts-nocheck
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate, useParams } from "react-router-dom"
 import type { RootState } from "../../../features/store"
